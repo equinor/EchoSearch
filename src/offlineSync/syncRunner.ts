@@ -1,0 +1,98 @@
+import { logPerformance, logWarn } from '../logger';
+import { searchSystem } from '../workers/searchSystem';
+import { BaseError } from './baseError';
+import { createError, InternalSyncResult, SyncResult } from './syncResult';
+import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
+import { asyncUsing } from './Utils/usingDisposable';
+
+export function syncIsOutdated(date: Date): boolean {
+    //TODO Ove Use this
+    const currDate = new Date();
+    const timeDiff = (currDate.valueOf() - date.valueOf()) / 1000;
+
+    const tenMinutes = 60 * 10;
+    return timeDiff > tenMinutes;
+}
+
+const currentlySyncing: OfflineSystem[] = [];
+export async function runSync<T>(searchSystem: searchSystem<T>): Promise<SyncResult> {
+    if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
+        var message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
+        logWarn(message);
+        return createError(message);
+    }
+
+    if (isSyncing(searchSystem.offlineSystemKey)) {
+        const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
+        logWarn(message);
+        return createError(message);
+    }
+
+    try {
+        const result = await asyncUsing(
+            async () => {
+                setIsSyncing(searchSystem.offlineSystemKey, true);
+                return await runSyncInternal(searchSystem);
+            },
+            () => setIsSyncing(searchSystem.offlineSystemKey, false)
+        );
+
+        return { ...result };
+    } catch (e) {
+        console.log(e);
+        throw new SyncError('Something went wrong when syncing ' + searchSystem.offlineSystemKey, e); //TODO fix printing of proper error
+    }
+}
+
+function isSyncing(offlineSystemKey: OfflineSystem): boolean {
+    return currentlySyncing.includes(offlineSystemKey);
+}
+
+function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
+    console.log('setIsSyncing', offlineSystemKey, syncEnabledState);
+    if (syncEnabledState) {
+        currentlySyncing.push(offlineSystemKey);
+        return;
+    }
+
+    const index = currentlySyncing.indexOf(offlineSystemKey, 0);
+    if (index > -1) {
+        currentlySyncing.splice(index, 1);
+    }
+}
+
+async function runSyncInternal<T>(searchSystem: searchSystem<T>): Promise<SyncResult> {
+    const logPerformanceToConsole = logPerformance();
+
+    const syncTime = new Date();
+    const settings = GetSetting(searchSystem.offlineSystemKey);
+
+    let result = {} as InternalSyncResult;
+    const needFullSync = settings.lastSyncedAtDate === undefined;
+
+    result = needFullSync
+        ? await searchSystem.runFullSync()
+        : await searchSystem.runUpdateSync(settings.lastSyncedAtDate!);
+
+    if (result.isSuccess) {
+        updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.dataSyncedAtDate);
+    }
+
+    var tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
+    logPerformanceToConsole.forceLog(`${searchSystem.offlineSystemKey} Sync ${tagSyncStatus}`);
+    return { ...result };
+}
+
+function updateLastSyncedDate(offlineSystemKey: OfflineSystem, date: Date, dataSyncedAtDate: Date): void {
+    const setting = GetSetting(offlineSystemKey);
+    setting.lastSyncedAtDate = date;
+    setting.syncDataDate = dataSyncedAtDate;
+    SaveSettings(setting);
+}
+
+class SyncError extends BaseError {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(message: string, exception: any) {
+        super(message, exception);
+    }
+}
