@@ -2,8 +2,8 @@
   "name": "@equinor/echo-search",
   "version": "0.0.1",
   "description": "Echo Search - search and offline for echo.",
-  "main": "dist/main.js",
-  "types": "dist/types/index.d.ts",
+  "main": "lib/main.js",
+  "types": "lib/types/index.d.ts",
   "source": "src/main.ts",
   "scripts": {
     "build": "npm run echo-build & rollup -c",
@@ -49,6 +49,6 @@
     "typescript": "^4.1.4"
   },
   "files": [
-    "dist/"
+    "lib/"
   ]
 }
