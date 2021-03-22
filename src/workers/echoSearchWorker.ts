@@ -154,4 +154,7 @@ function getToken(): string {
     return token;
 }
 
+//used for debugging in vsCode locally
+export const echoWorkerDebugDontUseThis = echoWorker;
+
 Comlink.expose(echoWorker, ctx);
