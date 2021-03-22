@@ -1,13 +1,5 @@
-import {
-    cancelAsync,
-    changePlantAsync,
-    closestTagSearchAsync,
-    doStuffBtn2Async,
-    runExpensiveAsync,
-    runSyncAsync,
-    searchAsync,
-    setEnabledAsync
-} from '.';
+import { search, syncer } from '.';
+import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
@@ -25,8 +17,48 @@ document.getElementById('CancelBtn')?.addEventListener('click', cancelBtnClicked
 document.getElementById('ExpensiveBtn')?.addEventListener('click', expensiveBtnClicked);
 document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Clicked);
 
+let count = 0;
+async function runSyncClicked() {
+    await syncer.runSyncAsync(OfflineSystem.Tags);
+}
+
+async function runSyncMcPacksClicked() {
+    await syncer.runSyncAsync(OfflineSystem.McPk);
+}
+
+async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
+    await syncer.setEnabledAsync(OfflineSystem.McPk, isEnabled);
+}
+
+async function changePlantBtnClicked() {
+    await syncer.changePlantAsync();
+}
+
+async function cameraSearchClicked() {
+    const similarTag = 'A73MAO0l';
+    var tag = await search.closestTagSearchAsync(similarTag);
+    console.log(similarTag, 'camera search: found tag', tag);
+}
+
+async function searchBtnClicked() {
+    var tags = await search.searchAsync(OfflineSystem.Tags, 'a73 pedes cran', 5);
+    console.log(
+        'found tags:',
+        tags.map((i) => i.tagNo)
+    );
+}
+
+async function expensiveBtnClicked() {
+    console.log('ExpensiveBtnClicked', count++);
+}
+
+async function doStuffBtn2Clicked() {
+    console.log('doStuffBtn2Clicked', count++);
+    await echoSearchWorker.doStuff2();
+}
+
 async function handleClick() {
-    const result = await runExpensiveAsync().catch((e) => console.log(e));
+    const result = echoSearchWorker.runExpensive();
     console.log(result);
 
     // try {
@@ -44,47 +76,7 @@ async function handleClick() {
     // );
 }
 
-let count = 0;
-async function runSyncClicked() {
-    await runSyncAsync(OfflineSystem.Tags);
-}
-
-async function runSyncMcPacksClicked() {
-    await runSyncAsync(OfflineSystem.McPk);
-}
-
-async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
-    await setEnabledAsync(OfflineSystem.McPk, isEnabled);
-}
-
-async function changePlantBtnClicked() {
-    await changePlantAsync();
-}
-
 async function cancelBtnClicked() {
     console.log('CancelBtnClicked', count++);
-    await cancelAsync();
-}
-
-async function cameraSearchClicked() {
-    const similarTag = 'A73MAO0l';
-    var tag = await closestTagSearchAsync(similarTag);
-    console.log(similarTag, 'camera search: found tag', tag);
-}
-
-async function searchBtnClicked() {
-    var tags = await searchAsync(OfflineSystem.Tags, 'a73 pedes cran', 5);
-    console.log(
-        'found tags:',
-        tags.map((i) => i.tagNo)
-    );
-}
-
-async function expensiveBtnClicked() {
-    console.log('ExpensiveBtnClicked', count++);
-}
-
-async function doStuffBtn2Clicked() {
-    console.log('doStuffBtn2Clicked', count++);
-    await doStuffBtn2Async();
+    echoSearchWorker.cancelSync();
 }
