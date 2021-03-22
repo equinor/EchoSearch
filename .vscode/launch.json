@@ -1,6 +1,15 @@
 {
-    //VSCode debugger, breakpoints not working :(
+    //VSCode debugger working in main thread, not in worker thread
 
+    // Debugging with Chrome
+    // ---------------------
+    //
+    // - Close all chrome windows, and start chrome with: 
+    // "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+    // - tsconfig.json, commented in this line: "sourceMap": true
+    // - Click Green Run button in debug tab: Echopedia Attach Chrome against localhost
+    // - Set breakpoints in code
+    // - Run: npm start
 
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
@@ -10,9 +19,9 @@
         {
             "type": "pwa-chrome",
             "request": "attach",
-            "name": "Launch Chrome against localhost",
+            "name": "Attach Chrome against localhost port 9222",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}",
+            "webRoot": "${workspaceFolder}/lib", //or src, seems to work with both
             "port": 9222,
             "sourceMaps": true
         }
