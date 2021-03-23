@@ -6,3 +6,4 @@ coverage
 
 # production
 lib
+src/tokenHelper.ts
