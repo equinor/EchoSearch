@@ -14,18 +14,25 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
     }
 }
 
-export async function syncFullMcPacks(): Promise<InternalSyncResult> {
-    const data = await apiAllMcPacks();
+export async function syncFullMcPacks(instCode: string): Promise<InternalSyncResult> {
+    const performanceLogger = logPerformance();
+    const data = await apiAllMcPacks(instCode);
+    performanceLogger.forceLogDelta('McPacks Api');
+
     inMemoryMcPacksInstance().clearAndInit(data);
+    performanceLogger.forceLogDelta('McPacks clear and init inMemoryData');
 
     await mcPacksAdministrator().deleteAndRecreate();
+    performanceLogger.forceLogDelta('McPacks deleteAndRecreate');
+
     await mcPacksRepository().addDataBulks(data);
+    performanceLogger.forceLogDelta('McPacks addDataBulks ' + data.length);
     return { isSuccess: true, itemsSyncedCount: data.length } as InternalSyncResult;
 }
 
-export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<InternalSyncResult> {
+export async function syncUpdateMcPacks(instCode: string, lastChangedDate: Date): Promise<InternalSyncResult> {
     const performanceLogger = logPerformance();
-    const data = await apiUpdatedMcPacks(lastChangedDate);
+    const data = await apiUpdatedMcPacks(instCode, lastChangedDate);
     performanceLogger.forceLogDelta('McPacks Api');
 
     inMemoryMcPacksInstance().updateData(data);

@@ -5,6 +5,7 @@ import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { workerFetch } from '../service/workerFetch';
 import ctx from '../setup/setup';
+import { getToken } from '../tokenHelper';
 import {
     externalCancelSync,
     externalClearAllTags,
@@ -146,13 +147,6 @@ const echoWorker: EchoWorker = {
         createFakeDatabases();
     }
 };
-
-function getToken(): string {
-    const token = 'ey...';
-    if (token.length < 15) console.error('bearer token has not been set');
-
-    return token;
-}
 
 //used for debugging in vsCode locally
 export const echoWorkerDebugDontUseThis = echoWorker;

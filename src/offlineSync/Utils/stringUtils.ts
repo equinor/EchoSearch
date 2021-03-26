@@ -17,3 +17,11 @@ export function randomNumberId(length): number {
     }
     return Number.parseInt(result);
 }
+
+export function dateAsApiString(date: Date | string): string {
+    if (!date) {
+        throw new Error('Argument exception - date is undefined');
+    }
+
+    return new Date(date).toISOString();
+}

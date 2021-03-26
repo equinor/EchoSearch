@@ -50,6 +50,8 @@ async function searchBtnClicked() {
 
 async function expensiveBtnClicked() {
     console.log('ExpensiveBtnClicked', count++);
+    const result = echoSearchWorker.runExpensive();
+    console.log(result);
 }
 
 async function doStuffBtn2Clicked() {
@@ -58,9 +60,9 @@ async function doStuffBtn2Clicked() {
 }
 
 async function handleClick() {
-    const result = echoSearchWorker.runExpensive();
-    console.log(result);
-
+    //const result = authenticatorHelper.getToken();
+    //console.log('echoClientId', echoClientId);
+    console.log('clicked - do nothing');
     // try {
     //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
     //     console.log(result2);
