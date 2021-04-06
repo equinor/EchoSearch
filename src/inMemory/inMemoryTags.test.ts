@@ -97,7 +97,8 @@ function mockTags(tags: string[]): TagSummaryDb[] {
             tagCategoryDescription: 'A',
             tagStatus: TagStatus.AsBuilt,
             tagType: 'C',
-            tagStatusDescription: 'D'
+            locationCode: 'A00',
+            updatedDate: new Date(2021, 1, 1)
         };
     });
 }

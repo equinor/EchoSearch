@@ -74,8 +74,9 @@ function getTag(): TagSummaryDb {
         tagNo: '1',
         tagCategoryDescription: '2',
         tagStatus: TagStatus.AsBuilt,
-        tagStatusDescription: '4',
         tagType: '5',
-        description: '6'
+        description: '6',
+        locationCode: 'A00',
+        updatedDate: new Date(2021, 1, 1)
     };
 }

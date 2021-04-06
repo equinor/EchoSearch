@@ -1,7 +1,7 @@
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
 import { logPerformance } from '../../logger';
 import { InternalSyncResult } from '../syncResult';
-import { instCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
+import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { apiAllMcPacks, apiUpdatedMcPacks } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
@@ -16,7 +16,7 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
 
 export async function syncFullMcPacks(): Promise<InternalSyncResult> {
     const performanceLogger = logPerformance();
-    const data = await apiAllMcPacks(instCode());
+    const data = await apiAllMcPacks(getInstCode());
     performanceLogger.forceLogDelta('McPacks Api');
 
     inMemoryMcPacksInstance().clearAndInit(data);
@@ -32,7 +32,7 @@ export async function syncFullMcPacks(): Promise<InternalSyncResult> {
 
 export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<InternalSyncResult> {
     const performanceLogger = logPerformance();
-    const data = await apiUpdatedMcPacks(instCode(), lastChangedDate);
+    const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate);
     performanceLogger.forceLogDelta('McPacks Api');
 
     inMemoryMcPacksInstance().updateData(data);

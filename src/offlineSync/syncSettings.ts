@@ -1,6 +1,8 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
 import { logInfo, logVerbose } from '../logger';
 
+export const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net/';
+
 /**
  * START Settings Repository
  * ideally this should be local storage
@@ -23,7 +25,7 @@ class SettingsDexieDB extends Dexie {
 let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
 let _instCode: string;
 
-export function instCode() {
+export function getInstCode() {
     return _instCode;
 }
 

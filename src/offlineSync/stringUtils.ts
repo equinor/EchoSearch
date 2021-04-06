@@ -1,15 +1,33 @@
-export function extractPositiveNumbers(values: string[]): number[] {
+import { BaseError } from './baseError';
+
+export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values
         .map((item) => parseInt(item.replace(/^\D+/g, '')))
         .filter((i) => i > 0 && (!isFinite(i) || !isNaN(i)));
 }
 
-export function getMaxNumberInCollection(databaseNames: string[]): number {
-    const versions = extractPositiveNumbers(databaseNames);
+export function getMaxNumberInCollectionOrOne(databaseNames: string[]): number {
+    const versions = extractPositiveFirstNumbers(databaseNames);
     const currentVersion = Math.max(1, ...versions);
     return currentVersion;
 }
 
-export function orEmpty(value: string): string {
+export function orEmpty(value?: string): string {
     return value || '';
 }
+
+export function toDateOrUndefined(date?: string | Date): Date | undefined {
+    const resultDate = date ? new Date(date) : undefined;
+    if (resultDate && isNaN(resultDate.valueOf())) {
+        return undefined;
+    }
+    return resultDate;
+}
+
+export function toDateOrThrowError(date?: string | Date): Date {
+    const properDate = toDateOrUndefined(date);
+    if (!properDate) throw new ArgumentDateError('Invalid date: ' + date);
+    return properDate;
+}
+
+export class ArgumentDateError extends BaseError {}

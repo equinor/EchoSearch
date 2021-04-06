@@ -4,7 +4,8 @@ export interface TagSummaryDb {
     tagNo: string;
     tagStatus: TagStatus;
     tagType: string;
-    tagStatusDescription: string;
+    updatedDate: Date;
+    locationCode: string;
 }
 
 export enum TagStatus {

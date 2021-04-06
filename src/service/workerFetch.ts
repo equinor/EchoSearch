@@ -1,3 +1,5 @@
+import { getToken } from '../tokenHelper';
+
 type Body =
     | string
     | Blob
@@ -20,14 +22,16 @@ export const workerFetch = async (
 ): Promise<Response> => {
     let statusCode = 0;
 
+    if (!token.toLowerCase().includes('bearer')) token = 'Bearer ' + token;
+
     try {
         const headers = body
             ? {
-                  Authorization: 'Bearer ' + token,
+                  Authorization: token,
                   ...headerOptions
               }
             : {
-                  Authorization: 'Bearer ' + token,
+                  Authorization: token,
                   'Content-Type': 'application/json',
                   ...headerOptions
               };
@@ -67,3 +71,7 @@ export const workerFetch = async (
         }
     }
 };
+
+export async function apiFetch(url: string): Promise<Response> {
+    return await workerFetch(url, getToken());
+}

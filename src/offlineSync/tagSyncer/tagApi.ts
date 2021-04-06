@@ -1,18 +1,17 @@
 import { logPerformance } from '../../logger';
-import { orEmpty } from '../stringUtils';
+import { apiFetch } from '../../service/workerFetch';
+import { BaseError } from '../baseError';
+import { orEmpty, toDateOrThrowError } from '../stringUtils';
+import { baseApiUrl, getInstCode } from '../syncSettings';
+import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
+
+const _useMockedTags = false;
 
 export interface TagsData {
     tags: TagSummaryDb[];
     dataSyncedAt: Date;
-}
-
-function getMockedTags(): TagsData {
-    const temp = getMockedTagsString(0);
-    const tags: TagSummaryDb[] = JSON.parse(temp);
-    const filename = 'JSVTags_22_2020-10-15_Tags408448_Estimated409496.json.gz';
-    return { tags, dataSyncedAt: ExtractDate(filename) } as TagsData;
 }
 
 function cleanupTag(tag: TagSummaryDb): TagSummaryDb {
@@ -21,8 +20,9 @@ function cleanupTag(tag: TagSummaryDb): TagSummaryDb {
         description: orEmpty(tag.description),
         tagCategoryDescription: orEmpty(tag.tagCategoryDescription),
         tagStatus: tag.tagStatus,
-        tagStatusDescription: orEmpty(tag.tagStatusDescription),
-        tagType: orEmpty(tag.tagType)
+        tagType: orEmpty(tag.tagType),
+        locationCode: orEmpty(tag.locationCode),
+        updatedDate: toDateOrThrowError(tag.updatedDate)
     };
 }
 
@@ -31,17 +31,13 @@ function cleanupTags(tags: TagSummaryDb[]): TagSummaryDb[] {
 }
 
 export async function apiAllTags(): Promise<TagsData> {
-    const tagData = getMockedTags();
+    const tagData = _useMockedTags ? getMockedTags() : await getAllTagsFromApi(getInstCode());
     tagData.tags = cleanupTags(tagData.tags);
     return tagData;
 }
 
 export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
-    const mockedTags = 100000;
-    const tagString = getMockedTagsString(mockedTags);
-    const p = logPerformance();
-    const tags: TagSummaryDb[] = JSON.parse(tagString);
-    p.forceLog('json parse ' + mockedTags);
+    const tags = _useMockedTags ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
     return { tags: cleanupTags(tags), dataSyncedAt: new Date() } as TagsData;
 }
 
@@ -59,27 +55,56 @@ export async function searchTagsOnline(searchText: string, maxHits: number): Pro
             description: 'This is a mocked online search ' + maxHits,
             tagStatus: TagStatus.AsBuilt,
             tagCategoryDescription: 'Mechanical',
-            tagStatusDescription: 'As Built description',
             tagType: 'A tag type'
         } as TagSummaryDb
     ];
 }
 
-// export async function getAllTagData(dto: PlantDataRequest): Promise<AllDataResult> {
-//     const regex = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/g;
-//     const url = `${baseApiUrl}/${dto.instCode}/archived-tags-file`;
-//     let tags: Tag[] = [];
-//     const response = await EchoCore.EchoClient.fetch(url);
+function extractDateFromHeader(response: Response, headerName: string): Date {
+    if (response && response.headers && response.headers.get(headerName)) {
+        const regex = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/g;
+        const dates = response.headers.get(headerName)?.match(regex) as string[];
+        return new Date(dates[0]);
+    }
+    throw new Error(`header (${headerName}) doesn't exist`);
+}
 
-//     try {
-//         tags = await JSON.parse(await response.text());
-//     } catch (ex) {
-//         throw new JsonParseError(url, ex);
-//     }
-//     let dateSynced: string[] = [];
-//     if (response && response.headers && response.headers.get('content-disposition')) {
-//         dateSynced = response.headers.get('content-disposition')?.match(regex) as string[];
-//     }
+export class JsonParseError extends BaseError {}
 
-//     return { dataResult: tags, dateSynced: dateSynced[0] } as AllDataResult;
-// }
+async function getAllTagsFromApi(instCode: string): Promise<TagsData> {
+    const url = `${baseApiUrl}/${instCode}/archived-tags-file`;
+    let tags: TagSummaryDb[] = [];
+    const response = await apiFetch(url); //TODO handle not ok, forbidden, etc
+
+    try {
+        tags = await JSON.parse(await response.text());
+    } catch (ex) {
+        throw new JsonParseError(url, ex);
+    }
+
+    return { tags, dataSyncedAt: extractDateFromHeader(response, 'content-disposition') } as TagsData;
+}
+
+async function getUpdatedTagFromApi(instCode: string, updatedSince: Date): Promise<TagSummaryDb[]> {
+    //const date = '2020-11-27T06:52:57.199Z'; //for testing
+    const date = dateAsApiString(updatedSince);
+    const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
+    const result = await apiFetch(url);
+    return (await result.json()) as TagSummaryDb[];
+}
+
+function getMockedTags(): TagsData {
+    const temp = getMockedTagsString(0);
+    const tags: TagSummaryDb[] = JSON.parse(temp);
+    const filename = 'JSVTags_22_2020-10-15_Tags408448_Estimated409496.json.gz';
+    return { tags, dataSyncedAt: ExtractDate(filename) } as TagsData;
+}
+
+function getMockedUpdatedTags(): TagSummaryDb[] {
+    const mockedTags = 100000;
+    const tagString = getMockedTagsString(mockedTags);
+    const p = logPerformance();
+    const tags: TagSummaryDb[] = JSON.parse(tagString);
+    p.forceLog('json parse ' + mockedTags);
+    return tags;
+}

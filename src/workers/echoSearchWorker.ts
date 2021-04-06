@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { SyncResult } from '../offlineSync/syncResult';
-import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
+import { baseApiUrl, OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { workerFetch } from '../service/workerFetch';
@@ -55,7 +55,6 @@ async function ourApi(): Promise<void> {
     console.log('dostuff');
 
     const date = '2021-02-07T06:52:57.199Z'; //for testing
-    const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net/';
     const url = `${baseApiUrl}/JSV/tags?updatedSince=${date}&take=1`;
     const response = await workerFetch(url, getToken());
     var result = await JSON.parse(await response.text());

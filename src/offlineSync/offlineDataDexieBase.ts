@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { logPerformance, logVerbose, logWarn } from '../logger';
 import { BaseError } from './baseError';
-import { getMaxNumberInCollection } from './stringUtils';
+import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { chunkArray } from './Utils/util';
 
 class SyncCanceledError extends BaseError {
@@ -144,7 +144,7 @@ export class DatabaseAdministrator<T> {
 
 export async function getCurrentVersion(databaseNamePreFix: string): Promise<number> {
     let databaseNames = await getDatabaseNames(databaseNamePreFix);
-    const currentVersion = getMaxNumberInCollection(databaseNames);
+    const currentVersion = getMaxNumberInCollectionOrOne(databaseNames);
     return currentVersion;
 }
 
@@ -153,7 +153,7 @@ export async function getDatabaseNames(databaseNamePreFix: string) {
 }
 export async function deleteDataBaseAndReturnNewVersionNumber(databaseNamePreFix: string): Promise<number> {
     const p = logPerformance();
-    const newVersion = 1 + getMaxNumberInCollection(await getDatabaseNames(databaseNamePreFix));
+    const newVersion = 1 + getMaxNumberInCollectionOrOne(await getDatabaseNames(databaseNamePreFix));
     await DeleteOlDatabaseVersions(databaseNamePreFix, newVersion);
     p.forceLog('Deleted  database ' + databaseNamePreFix);
     return newVersion;
