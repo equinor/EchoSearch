@@ -81,16 +81,14 @@ async function internalInitialize(): Promise<void> {
 
     performanceLogger.forceLog('SearchSystems starting');
 
-    const instCodeTODO = 'JSV';
-
     mcPacksSystem = new searchSystem<McPackDb>(
         OfflineSystem.McPk,
         initMcTask,
         () => inMemoryMcPacksInstance().isReady(),
         async (searchText, maxHits) => searchInMemoryMcPacksWithText(searchText, maxHits),
         async (searchText, maxHits) => searchMcPacksOnline(searchText, maxHits),
-        async () => syncFullMcPacks(instCodeTODO),
-        async (lastChangedDate) => syncUpdateMcPacks(instCodeTODO, lastChangedDate)
+        async () => syncFullMcPacks(),
+        async (lastChangedDate) => syncUpdateMcPacks(lastChangedDate)
     );
 
     tagSearchSystem = new searchSystem<TagSummaryDb>(

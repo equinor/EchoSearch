@@ -1,5 +1,5 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
-import { logVerbose } from '../logger';
+import { logInfo, logVerbose } from '../logger';
 
 /**
  * START Settings Repository
@@ -7,24 +7,37 @@ import { logVerbose } from '../logger';
  */
 class SettingsDexieDB extends Dexie {
     offlineStatus: Dexie.Table<OfflineSettingItem, OfflineSystem>;
+    settings: Dexie.Table<string, string>;
     constructor() {
         super('offlineSettingsEchoDb');
-        this.version(0.2).stores({
-            offlineStatus: 'offlineSystemKey'
+        this.version(0.3).stores({
+            offlineStatus: 'offlineSystemKey',
+            settings: ''
         });
 
         this.offlineStatus = this.table('offlineStatus');
+        this.settings = this.table('settings');
     }
 }
 
-let settingsDexieDb: SettingsDexieDB | undefined = undefined;
+let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
+let _instCode: string;
+
+export function instCode() {
+    return _instCode;
+}
+
+export async function saveInstCode(instCodeArg: string): Promise<void> {
+    await instance()?.settings.put(instCodeArg, 'instCode');
+    _instCode = instCodeArg;
+}
 
 function instance(): SettingsDexieDB {
-    if (settingsDexieDb !== undefined) {
-        return settingsDexieDb;
+    if (_settingsDexieDb !== undefined) {
+        return _settingsDexieDb;
     }
     let db = new SettingsDexieDB();
-    settingsDexieDb = db;
+    _settingsDexieDb = db;
     return db;
 }
 
@@ -39,6 +52,10 @@ export async function loadOfflineSettings(): Promise<void> {
     settings.forEach((setting) => {
         dictionary[setting.offlineSystemKey] = setting;
     });
+
+    const instCodeArg = await instance().settings.get('instCode');
+    _instCode = instCodeArg ?? '';
+    logInfo('instCode loaded:', _instCode);
 
     AddMissingSettings();
 }
@@ -87,7 +104,11 @@ export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem 
 
 export function SaveSettings(settings: OfflineSettingItem) {
     dictionary[settings.offlineSystemKey] = settings;
-    saveToRepository(settings); //TODO - Fire and Forget method
+    fireAndForget(() => saveToRepository(settings));
+}
+
+function fireAndForget(asyncFunc: () => Promise<void>): void {
+    asyncFunc();
 }
 
 export function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {

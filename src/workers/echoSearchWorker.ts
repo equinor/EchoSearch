@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { SyncResult } from '../offlineSync/syncResult';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { workerFetch } from '../service/workerFetch';
@@ -64,7 +64,7 @@ async function ourApi(): Promise<void> {
 
 export interface EchoWorker {
     initialize(): Promise<void>;
-    changePlantAsync(): Promise<void>;
+    changePlantAsync(instCode: string): Promise<void>;
     searchTags(searchText: string, maxHits: number): Promise<TagSummaryDb[]>;
     searchForClosestTagNo(searchText: string): Promise<string | undefined>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<SyncResult>;
@@ -101,7 +101,8 @@ const echoWorker: EchoWorker = {
         return await externalSearchForClosestTagNo(searchText);
     },
 
-    async changePlantAsync(): Promise<void> {
+    async changePlantAsync(instCode: string): Promise<void> {
+        await saveInstCode(instCode);
         await externalClearAllTags();
     },
 

@@ -23,7 +23,7 @@ class Syncer {
     }
 
     async changePlantAsync(): Promise<void> {
-        await echoSearchWorker.changePlantAsync();
+        await echoSearchWorker.changePlantAsync('JSV');
     }
 }
 
