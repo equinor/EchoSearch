@@ -6,10 +6,7 @@ import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
 //McPacks init
-let inMemoryDbMcPacks: InMemoryData<McPackDb> = new InMemoryData<McPackDb>(
-    (item) => item.commPkgNo,
-    (a, b) => (a.mcPkgNo > b.mcPkgNo ? 1 : -1)
-);
+let inMemoryDbMcPacks: InMemoryData<McPackDb> = new InMemoryData<McPackDb>((item) => item.commPkgNo);
 
 export function inMemoryMcPacksInstance(): InMemoryData<McPackDb> {
     return inMemoryDbMcPacks;

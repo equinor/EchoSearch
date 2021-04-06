@@ -69,10 +69,7 @@ describe('inMemoryData', () => {
 });
 
 function createDb(): InMemoryData<DummyData> {
-    const data = new InMemoryData<DummyData>(
-        (i) => i.id,
-        (a, b) => (a.id > b.id ? 1 : -1)
-    );
+    const data = new InMemoryData<DummyData>((i) => i.id);
     return data;
 }
 

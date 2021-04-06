@@ -14,15 +14,16 @@ export function clearAllInMemoryKeys(): void {
 
 export class InMemoryData<T> {
     inMemoryData: T[];
-    sortBy?: (a: T, b: T) => number;
     getKeyValue: (arg: T) => string;
     isReadyFlag: boolean;
-
-    constructor(getKeyValue: (arg: T) => string, sortBy?: (a: T, b: T) => number) {
+    alphabeticSort: (a: T, b: T) => number;
+    constructor(getKeyValue: (arg: T) => string) {
         this.isReadyFlag = false;
         this.inMemoryData = [] as T[];
-        this.sortBy = sortBy; //TODO use getKeyValue for sort by, and not in parameter
         this.getKeyValue = getKeyValue;
+        this.alphabeticSort = (a, b) => {
+            return this.getKeyValue(a) > this.getKeyValue(b) ? 1 : -1;
+        };
     }
 
     isReady(): boolean {
@@ -36,7 +37,7 @@ export class InMemoryData<T> {
     clearAndInit(data: T[]) {
         this.isReadyFlag = false;
         const newData = [...data];
-        newData.sort(this.sortBy);
+        newData.sort(this.alphabeticSort);
         this.inMemoryData = newData;
         this.isReadyFlag = true;
     }
@@ -50,7 +51,7 @@ export class InMemoryData<T> {
                 this.inMemoryData.push(item);
             }
         });
-        this.inMemoryData.sort(this.sortBy);
+        this.inMemoryData.sort(this.alphabeticSort);
     }
 
     //TODO delete data
