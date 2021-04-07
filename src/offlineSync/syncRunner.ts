@@ -1,5 +1,5 @@
 import { logPerformance, logWarn } from '../logger';
-import { searchSystem } from '../workers/searchSystem';
+import { SearchSystem } from '../workers/searchSystem';
 import { BaseError } from './baseError';
 import { createError, InternalSyncResult, SyncResult } from './syncResult';
 import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
@@ -15,7 +15,7 @@ export function syncIsOutdated(date: Date): boolean {
 }
 
 const currentlySyncing: OfflineSystem[] = [];
-export async function runSync<T>(searchSystem: searchSystem<T>): Promise<SyncResult> {
+export async function runSync<T>(searchSystem: SearchSystem<T>): Promise<SyncResult> {
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
         var message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
         logWarn(message);
@@ -61,7 +61,7 @@ function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
     }
 }
 
-async function runSyncInternal<T>(searchSystem: searchSystem<T>): Promise<SyncResult> {
+async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<SyncResult> {
     const logPerformanceToConsole = logPerformance();
 
     const syncTime = new Date();

@@ -23,7 +23,7 @@ import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
 import { tagsAdministrator } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer';
-import { searchSystem } from './searchSystem';
+import { SearchSystem } from './searchSystem';
 
 let _counter = 0;
 function functionShouldOnlyBeCalledOnce(): void {
@@ -33,8 +33,8 @@ function functionShouldOnlyBeCalledOnce(): void {
 functionShouldOnlyBeCalledOnce();
 
 let initDone = false;
-let mcPacksSystem: searchSystem<McPackDb>;
-let tagSearchSystem: searchSystem<TagSummaryDb>;
+let mcPacksSystem: SearchSystem<McPackDb>;
+let tagSearchSystem: SearchSystem<TagSummaryDb>;
 
 export async function externalInitialize(): Promise<void> {
     console.log('-------------- externalInitialize ------------ ');
@@ -80,7 +80,7 @@ async function internalInitialize(): Promise<void> {
 
     performanceLogger.forceLog('SearchSystems starting');
 
-    mcPacksSystem = new searchSystem<McPackDb>(
+    mcPacksSystem = new SearchSystem<McPackDb>(
         OfflineSystem.McPk,
         initMcTask,
         () => inMemoryMcPacksInstance().isReady(),
@@ -90,7 +90,7 @@ async function internalInitialize(): Promise<void> {
         async (lastChangedDate) => syncUpdateMcPacks(lastChangedDate)
     );
 
-    tagSearchSystem = new searchSystem<TagSummaryDb>(
+    tagSearchSystem = new SearchSystem<TagSummaryDb>(
         OfflineSystem.Tags,
         initTagsTask,
         () => isInMemoryTagsReady(),

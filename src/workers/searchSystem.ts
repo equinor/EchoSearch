@@ -1,7 +1,7 @@
 import { InternalSyncResult } from '../offlineSync/syncResult';
 import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
 
-export class searchSystem<T> {
+export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;
     private _initTask: Promise<void>;
     private _isOfflineSearchReady: () => boolean;
