@@ -5,7 +5,7 @@ import { baseApiUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedMcPacksString } from './mcPacksMocked';
 
-const useMockData = false;
+const useMockData = true;
 
 export interface McPackDb {
     id: number;

@@ -23,11 +23,15 @@ async function runSyncClicked() {
 }
 
 async function runSyncMcPacksClicked() {
-    await syncer.runSyncAsync(OfflineSystem.McPk);
+    //await syncer.runSyncAsync(OfflineSystem.McPk);
+    await syncer.runSyncAsync(OfflineSystem.Punches);
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
     await syncer.setEnabledAsync(OfflineSystem.McPk, isEnabled);
+    console.log('set punches enabled');
+    await syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
+    console.log('set punches enabled done');
 }
 
 async function changePlantBtnClicked() {

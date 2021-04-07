@@ -1,7 +1,7 @@
 import { logPerformance } from '../../logger';
 import { randomId, randomNumberId } from '../Utils/stringUtils';
 
-export function randomMockedMcPacksString(count: number) {
+function randomMockedMcPacksString(count: number) {
     if (count === 0) return '';
     var items = range(count);
     var itemsAsStrings = items.map((_) => createdMocked());

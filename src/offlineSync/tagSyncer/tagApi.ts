@@ -7,7 +7,7 @@ import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
-const _useMockedTags = false;
+const _useMockedTags = true;
 
 export interface TagsData {
     tags: TagSummaryDb[];

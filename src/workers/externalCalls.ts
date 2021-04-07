@@ -10,6 +10,9 @@ import { logPerformance } from '../logger';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
+import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
+import { punchesAdministrator } from '../offlineSync/punchSyncer/punchRepository';
+import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { SyncResult } from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
 import {
@@ -35,6 +38,7 @@ functionShouldOnlyBeCalledOnce();
 let initDone = false;
 let mcPacksSystem: SearchSystem<McPackDb>;
 let tagSearchSystem: SearchSystem<TagSummaryDb>;
+let punchSearchSystem: SearchSystem<PunchDb>;
 
 export async function externalInitialize(): Promise<void> {
     console.log('-------------- externalInitialize ------------ ');
@@ -100,6 +104,16 @@ async function internalInitialize(): Promise<void> {
         async (lastChangedDate) => syncUpdateTags(lastChangedDate)
     );
 
+    punchSearchSystem = new SearchSystem<PunchDb>(
+        OfflineSystem.Punches,
+        initTagsTask,
+        () => true, //isInMemoryTagsReady(),
+        async (searchText, maxHits) => [], // searchTags(searchText, maxHits),
+        async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
+        async () => syncFullPunches(),
+        async (lastChangedDate) => syncUpdatePunches(lastChangedDate)
+    );
+
     performanceLogger.forceLog('SearchSystems instantiated');
 
     await initMcTask;
@@ -151,14 +165,20 @@ export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<
     if (offlineSystemKey === OfflineSystem.McPk) {
         return await runSync(mcPacksSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
-        console.log('run sync tags');
         return await runSync(tagSearchSystem);
+    } else if (offlineSystemKey === OfflineSystem.Punches) {
+        return await runSync(punchSearchSystem);
     }
+
     return { isSuccess: false, error: 'sync has not been implemented for ' + offlineSystemKey } as SyncResult;
 }
 
 export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-    setMcPacksIsEnabled(isEnabled);
+    if (offlineSystemKey === OfflineSystem.McPk) {
+        setMcPacksIsEnabled(isEnabled);
+    } else if (offlineSystemKey === OfflineSystem.Punches) {
+        setPunchesIsEnabled(isEnabled);
+    }
 
     const setting = GetSetting(offlineSystemKey);
     console.log(
@@ -181,6 +201,10 @@ export async function externalClearAllTags() {
     ClearSettings(OfflineSystem.McPk);
     await mcPacksAdministrator().deleteAndRecreate();
     inMemoryMcPacksInstance().clearData();
+
+    ClearSettings(OfflineSystem.Punches);
+    await punchesAdministrator().deleteAndRecreate();
+    //inMemoryPunchesInstance().clearData();
 }
 
 function ClearSettings(offlineSystemKey: OfflineSystem): void {
