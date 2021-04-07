@@ -74,7 +74,6 @@ async function internalInitialize(): Promise<void> {
 
     await loadOfflineSettings();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
-    performanceLogger.forceLog('Loaded Offline Settings 22'); //TODO fix prefix text logging, not working here..
 
     const initMcTask = initMcPacks();
     const initTagsTask = initTags();

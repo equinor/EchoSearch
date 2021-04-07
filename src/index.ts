@@ -22,8 +22,8 @@ class Syncer {
         await echoSearchWorker.setEnabled(offlineSystemKey, isEnabled);
     }
 
-    async changePlantAsync(): Promise<void> {
-        await echoSearchWorker.changePlantAsync('JSV');
+    async changePlantAsync(instCode: string): Promise<void> {
+        await echoSearchWorker.changePlantAsync(instCode);
     }
 }
 

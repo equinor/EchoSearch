@@ -81,7 +81,7 @@ export function logPerformance(preText?: string): LogPerformance {
     return {
         log: (message) => internalLogPerformanceToConsole(message, tStart, false),
         logDelta: (message) => internalLogPerformanceToConsole(message, tDelta, false),
-        forceLog: (message) => logPerformanceToConsole(message, tStart, true),
+        forceLog: (message) => internalLogPerformanceToConsole(message, tStart, true),
         forceLogDelta: (message) => internalLogPerformanceToConsole(message, tDelta, true)
     };
 }
