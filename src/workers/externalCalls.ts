@@ -57,6 +57,13 @@ async function initMcPacks(): Promise<void> {
     performanceLogger.forceLogDelta('McPacks done ' + mcPackCount);
 }
 
+async function initPunches(): Promise<void> {
+    const performanceLogger = logPerformance('Init Punches');
+    await punchesAdministrator().init();
+    const mcPackCount = 0; // await inMemoryPunchesInit();
+    performanceLogger.forceLogDelta('Punches done ' + mcPackCount);
+}
+
 async function initTags(): Promise<void> {
     const performanceLogger = logPerformance('Init Tags');
     await tagsAdministrator().init();
@@ -81,6 +88,7 @@ async function internalInitialize(): Promise<void> {
 
     const initMcTask = initMcPacks();
     const initTagsTask = initTags();
+    const initPunchesTask = initPunches();
 
     performanceLogger.forceLog('SearchSystems starting');
 
@@ -106,7 +114,7 @@ async function internalInitialize(): Promise<void> {
 
     punchSearchSystem = new SearchSystem<PunchDb>(
         OfflineSystem.Punches,
-        initTagsTask,
+        initPunchesTask,
         () => true, //isInMemoryTagsReady(),
         async (searchText, maxHits) => [], // searchTags(searchText, maxHits),
         async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
@@ -116,8 +124,9 @@ async function internalInitialize(): Promise<void> {
 
     performanceLogger.forceLog('SearchSystems instantiated');
 
-    await initMcTask;
-    await initTagsTask;
+    // await initMcTask;
+    // await initTagsTask;
+    await Promise.all([initMcTask, initPunchesTask, initTagsTask]);
     performanceLogger.log('DONE');
 
     //Keep for performance testing when we have more items to sync.
@@ -192,7 +201,7 @@ export function externalCancelSync(offlineSystemKey: OfflineSystem): void {
     //return await runSync(offlineSystemKey);
 }
 
-export async function externalClearAllTags() {
+export async function externalDeleteAllData() {
     ClearSettings(OfflineSystem.Tags);
     await tagsAdministrator().deleteAndRecreate();
     clearInMemoryTags();

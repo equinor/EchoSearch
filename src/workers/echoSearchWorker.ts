@@ -8,7 +8,7 @@ import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
     externalCancelSync,
-    externalClearAllTags,
+    externalDeleteAllData,
     externalInitialize,
     externalMcPackSearch,
     externalRunSync,
@@ -102,7 +102,7 @@ const echoWorker: EchoWorker = {
 
     async changePlantAsync(instCode: string): Promise<void> {
         await saveInstCode(instCode);
-        await externalClearAllTags();
+        await externalDeleteAllData();
     },
 
     async runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<SyncResult> {

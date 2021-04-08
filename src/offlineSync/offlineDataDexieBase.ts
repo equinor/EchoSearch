@@ -106,22 +106,17 @@ export class DatabaseAdministrator<T> {
     constructor(databaseNamePreFix: string, databaseCreator: (version: number) => OfflineDataDexieBase<T>) {
         this.databaseNamePreFix = databaseNamePreFix;
         this.isInitDone = false;
-        this.databaseCreator = databaseCreator;
-
         this.database = null;
-
-        getCurrentVersion(this.databaseNamePreFix).then((version) => {
-            this.database = databaseCreator(version);
-        });
+        this.databaseCreator = databaseCreator;
     }
     async init() {
         if (this.isInitDone) {
             logWarn(this.databaseNamePreFix + ' has already been initialized');
             return;
         }
-        this.isInitDone = true;
         const version = await getCurrentVersion(this.databaseNamePreFix);
         this.database = this.databaseCreator(version);
+        this.isInitDone = true;
     }
 
     repository(): Repository<T> {
@@ -137,7 +132,7 @@ export class DatabaseAdministrator<T> {
     }
 
     private openVersion(currentVersion: number) {
-        logVerbose('opening McPacks database v', currentVersion);
+        logVerbose('opening database v' + this.databaseNamePreFix + currentVersion);
         this.database = this.databaseCreator(currentVersion);
     }
 }

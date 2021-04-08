@@ -3,7 +3,6 @@ import { randomId, randomNumberId } from '../Utils/stringUtils';
 
 export function randomMockedPunchesArrayString(count: number): string {
     const result = randomMockedArrayString(count, () => randomPunch());
-    console.log(result);
     return result;
 }
 
