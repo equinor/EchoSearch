@@ -16,6 +16,11 @@ export function orEmpty(value?: string): string {
     return value || '';
 }
 
+export function toNumber(value?: string | number): number {
+    if (!value) return NaN;
+    return parseFloat(value.toString());
+}
+
 export function toDateOrUndefined(date?: string | Date): Date | undefined {
     const resultDate = date ? new Date(date) : undefined;
     if (resultDate && isNaN(resultDate.valueOf())) {

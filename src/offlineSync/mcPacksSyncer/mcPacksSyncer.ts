@@ -6,7 +6,7 @@ import { apiAllMcPacks, apiUpdatedMcPacks } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
 export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
-    setIsSyncEnabled(OfflineSystem.McPk, isEnabled);
+    setIsSyncEnabled(OfflineSystem.McPack, isEnabled);
 
     if (!isEnabled) {
         mcPacksAdministrator().deleteAndRecreate(); //TODO part of searchSystem?

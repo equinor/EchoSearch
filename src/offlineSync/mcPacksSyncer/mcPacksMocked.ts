@@ -47,7 +47,7 @@ function getMockedStringInternal(randomItemsToCreateCount: number): string {
 
 function getRealMockDataString(): string {
     return `{
-            "id": 105971470,
+            "id": "105971470",
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-A01",
             "description": null,

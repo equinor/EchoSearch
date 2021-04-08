@@ -1,6 +1,6 @@
 import { logPerformance } from '../../logger';
 import { apiFetch } from '../../service/workerFetch';
-import { orEmpty, toDateOrThrowError, toDateOrUndefined } from '../stringUtils';
+import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { openClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
@@ -34,7 +34,7 @@ export interface PunchDb {
 
 function cleanupPunch(punch: PunchDb): PunchDb {
     return {
-        id: parseFloat(punch.id.toString()),
+        id: toNumber(punch.id),
         tagNo: punch.tagNo,
         createdAt: toDateOrThrowError(punch.createdAt),
         updatedAt: toDateOrThrowError(punch.updatedAt),
@@ -43,7 +43,6 @@ function cleanupPunch(punch: PunchDb): PunchDb {
         tagDescription: orEmpty(punch.tagDescription),
         description: orEmpty(punch.description),
         statusId: orEmpty(punch.statusId),
-        //punchListItemNo: punch.punchListItemNo,
         mcPkgNo: orEmpty(punch.mcPkgNo),
         commPkgNo: orEmpty(punch.commPkgNo),
         areaId: orEmpty(punch.areaId),

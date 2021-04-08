@@ -1,6 +1,6 @@
 import { logPerformance } from '../../logger';
 import { apiFetch } from '../../service/workerFetch';
-import { orEmpty, toDateOrThrowError } from '../stringUtils';
+import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedMcPacksString } from './mcPacksMocked';
@@ -18,7 +18,7 @@ export interface McPackDb {
 
 function cleanupMcPack(mcPack: McPackDb): McPackDb {
     return {
-        id: mcPack.id,
+        id: toNumber(mcPack.id),
         commPkgNo: orEmpty(mcPack.commPkgNo),
         description: orEmpty(mcPack.description),
         mcPkgNo: orEmpty(mcPack.mcPkgNo),

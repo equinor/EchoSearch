@@ -135,8 +135,8 @@ export enum OfflineSystem {
     Documents = 'Documents',
     Punches = 'Punches',
     Checklist = 'Checklist',
-    CommPk = 'CommPk',
-    McPk = 'McPk',
+    CommPack = 'CommPack',
+    McPack = 'McPack',
     Notifications = 'Notifications',
     WorkOrders = 'WorkOrders' //missing in SystemKey
 }

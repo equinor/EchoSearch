@@ -13,7 +13,7 @@ export function inMemoryMcPacksInstance(): InMemoryData<McPackDb> {
 }
 
 export async function inMemoryMcPacksInit(): Promise<number> {
-    if (!isFullSyncDone(OfflineSystem.McPk)) {
+    if (!isFullSyncDone(OfflineSystem.McPack)) {
         logWarn('Full mc pack sync is not done, cannot init in memory');
         return 0;
     }

@@ -109,7 +109,7 @@ const echoWorker: EchoWorker = {
         return await externalRunSync(offlineSystemKey);
     },
     cancelSync(): void {
-        externalCancelSync(OfflineSystem.McPk);
+        externalCancelSync(OfflineSystem.McPack);
     },
 
     async setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {

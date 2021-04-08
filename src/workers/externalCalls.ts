@@ -85,7 +85,7 @@ async function internalInitialize(): Promise<void> {
     performanceLogger.forceLog('SearchSystems starting');
 
     mcPacksSystem = new SearchSystem<McPackDb>(
-        OfflineSystem.McPk,
+        OfflineSystem.McPack,
         initMcTask,
         () => inMemoryMcPacksInstance().isReady(),
         async (searchText, maxHits) => searchInMemoryMcPacksWithText(searchText, maxHits),
@@ -162,7 +162,7 @@ export async function externalSearchForClosestTagNo(searchText: string): Promise
 }
 
 export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<SyncResult> {
-    if (offlineSystemKey === OfflineSystem.McPk) {
+    if (offlineSystemKey === OfflineSystem.McPack) {
         return await runSync(mcPacksSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
         return await runSync(tagSearchSystem);
@@ -174,7 +174,7 @@ export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<
 }
 
 export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.McPk) {
+    if (offlineSystemKey === OfflineSystem.McPack) {
         setMcPacksIsEnabled(isEnabled);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
         setPunchesIsEnabled(isEnabled);
@@ -198,7 +198,7 @@ export async function externalClearAllTags() {
     clearInMemoryTags();
     clearLevTrie();
 
-    ClearSettings(OfflineSystem.McPk);
+    ClearSettings(OfflineSystem.McPack);
     await mcPacksAdministrator().deleteAndRecreate();
     inMemoryMcPacksInstance().clearData();
 
