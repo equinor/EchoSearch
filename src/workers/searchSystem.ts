@@ -1,3 +1,4 @@
+import { ArgumentDateError } from '../offlineSync/stringUtils';
 import { InternalSyncResult } from '../offlineSync/syncResult';
 import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
 
@@ -50,6 +51,8 @@ export class SearchSystem<T> {
     }
 
     async runUpdateSync(lastChangedDate: Date): Promise<InternalSyncResult> {
+        if (!lastChangedDate)
+            throw new ArgumentDateError('lastChangedDate is undefined in update sync for ' + this.offlineSystemKey);
         return await this._updateSync(lastChangedDate);
     }
 }

@@ -7,6 +7,7 @@ import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
 import { logPerformance } from '../logger';
+import { BaseError } from '../offlineSync/baseError';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
@@ -182,6 +183,21 @@ export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<
     return { isSuccess: false, error: 'sync has not been implemented for ' + offlineSystemKey } as SyncResult;
 }
 
+// function getSearchSystem<T>(offlineSystemKey: OfflineSystem) : SearchSystem<T> {
+//     if (offlineSystemKey === OfflineSystem.McPack) {
+//         return mcPacksSystem as SearchSystem<T>;
+
+//     } else if (offlineSystemKey === OfflineSystem.Tags) {
+//          return tagSearchSystem;
+//     }
+//     // } else if (offlineSystemKey === OfflineSystem.Punches) {
+//     //     return punchSearchSystem;
+//     // }
+//     throw new NotImplementedError('getSearchSystem has not been implemented for ', offlineSystemKey);
+// }
+
+export class NotImplementedError extends BaseError {}
+
 export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
     if (offlineSystemKey === OfflineSystem.McPack) {
         setMcPacksIsEnabled(isEnabled);
@@ -192,7 +208,7 @@ export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnab
     const setting = GetSetting(offlineSystemKey);
     console.log(
         'Setting: ',
-        [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.syncDataDate].join(' ')
+        [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
     );
 }
 

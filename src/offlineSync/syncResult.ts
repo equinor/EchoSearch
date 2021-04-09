@@ -4,7 +4,7 @@ export interface SyncResult {
 }
 
 export interface InternalSyncResult extends SyncResult {
-    dataSyncedAtDate: Date;
+    newestItemDate?: Date;
     itemsSyncedCount: number;
 }
 

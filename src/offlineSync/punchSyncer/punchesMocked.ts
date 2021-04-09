@@ -21,7 +21,7 @@ function randomPunch(): string {
         "description": "${randomId(7)}",
         "url": "",
         "statusId": "PA",
-        "updatedAt": "2019-12-31T06:13:37",
+        "updatedAt": "2021-04-04T02:13:37",
         "createdAt": "2019-12-23T01:27:29",
         "clearedAt": null,
         "rejectedAt": null,

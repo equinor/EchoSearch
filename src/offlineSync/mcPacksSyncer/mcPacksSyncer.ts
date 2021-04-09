@@ -2,7 +2,8 @@ import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
 import { logPerformance } from '../../logger';
 import { InternalSyncResult } from '../syncResult';
 import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
-import { apiAllMcPacks, apiUpdatedMcPacks } from './mcPacksApi';
+import { getMaxDateFunc } from '../Utils/dateUtils';
+import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
 export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
@@ -27,7 +28,8 @@ export async function syncFullMcPacks(): Promise<InternalSyncResult> {
 
     await mcPacksRepository().addDataBulks(data);
     performanceLogger.forceLogDelta('McPacks addDataBulks ' + data.length);
-    return { isSuccess: true, itemsSyncedCount: data.length } as InternalSyncResult;
+    const newestItemDate = getNewestItemDate(data);
+    return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
 export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<InternalSyncResult> {
@@ -41,5 +43,11 @@ export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<Internal
     await mcPacksRepository().addDataBulks(data);
     performanceLogger.forceLogDelta('McPacks Add to Dexie');
 
-    return { isSuccess: true, itemsSyncedCount: data.length } as InternalSyncResult;
+    const newestItemDate = getNewestItemDate(data);
+
+    return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
+}
+
+function getNewestItemDate(data: McPackDb[]) {
+    return getMaxDateFunc(data, (mcPack) => [mcPack.updatedAt]);
 }
