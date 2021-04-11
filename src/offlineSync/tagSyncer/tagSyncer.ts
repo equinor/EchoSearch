@@ -1,4 +1,8 @@
-import { clearAndInitInMemoryTags, updateInMemoryTags } from '../../inMemory/inMemoryTags';
+import {
+    clearAndInitInMemoryTags,
+    inMemoryTagsCount as inMemoryTagCount,
+    updateInMemoryTags
+} from '../../inMemory/inMemoryTags';
 import { populateLevTrieWithTags } from '../../inMemory/inMemoryTagSearch';
 import { InternalSyncResult } from '../syncResult';
 import { getMaxDateFunc } from '../Utils/dateUtils';
@@ -12,7 +16,9 @@ export async function syncFullTags(): Promise<InternalSyncResult> {
     await tagsRepository().addDataBulks(data.tags);
     clearAndInitInMemoryTags(data.tags); //we are dependent on summary from indexDb, so have to sync in memory after indexDb is done :(
     populateLevTrieWithTags(data.tags.map((item) => item.tagNo));
-    return { isSuccess: true, newestItemDate: data.dataSyncedAt, itemsSyncedCount: data.tags.length };
+
+    const result = syncUpdateTags(data.dataSyncedAt);
+    return { ...result, itemsSyncedCount: inMemoryTagCount() };
 }
 
 export async function syncUpdateTags(lastChangedDate: Date): Promise<InternalSyncResult> {
