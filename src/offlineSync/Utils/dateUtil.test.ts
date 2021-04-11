@@ -1,4 +1,4 @@
-import { getMaxDate, getMaxDateFunc, getMaxDateInCollection, minusOneDay } from './dateUtils';
+import { dateDifferenceInDays, getMaxDate, getMaxDateFunc, getMaxDateInCollection, minusOneDay } from './dateUtils';
 
 describe('getMaxDate', () => {
     it('should get max date', () => {
@@ -89,6 +89,32 @@ describe('minusOneDay', () => {
         const expected = new Date('2020-01-17T01:00:01');
         const actual = minusOneDay(stringDateDisguisedAsDate);
         expect(actual).toEqual(expected);
+    });
+});
+
+describe('dateDifferenceInDays', () => {
+    it('undefined should return many days difference', () => {
+        const date = new Date('2020-01-19T01:00:01');
+        const actual = dateDifferenceInDays(date);
+        expect(actual).toBeGreaterThanOrEqual(999);
+    });
+
+    it('should return positive number of days independent of arguments order', () => {
+        const date1 = new Date('2020-01-19T01:00:01');
+        const date2 = new Date('2020-01-18T01:00:01');
+        expect(dateDifferenceInDays(date1, date2)).toBe(1);
+        expect(dateDifferenceInDays(date2, date1)).toBe(1);
+    });
+
+    it('should return 0 days if same day', () => {
+        const date1 = new Date('2020-01-19T01:00:01');
+        const date2 = new Date('2020-01-19T17:00:01');
+        expect(dateDifferenceInDays(date1, date2)).toBe(0);
+    });
+
+    it('should handle date disguised as a string', () => {
+        const stringDateDisguisedAsDate = parseJsonDates('2020-02-18T01:00:01', '2020-01-19T01:00:01');
+        expect(dateDifferenceInDays(stringDateDisguisedAsDate[0].date1, stringDateDisguisedAsDate[0].date2)).toBe(30);
     });
 });
 

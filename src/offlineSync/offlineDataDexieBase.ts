@@ -1,4 +1,4 @@
-import Dexie from 'dexie';
+import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { logPerformance, logVerbose, logWarn } from '../logger';
 import { BaseError } from './baseError';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
@@ -55,6 +55,10 @@ export class OfflineDataDexieBase<T> extends Dexie {
         }
     }
 
+    async bulkDeleteData(keys: IndexableTypeArrayReadonly): Promise<void> {
+        await this.table(this.tableName).bulkDelete(keys);
+    }
+
     /**
      * Returns all the data in indexDb database.
      * Be aware that this is a slow and blocking operation, and should generally be avoided.
@@ -76,6 +80,10 @@ export class Repository<T> {
 
     async addDataBulks(data: T[]): Promise<void> {
         await this.database.addDataBulks(data);
+    }
+
+    async bulkDeleteData(keys: IndexableTypeArrayReadonly): Promise<void> {
+        await this.database.bulkDeleteData(keys);
     }
 
     async bulkGet(keys: string[]): Promise<T[]> {

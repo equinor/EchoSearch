@@ -36,3 +36,13 @@ export function minusOneDay(date?: Date): Date | undefined {
     date.setDate(date.getDate() - 1);
     return date;
 }
+
+export function dateDifferenceInDays(date1?: Date, date2?: Date): number {
+    if (!date1 || !date2) {
+        return 9999999;
+    }
+    date2 = new Date(date2); //typescript doesn't know the difference between string and date...
+    date1 = new Date(date1);
+    const diff = Math.abs(date1.getTime() - date2.getTime());
+    return Math.floor(diff / (1000 * 3600 * 24));
+}

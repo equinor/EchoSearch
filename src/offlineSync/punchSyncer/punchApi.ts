@@ -3,7 +3,7 @@ import { apiFetch } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
-import { openClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
+import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
 
 const useMockData = true;
 
@@ -60,7 +60,7 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
     const performanceLogger = logPerformance();
     const items: PunchDb[] = useMockData
-        ? JSON.parse(openClosedRejectedPunches())
+        ? JSON.parse(mockedOpenClosedRejectedPunches())
         : await getAllPunchesFromApi(instCode);
     performanceLogger.forceLogDelta(useMockData ? 'Got mocked data' : ' Got api data');
 
@@ -70,11 +70,15 @@ export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
 }
 
 export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promise<PunchDb[]> {
-    const items: PunchDb[] = useMockData
-        ? JSON.parse(randomMockedPunchesArrayString(2))
-        : await getUpdatedPunchesFromApi(instCode, fromDate);
+    const items: PunchDb[] = useMockData ? mockedUpdatedPunches() : await getUpdatedPunchesFromApi(instCode, fromDate);
 
     return items.map((item) => cleanupPunch(item));
+}
+
+function mockedUpdatedPunches(): PunchDb[] {
+    const punches: PunchDb[] = JSON.parse(mockedOpenClosedRejectedPunches());
+    const randomPunches: PunchDb[] = JSON.parse(randomMockedPunchesArrayString(1));
+    return punches.concat(randomPunches);
 }
 
 async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {

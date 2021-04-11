@@ -1,7 +1,7 @@
-import { logPerformance } from '../../logger';
+import { logInfo, logPerformance } from '../../logger';
 import { InternalSyncResult } from '../syncResult';
-import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
-import { getMaxDateFunc } from '../Utils/dateUtils';
+import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
+import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllPunches, apiUpdatedPunches, PunchDb } from './punchApi';
 import { punchesAdministrator, punchesRepository } from './punchRepository';
 
@@ -27,23 +27,38 @@ export async function syncFullPunches(): Promise<InternalSyncResult> {
 
     await punchesRepository().addDataBulks(data);
     performanceLogger.forceLogDelta('Punches addDataBulks ' + data.length);
+
     const newestItemDate = getNewestItemDate(data);
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdatePunches(lastChangedDate: Date): Promise<InternalSyncResult> {
+export async function syncUpdatePunches(newestItemDate: Date): Promise<InternalSyncResult> {
+    const lastSyncedAtDate = GetSetting(OfflineSystem.Punches).lastSyncedAtDate;
+    const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
+    const daysBackInTime = 2;
+    if (daysSinceLastUpdate >= daysBackInTime) {
+        console.log('------ running full punch sync');
+        return await syncFullPunches();
+    }
+
     const performanceLogger = logPerformance();
-    const punches = await apiUpdatedPunches(getInstCode(), lastChangedDate);
+    const punches = await apiUpdatedPunches(getInstCode(), newestItemDate);
     performanceLogger.forceLogDelta('Punches Api');
 
     //inMemoryPunchesInstance().updateData(data);
     //performanceLogger.forceLogDelta('Punches Add to inMemory, total: ' + inMemoryPunchesInstance().length());
 
-    await punchesRepository().addDataBulks(punches);
+    const repository = punchesRepository();
+    await repository.addDataBulks(punches);
     performanceLogger.forceLogDelta('Punches Add to Dexie');
 
-    const newestItemDate = getNewestItemDate(punches);
-    return { isSuccess: true, itemsSyncedCount: punches.length, newestItemDate };
+    const closedPunchesNos = punches.filter((punch) => punch.clearedAt || punch.rejectedAt).map((item) => item.id);
+    if (closedPunchesNos.length > 0) {
+        logInfo('-- Delete closed punches', closedPunchesNos.length);
+        await repository.bulkDeleteData(closedPunchesNos);
+    }
+
+    return { isSuccess: true, itemsSyncedCount: punches.length, newestItemDate: getNewestItemDate(punches) };
 }
 
 function getNewestItemDate(data: PunchDb[]): Date | undefined {

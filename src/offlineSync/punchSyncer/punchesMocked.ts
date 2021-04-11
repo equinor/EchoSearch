@@ -6,7 +6,7 @@ export function randomMockedPunchesArrayString(count: number): string {
     return result;
 }
 
-export function openClosedRejectedPunches(): string {
+export function mockedOpenClosedRejectedPunches(): string {
     return '[' + openPunch() + ', ' + closedPunch() + ', ' + rejectedPunch() + ']';
 }
 
@@ -48,7 +48,7 @@ function openPunch(): string {
         "description": "[MC] Defect cable on crane.",
         "url": "",
         "statusId": "PA",
-        "updatedAt": "2019-12-31T06:13:37",
+        "updatedAt": "${new Date()}",
         "createdAt": "2019-12-23T01:27:29",
         "clearedAt": null,
         "rejectedAt": null,
@@ -102,7 +102,7 @@ function rejectedPunch(): string {
         "updatedAt": "2019-12-31T06:13:37",
         "createdAt": "2019-12-23T01:27:29",
         "clearedAt": null,
-        "rejectedAt": "2021-12-29T08:50:04",        
+        "rejectedAt": "2021-02-29T08:50:04",        
         "mcPkgNo": "1111-E590",
         "commPkgNo": "1111-B61",
         "areaId": null,
