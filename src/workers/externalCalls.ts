@@ -3,7 +3,11 @@ import {
     inMemoryMcPacksInstance,
     searchInMemoryMcPacksWithText
 } from '../inMemory/inMemoryMcPacks';
-import { inMemoryPunchesInit } from '../inMemory/inMemoryPunches';
+import {
+    inMemoryPunchesInit,
+    inMemoryPunchesInstance,
+    searchInMemoryPunchesWithText
+} from '../inMemory/inMemoryPunches';
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
@@ -118,7 +122,7 @@ async function internalInitialize(): Promise<void> {
         OfflineSystem.Punches,
         initPunchesTask,
         () => isInMemoryTagsReady(),
-        async (searchText, maxHits) => [], // searchTags(searchText, maxHits),
+        async (searchText, maxHits) => searchInMemoryPunchesWithText(searchText, maxHits),
         async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
         async () => syncFullPunches(),
         async (lastChangedDate) => syncUpdatePunches(lastChangedDate)
@@ -151,6 +155,11 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
     //     return [];
     // }
     const results = await mcPacksSystem.search(searchText, maxHits);
+    return results;
+}
+
+export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<PunchDb[]> {
+    const results = await punchSearchSystem.search(searchText, maxHits);
     return results;
 }
 
@@ -230,7 +239,7 @@ export async function externalDeleteAllData() {
 
     ClearSettings(OfflineSystem.Punches);
     await punchesAdministrator().deleteAndRecreate();
-    //inMemoryPunchesInstance().clearData();
+    inMemoryPunchesInstance().clearData();
 }
 
 function ClearSettings(offlineSystemKey: OfflineSystem): void {
