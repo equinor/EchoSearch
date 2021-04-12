@@ -3,6 +3,7 @@ import {
     inMemoryMcPacksInstance,
     searchInMemoryMcPacksWithText
 } from '../inMemory/inMemoryMcPacks';
+import { inMemoryPunchesInit } from '../inMemory/inMemoryPunches';
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
@@ -61,7 +62,7 @@ async function initMcPacks(): Promise<void> {
 async function initPunches(): Promise<void> {
     const performanceLogger = logPerformance('Init Punches');
     await punchesAdministrator().init();
-    const mcPackCount = 0; // await inMemoryPunchesInit();
+    const mcPackCount = await inMemoryPunchesInit();
     performanceLogger.forceLogDelta('Punches done ' + mcPackCount);
 }
 
@@ -116,7 +117,7 @@ async function internalInitialize(): Promise<void> {
     punchSearchSystem = new SearchSystem<PunchDb>(
         OfflineSystem.Punches,
         initPunchesTask,
-        () => true, //isInMemoryTagsReady(),
+        () => isInMemoryTagsReady(),
         async (searchText, maxHits) => [], // searchTags(searchText, maxHits),
         async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
         async () => syncFullPunches(),

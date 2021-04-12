@@ -34,20 +34,29 @@ export class InMemoryData<T> {
         return this.inMemoryData;
     }
 
-    count(): number {
+    length(): number {
         return this.inMemoryData.length;
     }
 
-    clearAndInit(data: T[]) {
+    clearData(): void {
         this.isReadyFlag = false;
+        this.inMemoryData = [] as T[];
+    }
+
+    clearAndInit(data: T[]) {
         const newData = [...data];
         newData.sort(this.alphabeticSort);
         this.inMemoryData = newData;
-        this.isReadyFlag = true;
+        this.isReadyFlag = true; //no need to set it to false in start of method, cause we already have old data we can use for searching
     }
 
-    updateData(data: T[]): void {
-        data.forEach((item) => {
+    /**
+     * Updates existing items (with matching keys). Adds new items (not found by key).
+     * @param updateItems
+     */
+    updateItems(updateItems: T[]): void {
+        //not thread safe? - abort if clearAndInit is called?
+        updateItems.forEach((item) => {
             const index = this.indexOfBinarySearch(this.getKeyValue(item));
             if (index >= 0) {
                 this.inMemoryData[index] = item; //update existing item
@@ -58,7 +67,19 @@ export class InMemoryData<T> {
         this.inMemoryData.sort(this.alphabeticSort);
     }
 
-    //TODO delete data
+    /**
+     * Removes items with matching key.
+     * @param itemsToBeRemoved Items to be removed
+     */
+    removeItems(itemsToBeRemoved: T[]): void {
+        //not thread safe? - abort if clearAndInit is called?
+        itemsToBeRemoved.forEach((itemToDelete) => {
+            const index = this.indexOfBinarySearch(this.getKeyValue(itemToDelete));
+            if (index > -1) {
+                this.inMemoryData.splice(index, 1);
+            }
+        });
+    }
 
     indexOfBinarySearch(key: string): number {
         let minNum = 0;
@@ -76,14 +97,5 @@ export class InMemoryData<T> {
         }
 
         return -1;
-    }
-
-    clearData(): void {
-        this.isReadyFlag = false;
-        this.inMemoryData = [] as T[];
-    }
-
-    length(): number {
-        return this.inMemoryData.length;
     }
 }

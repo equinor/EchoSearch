@@ -37,7 +37,7 @@ export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<Internal
     const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate);
     performanceLogger.forceLogDelta('McPacks Api');
 
-    inMemoryMcPacksInstance().updateData(data);
+    inMemoryMcPacksInstance().updateItems(data);
     performanceLogger.forceLogDelta('McPacks Add to inMemory, total: ' + inMemoryMcPacksInstance().length());
 
     await mcPacksRepository().addDataBulks(data);

@@ -46,13 +46,13 @@ export async function syncUpdatePunches(newestItemDate: Date): Promise<InternalS
     const performanceLogger = logPerformance();
     const punches = await apiUpdatedPunches(getInstCode(), newestItemDate);
     performanceLogger.forceLogDelta('Punches Api');
-    inMemoryPunchesInstance().updateData(punches);
+    inMemoryPunchesInstance().updateItems(punches);
 
     const repository = punchesRepository();
     await repository.addDataBulks(punches);
     await deleteClosedPunches(punches, repository);
 
-    if (!(await verifyPunchCount(getInstCode(), inMemoryPunchesInstance().count()))) {
+    if (!(await verifyPunchCount(getInstCode(), inMemoryPunchesInstance().length()))) {
         return syncFullPunches();
     }
 
@@ -60,6 +60,8 @@ export async function syncUpdatePunches(newestItemDate: Date): Promise<InternalS
 }
 
 async function deleteClosedPunches(punches: PunchDb[], repository: Repository<PunchDb>): Promise<void> {
+    inMemoryPunchesInstance().removeItems(punches);
+
     const closedPunchesNos = punches.filter((punch) => punch.clearedAt || punch.rejectedAt).map((item) => item.id);
     if (closedPunchesNos.length > 0) {
         logInfo('-- Delete closed punches', closedPunchesNos.length);
