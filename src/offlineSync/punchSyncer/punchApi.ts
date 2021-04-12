@@ -1,7 +1,8 @@
 import { logPerformance } from '../../logger';
 import { apiFetch } from '../../service/workerFetch';
+import { verifyCount } from '../dataVerification';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { baseApiUrl, OfflineSystem } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
 
@@ -75,6 +76,19 @@ export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promi
     return items.map((item) => cleanupPunch(item));
 }
 
+export async function apiEstimatedPunchCount(instCode: string): Promise<number> {
+    //Statistics/open-punches-estimated-count?instCode=JSV
+    const url = `${baseApiUrl}/${instCode}/statistics/open-punches-estimated-count`;
+    const response = await apiFetch(url);
+    if (response.ok) return Number.parseInt(await response.text());
+    return 0;
+}
+
+export async function verifyPunchCount(instCode: string, punchesCount: number): Promise<boolean> {
+    if (useMockData) return true;
+    return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode), OfflineSystem.Punches);
+}
+
 function mockedUpdatedPunches(): PunchDb[] {
     const punches: PunchDb[] = JSON.parse(mockedOpenClosedRejectedPunches());
     const randomPunches: PunchDb[] = JSON.parse(randomMockedPunchesArrayString(1));
@@ -83,13 +97,13 @@ function mockedUpdatedPunches(): PunchDb[] {
 
 async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
     const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    const result = await apiFetch(url);
-    return (await result.json()) as PunchDb[];
+    const response = await apiFetch(url);
+    return (await response.json()) as PunchDb[];
 }
 
 async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    const result = await apiFetch(url);
-    return (await result.json()) as PunchDb[];
+    const response = await apiFetch(url);
+    return (await response.json()) as PunchDb[];
 }

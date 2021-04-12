@@ -34,6 +34,10 @@ export class InMemoryData<T> {
         return this.inMemoryData;
     }
 
+    count(): number {
+        return this.inMemoryData.length;
+    }
+
     clearAndInit(data: T[]) {
         this.isReadyFlag = false;
         const newData = [...data];
