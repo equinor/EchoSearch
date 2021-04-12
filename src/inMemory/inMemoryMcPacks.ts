@@ -13,8 +13,8 @@ export function inMemoryMcPacksInstance(): InMemoryData<McPackDb> {
 }
 
 export async function inMemoryMcPacksInit(): Promise<number> {
-    if (!isFullSyncDone(OfflineSystem.McPk)) {
-        logWarn('Full mc pack sync is not done, cannot init in memory');
+    if (!isFullSyncDone(OfflineSystem.McPack)) {
+        logWarn(`Full ${OfflineSystem.McPack} sync is not done, cannot init in memory`);
         return 0;
     }
 
@@ -29,6 +29,6 @@ export function searchInMemoryMcPacksWithText(searchText: string, maxHits: numbe
         (item) => [item.mcPkgNo, item.commPkgNo, item.description, item.projectName],
         searchText,
         maxHits,
-        'McPacks'
+        OfflineSystem.Punches
     );
 }

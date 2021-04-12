@@ -3,6 +3,7 @@ import { SearchSystem } from '../workers/searchSystem';
 import { BaseError } from './baseError';
 import { createError, InternalSyncResult, SyncResult } from './syncResult';
 import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
+import { getMaxDate, minusOneDay } from './Utils/dateUtils';
 import { asyncUsing } from './Utils/usingDisposable';
 
 export function syncIsOutdated(date: Date): boolean {
@@ -68,14 +69,14 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<SyncRe
     const settings = GetSetting(searchSystem.offlineSystemKey);
 
     let result = {} as InternalSyncResult;
-    const needFullSync = settings.lastSyncedAtDate === undefined;
+    const needFullSync = !settings.lastSyncedAtDate;
 
     result = needFullSync
         ? await searchSystem.runFullSync()
-        : await searchSystem.runUpdateSync(settings.lastSyncedAtDate!);
+        : await searchSystem.runUpdateSync(settings.newestItemDate!);
 
     if (result.isSuccess) {
-        updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.dataSyncedAtDate);
+        updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.newestItemDate);
     }
 
     var tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
@@ -83,10 +84,16 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<SyncRe
     return { ...result };
 }
 
-function updateLastSyncedDate(offlineSystemKey: OfflineSystem, date: Date, dataSyncedAtDate: Date): void {
+function updateLastSyncedDate(offlineSystemKey: OfflineSystem, lastSyncedAtDate: Date, newestItemDate?: Date): void {
     const setting = GetSetting(offlineSystemKey);
-    setting.lastSyncedAtDate = date;
-    setting.syncDataDate = dataSyncedAtDate;
+    setting.lastSyncedAtDate = lastSyncedAtDate;
+
+    if (newestItemDate) {
+        setting.newestItemDate = newestItemDate;
+    } else {
+        const lastSyncedMinusOneDayBecauseOfServerTimezone = minusOneDay(lastSyncedAtDate)!;
+        setting.newestItemDate = getMaxDate(setting.newestItemDate, lastSyncedMinusOneDayBecauseOfServerTimezone);
+    }
     SaveSettings(setting);
 }
 

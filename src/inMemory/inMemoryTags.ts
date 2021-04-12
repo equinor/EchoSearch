@@ -91,6 +91,10 @@ export function getInMemoryTagsSorted(): ReadonlyArray<TagNoAlphaNumeric> {
     return _sortedInMemoryTags;
 }
 
+export function inMemoryTagsCount(): number {
+    return _sortedInMemoryTags.length;
+}
+
 export function clearInMemoryTags(): void {
     _sortedInMemoryTags = [];
     _isInMemoryTagsInitialized = false;

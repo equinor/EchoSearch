@@ -87,7 +87,7 @@ export function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boo
     const settings = GetSetting(offlineSystemKey);
     settings.isEnable = isEnabled;
     settings.lastSyncedAtDate = undefined;
-    settings.syncDataDate = undefined;
+    settings.newestItemDate = undefined;
     SaveSettings(settings);
 }
 
@@ -117,7 +117,7 @@ export function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineS
     const setting: OfflineSettingItem = {
         offlineSystemKey: offlineSystemKey,
         isEnable: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
-        syncDataDate: undefined,
+        newestItemDate: undefined,
         lastSyncedAtDate: undefined
     };
     return setting;
@@ -126,7 +126,7 @@ export function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineS
 export interface OfflineSettingItem {
     offlineSystemKey: OfflineSystem;
     isEnable: boolean;
-    syncDataDate?: Date;
+    newestItemDate?: Date;
     lastSyncedAtDate?: Date;
 }
 
@@ -135,8 +135,8 @@ export enum OfflineSystem {
     Documents = 'Documents',
     Punches = 'Punches',
     Checklist = 'Checklist',
-    CommPk = 'CommPk',
-    McPk = 'McPk',
+    CommPack = 'CommPack',
+    McPack = 'McPack',
     Notifications = 'Notifications',
     WorkOrders = 'WorkOrders' //missing in SystemKey
 }

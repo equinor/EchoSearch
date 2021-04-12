@@ -1,0 +1,109 @@
+import { logPerformance } from '../../logger';
+import { apiFetch } from '../../service/workerFetch';
+import { verifyCount } from '../dataVerification';
+import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
+import { baseApiUrl, OfflineSystem } from '../syncSettings';
+import { dateAsApiString } from '../Utils/stringUtils';
+import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
+
+const useMockData = true;
+
+export interface PunchDb {
+    id: number;
+    //punchListItemNo: number; //not needed, same as id
+    createdAt: Date;
+    updatedAt: Date;
+    clearedAt?: Date;
+    rejectedAt?: Date;
+
+    tagNo: string;
+    tagDescription: string;
+    tagArea: string;
+    description: string;
+    statusId: string;
+    mcPkgNo: string;
+    commPkgNo: string;
+    areaId: string;
+    url: string;
+    systemId: string;
+    clearedByOrg: string;
+    raisedByOrg: string;
+    typeDescription: string;
+    priorityId: string;
+    plantIdentificator: string;
+}
+
+function cleanupPunch(punch: PunchDb): PunchDb {
+    return {
+        id: toNumber(punch.id),
+        tagNo: punch.tagNo,
+        createdAt: toDateOrThrowError(punch.createdAt),
+        updatedAt: toDateOrThrowError(punch.updatedAt),
+        clearedAt: toDateOrUndefined(punch.clearedAt),
+        rejectedAt: toDateOrUndefined(punch.rejectedAt),
+        tagDescription: orEmpty(punch.tagDescription),
+        description: orEmpty(punch.description),
+        statusId: orEmpty(punch.statusId),
+        mcPkgNo: orEmpty(punch.mcPkgNo),
+        commPkgNo: orEmpty(punch.commPkgNo),
+        areaId: orEmpty(punch.areaId),
+        url: orEmpty(punch.url),
+        tagArea: orEmpty(punch.tagArea),
+        systemId: orEmpty(punch.systemId),
+        clearedByOrg: orEmpty(punch.clearedByOrg),
+        raisedByOrg: orEmpty(punch.raisedByOrg),
+        typeDescription: orEmpty(punch.typeDescription),
+        priorityId: orEmpty(punch.priorityId),
+        plantIdentificator: orEmpty(punch.plantIdentificator)
+    };
+}
+
+export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
+    const performanceLogger = logPerformance();
+    const items: PunchDb[] = useMockData
+        ? JSON.parse(mockedOpenClosedRejectedPunches())
+        : await getAllPunchesFromApi(instCode);
+    performanceLogger.forceLogDelta(useMockData ? 'Got mocked data' : ' Got api data');
+
+    const results = items.map((item) => cleanupPunch(item));
+    performanceLogger.forceLogDelta('Cleanup mc Packs');
+    return results;
+}
+
+export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promise<PunchDb[]> {
+    const items: PunchDb[] = useMockData ? mockedUpdatedPunches() : await getUpdatedPunchesFromApi(instCode, fromDate);
+
+    return items.map((item) => cleanupPunch(item));
+}
+
+export async function apiEstimatedPunchCount(instCode: string): Promise<number> {
+    //Statistics/open-punches-estimated-count?instCode=JSV
+    const url = `${baseApiUrl}/${instCode}/statistics/open-punches-estimated-count`;
+    const response = await apiFetch(url);
+    if (response.ok) return Number.parseInt(await response.text());
+    return 0;
+}
+
+export async function verifyPunchCount(instCode: string, punchesCount: number): Promise<boolean> {
+    if (useMockData) return true;
+    return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode), OfflineSystem.Punches);
+}
+
+function mockedUpdatedPunches(): PunchDb[] {
+    const punches: PunchDb[] = JSON.parse(mockedOpenClosedRejectedPunches());
+    const randomPunches: PunchDb[] = JSON.parse(randomMockedPunchesArrayString(1));
+    return punches.concat(randomPunches);
+}
+
+async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
+    const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
+    const response = await apiFetch(url);
+    return (await response.json()) as PunchDb[];
+}
+
+async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
+    const date = dateAsApiString(updatedSince);
+    const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
+    const response = await apiFetch(url);
+    return (await response.json()) as PunchDb[];
+}

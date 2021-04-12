@@ -8,9 +8,10 @@ import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
     externalCancelSync,
-    externalClearAllTags,
+    externalDeleteAllData,
     externalInitialize,
     externalMcPackSearch,
+    externalPunchesSearch,
     externalRunSync,
     externalSearchForClosestTagNo,
     externalSetEnabled,
@@ -84,13 +85,9 @@ const echoWorker: EchoWorker = {
         await externalInitialize();
     },
     async searchTags(searchText: string, maxHits = 100): Promise<TagSummaryDb[]> {
-        const mcPacks = await externalMcPackSearch('0001-A01', 2);
-        console.log(
-            'mc packs search',
-            mcPacks.map((item) =>
-                [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
-            )
-        );
+        await testSearchMcPacks();
+        await testSearchPunches();
+
         const tags = await externalTagSearch(searchText, maxHits);
 
         return tags;
@@ -102,14 +99,14 @@ const echoWorker: EchoWorker = {
 
     async changePlantAsync(instCode: string): Promise<void> {
         await saveInstCode(instCode);
-        await externalClearAllTags();
+        await externalDeleteAllData();
     },
 
     async runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<SyncResult> {
         return await externalRunSync(offlineSystemKey);
     },
     cancelSync(): void {
-        externalCancelSync(OfflineSystem.McPk);
+        externalCancelSync(OfflineSystem.McPack);
     },
 
     async setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
@@ -152,3 +149,23 @@ const echoWorker: EchoWorker = {
 export const echoWorkerDebugDontUseThis = echoWorker;
 
 Comlink.expose(echoWorker, ctx);
+
+async function testSearchMcPacks() {
+    const mcPacks = await externalMcPackSearch('0001-A01', 2);
+    console.log(
+        'mc packs search',
+        mcPacks.map((item) =>
+            [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
+        )
+    );
+}
+
+async function testSearchPunches() {
+    const punches = await externalPunchesSearch('A-73MA001', 2);
+    console.log(
+        'punches search',
+        punches.map((item) =>
+            [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
+        )
+    );
+}

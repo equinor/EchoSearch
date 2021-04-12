@@ -4,7 +4,8 @@ import {
     getMaxNumberInCollectionOrOne,
     orEmpty,
     toDateOrThrowError,
-    toDateOrUndefined
+    toDateOrUndefined,
+    toNumber
 } from './stringUtils';
 
 describe('extractPositiveNumbers', () => {
@@ -38,6 +39,29 @@ describe('orEmpty', () => {
 
     it('should return same string if proper string', () => {
         expect(orEmpty('a proper string')).toEqual('a proper string');
+    });
+});
+
+describe('toNumber', () => {
+    it('should return same number if number', () => {
+        expect(toNumber(-1234.56)).toEqual(-1234.56);
+    });
+
+    it('should return number if string is a valid number', () => {
+        expect(toNumber('-1234.57')).toEqual(-1234.57);
+    });
+
+    it('should return NaN if string is undefined', () => {
+        const undefinedString: string = (undefined as unknown) as string;
+        expect(toNumber(undefinedString)).toEqual(NaN);
+    });
+
+    it('should return NaN if string is empty', () => {
+        expect(toNumber('')).toEqual(NaN);
+    });
+
+    it('should return NaN if its a string and not a number', () => {
+        expect(toNumber('a proper string')).toEqual(NaN);
     });
 });
 

@@ -1,4 +1,4 @@
-import Dexie from 'dexie';
+import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { logPerformance, logVerbose, logWarn } from '../logger';
 import { BaseError } from './baseError';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
@@ -55,6 +55,10 @@ export class OfflineDataDexieBase<T> extends Dexie {
         }
     }
 
+    async bulkDeleteData(keys: IndexableTypeArrayReadonly): Promise<void> {
+        await this.table(this.tableName).bulkDelete(keys);
+    }
+
     /**
      * Returns all the data in indexDb database.
      * Be aware that this is a slow and blocking operation, and should generally be avoided.
@@ -76,6 +80,10 @@ export class Repository<T> {
 
     async addDataBulks(data: T[]): Promise<void> {
         await this.database.addDataBulks(data);
+    }
+
+    async bulkDeleteData(keys: IndexableTypeArrayReadonly): Promise<void> {
+        await this.database.bulkDeleteData(keys);
     }
 
     async bulkGet(keys: string[]): Promise<T[]> {
@@ -106,22 +114,17 @@ export class DatabaseAdministrator<T> {
     constructor(databaseNamePreFix: string, databaseCreator: (version: number) => OfflineDataDexieBase<T>) {
         this.databaseNamePreFix = databaseNamePreFix;
         this.isInitDone = false;
-        this.databaseCreator = databaseCreator;
-
         this.database = null;
-
-        getCurrentVersion(this.databaseNamePreFix).then((version) => {
-            this.database = databaseCreator(version);
-        });
+        this.databaseCreator = databaseCreator;
     }
     async init() {
         if (this.isInitDone) {
             logWarn(this.databaseNamePreFix + ' has already been initialized');
             return;
         }
-        this.isInitDone = true;
         const version = await getCurrentVersion(this.databaseNamePreFix);
         this.database = this.databaseCreator(version);
+        this.isInitDone = true;
     }
 
     repository(): Repository<T> {
@@ -137,7 +140,7 @@ export class DatabaseAdministrator<T> {
     }
 
     private openVersion(currentVersion: number) {
-        logVerbose('opening McPacks database v', currentVersion);
+        logVerbose('opening database v' + this.databaseNamePreFix + currentVersion);
         this.database = this.databaseCreator(currentVersion);
     }
 }
