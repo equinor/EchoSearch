@@ -91,7 +91,7 @@ function updateLastSyncedDate(offlineSystemKey: OfflineSystem, lastSyncedAtDate:
     if (newestItemDate) {
         setting.newestItemDate = newestItemDate;
     } else {
-        const lastSyncedMinusOneDayBecauseOfServerTimezone = minusOneDay(lastSyncedAtDate)!;
+        const lastSyncedMinusOneDayBecauseOfServerTimezone = minusOneDay(lastSyncedAtDate);
         setting.newestItemDate = getMaxDate(setting.newestItemDate, lastSyncedMinusOneDayBecauseOfServerTimezone);
     }
     SaveSettings(setting);

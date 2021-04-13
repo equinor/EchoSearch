@@ -17,6 +17,7 @@ export const workerFetch = async (
     headerOptions: Record<string, unknown> = {},
     method = 'GET',
     body?: Body,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleClientError?: (ex: unknown, statusCode: number, endpoint: string) => any,
     signal?: AbortSignal
 ): Promise<Response> => {
