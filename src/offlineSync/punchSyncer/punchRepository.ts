@@ -17,8 +17,8 @@ class PunchesDatabase extends OfflineDataDexieBase<PunchDb> {
         this.version(1.0) //It is preferred to increment the version by 0.1.
             .stores({
                 Punches: 'id'
-            })
-            .upgrade(() => {});
+            });
+        //.upgrade(() => {});
         this.PunchesTable = this.table(tableNameCannotBeRenamed);
     }
 }

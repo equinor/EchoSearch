@@ -40,12 +40,12 @@ async function changePlantBtnClicked() {
 
 async function cameraSearchClicked() {
     const similarTag = 'A73MAO0l';
-    var tag = await search.closestTagSearchAsync(similarTag);
+    const tag = await search.closestTagSearchAsync(similarTag);
     console.log(similarTag, 'camera search: found tag', tag);
 }
 
 async function searchBtnClicked() {
-    var tags = await search.searchAsync(OfflineSystem.Tags, 'a73 pedes cran', 5);
+    const tags = await search.searchAsync(OfflineSystem.Tags, 'a73 pedes cran', 5);
     console.log(
         'found tags:',
         tags.map((i) => i.tagNo)

@@ -1,12 +1,12 @@
 import { logPerformance } from '../../logger';
 import { randomId } from '../Utils/stringUtils';
 
-export function randomMockedTagsString(count: number) {
+export function randomMockedTagsString(count: number): string {
     if (count === 0) return '';
-    var items = range(count);
-    var tagStrings = items.map((_) => createMockedTag());
+    const items = range(count);
+    const tagStrings = items.map(() => createMockedTag());
 
-    var tagString = tagStrings.join(',');
+    const tagString = tagStrings.join(',');
 
     return tagString;
 }
@@ -33,7 +33,7 @@ export function getMockedTagsString(randomTagsCount: number): string {
     return result;
 }
 export function getMockedTagsStringInternal(randomTagsCount: number): string {
-    var randomTags = randomMockedTagsString(randomTagsCount);
+    let randomTags = randomMockedTagsString(randomTagsCount);
     if (randomTags.length > 0) randomTags += ',';
     return `
     [ ${randomTags}     

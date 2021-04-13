@@ -10,7 +10,9 @@ import * as Comlink from 'comlink';
  *   Code for Worker startup here!!
  *   Can be overwritten per worker instance
  */
-function start(): void {}
+function start(): void {
+    console.log('ctx start function');
+}
 
 const ctx: Comlink.Endpoint = self as any;
 ctx.start = start;

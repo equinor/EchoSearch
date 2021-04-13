@@ -18,7 +18,7 @@ export function syncIsOutdated(date: Date): boolean {
 const currentlySyncing: OfflineSystem[] = [];
 export async function runSync<T>(searchSystem: SearchSystem<T>): Promise<SyncResult> {
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
-        var message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
+        const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
         logWarn(message);
         return createError(message);
     }
@@ -79,7 +79,7 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<SyncRe
         updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.newestItemDate);
     }
 
-    var tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
+    const tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
     logPerformanceToConsole.forceLog(`${searchSystem.offlineSystemKey} Sync ${tagSyncStatus}`);
     return { ...result };
 }
@@ -91,7 +91,7 @@ function updateLastSyncedDate(offlineSystemKey: OfflineSystem, lastSyncedAtDate:
     if (newestItemDate) {
         setting.newestItemDate = newestItemDate;
     } else {
-        const lastSyncedMinusOneDayBecauseOfServerTimezone = minusOneDay(lastSyncedAtDate)!;
+        const lastSyncedMinusOneDayBecauseOfServerTimezone = minusOneDay(lastSyncedAtDate);
         setting.newestItemDate = getMaxDate(setting.newestItemDate, lastSyncedMinusOneDayBecauseOfServerTimezone);
     }
     SaveSettings(setting);

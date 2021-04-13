@@ -16,11 +16,14 @@ export function searchOrderedByBestMatch<T>(
     searchText: string,
     maxHits: number,
     typeNameForLogging: string,
-    alwaysPerformanceLogging = false //TODO Ove
+    alwaysPerformanceLogging = false
 ): T[] {
     const performanceLogger = logPerformance();
     const results = searchOrderedByBestMatchLogic(collection, getSearchableFieldsPrioritizedFunc, searchText, maxHits);
-    performanceLogger.forceLog(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`);
+    alwaysPerformanceLogging
+        ? performanceLogger.forceLog(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`)
+        : performanceLogger.log(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`);
+
     return results;
 }
 

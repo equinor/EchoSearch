@@ -4,37 +4,37 @@ describe('inMemoryData', () => {
     it('should INIT and SORT initial data', () => {
         const db = createDb();
 
-        var input = [create('2'), create('1'), create('3')];
+        const input = [create('2'), create('1'), create('3')];
         db.clearAndInit(input);
         const actual = db.all();
 
-        var expected = [create('1'), create('2'), create('3')];
+        const expected = [create('1'), create('2'), create('3')];
         expect(actual).toEqual(expected);
     });
 
     it('should CLEAR old data and INIT new data', () => {
         const db = createDb();
 
-        var input = [create('2'), create('1'), create('3')];
+        const input = [create('2'), create('1'), create('3')];
         db.clearAndInit(input);
         const actual = db.all();
-        var expected = [create('1'), create('2'), create('3')];
+        const expected = [create('1'), create('2'), create('3')];
         expect(actual).toEqual(expected);
 
-        var input2 = [create('6'), create('5')];
+        const input2 = [create('6'), create('5')];
         db.clearAndInit(input2);
         const actual2 = db.all();
-        var expected2 = [create('5'), create('6')];
+        const expected2 = [create('5'), create('6')];
         expect(actual2).toEqual(expected2);
     });
 
     it('should CLEAR all data', () => {
         const db = createDb();
 
-        var input = [create('2'), create('1'), create('3')];
+        const input = [create('2'), create('1'), create('3')];
         db.clearAndInit(input);
         const actual = db.all();
-        var expected = [create('1'), create('2'), create('3')];
+        const expected = [create('1'), create('2'), create('3')];
         expect(actual).toEqual(expected);
 
         db.clearData();
@@ -45,7 +45,7 @@ describe('inMemoryData', () => {
     it('length should equal count of all items', () => {
         const db = createDb();
 
-        var input = [create('2'), create('1'), create('3')];
+        const input = [create('2'), create('1'), create('3')];
         db.clearAndInit(input);
         const actual = db.length();
         expect(actual).toEqual(3);
@@ -56,12 +56,12 @@ describe('inMemoryData', () => {
 
         db.clearAndInit([create('2'), create('1'), create('3')]);
         const actual = db.all();
-        var expected = [create('1'), create('2'), create('3')];
+        const expected = [create('1'), create('2'), create('3')];
         expect(actual).toEqual(expected);
 
         db.updateItems([create('1', 'a name'), create('9'), create('8')]);
         const actual2 = db.all();
-        var expected2 = [create('1', 'a name'), create('2'), create('3'), create('8'), create('9')];
+        const expected2 = [create('1', 'a name'), create('2'), create('3'), create('8'), create('9')];
         expect(actual2).toEqual(expected2);
 
         expect(db.length()).toEqual(5);
@@ -70,7 +70,7 @@ describe('inMemoryData', () => {
     it('should REMOVE specific items', () => {
         const db = createDb();
 
-        var input = [create('2'), create('1'), create('3'), create('5'), create('4'), create('6')];
+        const input = [create('2'), create('1'), create('3'), create('5'), create('4'), create('6')];
         db.clearAndInit(input);
 
         db.removeItems([create('1'), create('2'), create('3'), create('6')]);

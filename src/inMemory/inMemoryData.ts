@@ -43,7 +43,7 @@ export class InMemoryData<T> {
         this.inMemoryData = [] as T[];
     }
 
-    clearAndInit(data: T[]) {
+    clearAndInit(data: T[]): void {
         const newData = [...data];
         newData.sort(this.alphabeticSort);
         this.inMemoryData = newData;

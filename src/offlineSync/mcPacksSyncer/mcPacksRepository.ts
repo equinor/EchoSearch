@@ -17,8 +17,8 @@ class McPacksDatabase extends OfflineDataDexieBase<McPackDb> {
         this.version(1.0) //It is preferred to increment the version by 0.1.
             .stores({
                 McPacks: 'id'
-            })
-            .upgrade(() => {});
+            });
+        //.upgrade(() => {});
         this.McPacksTable = this.table(tableNameCannotBeRenamed);
     }
 }

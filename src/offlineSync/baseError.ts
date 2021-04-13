@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { isNullOrEmpty } from './Utils/stringExtensions';
 
 //TODO Ove use Base error from echo CORE
 export class BaseError extends Error {
     properties: ErrorProperties;
     hasBeenLogged: boolean;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(message: string, exception?: any) {
         super(message);

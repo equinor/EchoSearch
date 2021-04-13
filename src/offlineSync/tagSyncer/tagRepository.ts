@@ -19,8 +19,7 @@ class TagsDatabase extends OfflineDataDexieBase<TagSummaryDb> {
         this.version(1.0) //It is preferred to increment the version by 0.1.
             .stores({
                 Tags: 'tagNo'
-            })
-            .upgrade(() => {});
+            });
         this.Tags = this.table(tableNameCannotBeRenamed);
         this.on('ready', dbIsReady);
     }
