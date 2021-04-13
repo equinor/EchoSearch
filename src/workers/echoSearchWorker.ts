@@ -31,7 +31,7 @@ function expensive(time: number): number {
     return count;
 }
 
-async function callApis(arg: string): Promise<string> {
+async function callApis(): Promise<string> {
     const placeHolderApiResult = await placeholderApi();
     await ourApi();
     return placeHolderApiResult;
@@ -58,7 +58,7 @@ async function ourApi(): Promise<void> {
     const date = '2021-02-07T06:52:57.199Z'; //for testing
     const url = `${baseApiUrl}/JSV/tags?updatedSince=${date}&take=1`;
     const response = await workerFetch(url, getToken());
-    var result = await JSON.parse(await response.text());
+    const result = await JSON.parse(await response.text());
     console.log('result', result);
 }
 
@@ -121,12 +121,12 @@ const echoWorker: EchoWorker = {
         try {
             await throwErrorForTesting();
         } catch (e) {
-            console.error('error caught');
+            console.error('error caught' + name);
             console.log(e);
         }
 
         // try {
-        return await callApis(name);
+        return await callApis();
         // } catch (e) {
         //     console.error('are we able to catch api errors?');
         //     console.log(e);

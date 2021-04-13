@@ -38,7 +38,7 @@ function instance(): SettingsDexieDB {
     if (_settingsDexieDb !== undefined) {
         return _settingsDexieDb;
     }
-    let db = new SettingsDexieDB();
+    const db = new SettingsDexieDB();
     _settingsDexieDb = db;
     return db;
 }
@@ -46,7 +46,7 @@ function instance(): SettingsDexieDB {
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
     await instance()
         .offlineStatus.put(offlineSettingItem)
-        .then((_) => logVerbose(offlineSettingItem.offlineSystemKey, 'settings done saving'));
+        .then(() => logVerbose(offlineSettingItem.offlineSystemKey, 'settings done saving'));
 }
 
 export async function loadOfflineSettings(): Promise<void> {

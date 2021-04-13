@@ -2,17 +2,17 @@ function range(size, startAt = 0) {
     return [...Array(size).keys()].map((i) => i + startAt);
 }
 
-export function randomMockedArrayString(count: number, createdMocked: () => string) {
-    var tagString = randomMockedString(count, createdMocked);
+export function randomMockedArrayString(count: number, createdMocked: () => string): string {
+    const tagString = randomMockedString(count, createdMocked);
     return '[' + tagString + ']';
 }
 
-export function randomMockedString(count: number, createdMocked: () => string) {
+export function randomMockedString(count: number, createdMocked: () => string): string {
     if (count === 0) return '';
-    var items = range(count);
-    var itemsAsStrings = items.map((_) => createdMocked());
+    const items = range(count);
+    const itemsAsStrings = items.map(() => createdMocked());
 
-    var tagString = itemsAsStrings.join(',');
+    const tagString = itemsAsStrings.join(',');
 
     return tagString;
 }

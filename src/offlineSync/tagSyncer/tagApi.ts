@@ -44,7 +44,7 @@ export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
 function ExtractDate(stringWithDate: string): Date {
     const regex = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/g;
     const dateStrings = stringWithDate?.match(regex) as string[];
-    var date = new Date(dateStrings[0]);
+    const date = new Date(dateStrings[0]);
     return date;
 }
 

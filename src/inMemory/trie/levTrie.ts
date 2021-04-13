@@ -73,6 +73,7 @@ export class LevTrie {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     closestRecursive(this: any, node: Node, letter: string, word: string, previousRow: Array<number>): void {
         const currentRow = [previousRow[0] + this.defaultCost];
 

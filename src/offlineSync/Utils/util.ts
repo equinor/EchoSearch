@@ -51,10 +51,10 @@ export function getAllWordsAsAlphaNumericUpperCase(text?: string): string[] {
 
 export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
 
-export function chunkArray(array: any[], size: number): any[][] {
+export function chunkArray<T>(array: T[], size: number): T[][] {
     if (!array) return [];
 
-    const chunkedArray = [] as any[];
+    const chunkedArray = [] as T[][];
     let index = 0;
     while (index < array.length) {
         chunkedArray.push(array.slice(index, size + index));

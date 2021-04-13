@@ -77,7 +77,7 @@ describe('toDateOrUndefined', () => {
     });
 
     it('should return correct date if date', () => {
-        var dateString = '2017-09-21T13:24:37';
+        const dateString = '2017-09-21T13:24:37';
         const actual = toDateOrUndefined(dateString);
         expect(actual).toEqual(new Date(dateString));
     });
@@ -93,7 +93,7 @@ describe('toDateOrThrowError', () => {
     });
 
     it('should return correct date if date', () => {
-        var dateString = '2017-09-21T13:24:37';
+        const dateString = '2017-09-21T13:24:37';
         const actual = toDateOrThrowError(dateString);
         expect(actual).toEqual(new Date(dateString));
     });

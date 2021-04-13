@@ -5,7 +5,7 @@ import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
-let inMemoryDbPunches: InMemoryData<PunchDb> = new InMemoryData<PunchDb>((item) => item.commPkgNo);
+const inMemoryDbPunches: InMemoryData<PunchDb> = new InMemoryData<PunchDb>((item) => item.commPkgNo);
 
 export function inMemoryPunchesInstance(): InMemoryData<PunchDb> {
     return inMemoryDbPunches;

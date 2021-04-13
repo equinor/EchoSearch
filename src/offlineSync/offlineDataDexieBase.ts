@@ -146,7 +146,7 @@ export class DatabaseAdministrator<T> {
 }
 
 export async function getCurrentVersion(databaseNamePreFix: string): Promise<number> {
-    let databaseNames = await getDatabaseNames(databaseNamePreFix);
+    const databaseNames = await getDatabaseNames(databaseNamePreFix);
     const currentVersion = getMaxNumberInCollectionOrOne(databaseNames);
     return currentVersion;
 }

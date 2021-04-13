@@ -3,10 +3,10 @@ import { randomId, randomNumberId } from '../Utils/stringUtils';
 
 function randomMockedMcPacksString(count: number) {
     if (count === 0) return '';
-    var items = range(count);
-    var itemsAsStrings = items.map((_) => createdMocked());
+    const items = range(count);
+    const itemsAsStrings = items.map(() => createdMocked());
 
-    var tagString = itemsAsStrings.join(',');
+    const tagString = itemsAsStrings.join(',');
 
     return tagString;
 }
