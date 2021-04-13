@@ -25,7 +25,7 @@ class SettingsDexieDB extends Dexie {
 let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
 let _instCode: string;
 
-export function getInstCode() {
+export function getInstCode(): string {
     return _instCode;
 }
 
@@ -104,7 +104,7 @@ export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem 
     throw new Error('settings not initialized - bug in code');
 }
 
-export function SaveSettings(settings: OfflineSettingItem) {
+export function SaveSettings(settings: OfflineSettingItem): void {
     dictionary[settings.offlineSystemKey] = settings;
     fireAndForget(() => saveToRepository(settings));
 }

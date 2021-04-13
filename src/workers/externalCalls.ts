@@ -123,7 +123,8 @@ async function internalInitialize(): Promise<void> {
         initPunchesTask,
         () => isInMemoryTagsReady(),
         async (searchText, maxHits) => searchInMemoryPunchesWithText(searchText, maxHits),
-        async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
+        async () => [],
+        //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
         async () => syncFullPunches(),
         async (lastChangedDate) => syncUpdatePunches(lastChangedDate)
     );
@@ -169,7 +170,7 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
             commPkgNo: '1',
             description: 'McPacks online Search',
             mcPkgNo: searchText,
-            projectName: '2',
+            projectName: maxHits.toString(),
             id: 5,
             updatedAt: new Date()
         } as McPackDb
@@ -223,11 +224,11 @@ export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnab
 }
 
 export function externalCancelSync(offlineSystemKey: OfflineSystem): void {
-    mcPacksRepository().cancelSync();
-    //return await runSync(offlineSystemKey);
+    if (offlineSystemKey === OfflineSystem.McPack) mcPacksRepository().cancelSync();
+    else throw new NotImplementedError('cancel not implemented for ' + offlineSystemKey);
 }
 
-export async function externalDeleteAllData() {
+export async function externalDeleteAllData(): Promise<void> {
     ClearSettings(OfflineSystem.Tags);
     await tagsAdministrator().deleteAndRecreate();
     clearInMemoryTags();

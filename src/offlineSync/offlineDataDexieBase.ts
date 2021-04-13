@@ -117,7 +117,7 @@ export class DatabaseAdministrator<T> {
         this.database = null;
         this.databaseCreator = databaseCreator;
     }
-    async init() {
+    async init(): Promise<void> {
         if (this.isInitDone) {
             logWarn(this.databaseNamePreFix + ' has already been initialized');
             return;
@@ -151,7 +151,7 @@ export async function getCurrentVersion(databaseNamePreFix: string): Promise<num
     return currentVersion;
 }
 
-export async function getDatabaseNames(databaseNamePreFix: string) {
+export async function getDatabaseNames(databaseNamePreFix: string): Promise<string[]> {
     return (await Dexie.getDatabaseNames()).filter((item) => item.includes(databaseNamePreFix));
 }
 export async function deleteDataBaseAndReturnNewVersionNumber(databaseNamePreFix: string): Promise<number> {
