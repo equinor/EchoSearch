@@ -85,6 +85,7 @@ const echoWorker: EchoWorker = {
         await externalInitialize();
     },
     async searchTags(searchText: string, maxHits = 100): Promise<TagSummaryDb[]> {
+        const token = await EchoCore.EchoClient.getAccessToken();
         await testSearchMcPacks();
         await testSearchPunches();
 

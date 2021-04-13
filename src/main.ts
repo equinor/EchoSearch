@@ -67,6 +67,7 @@ async function doStuffBtn2Clicked() {
 function authenticate(): void {
     EchoCore.EchoAuthProvider.handleLogin();
 }
+
 authenticate();
 
 async function handleClick(): Promise<void> {
