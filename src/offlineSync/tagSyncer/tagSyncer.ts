@@ -13,12 +13,16 @@ import { TagSummaryDb } from './tagSummaryDb';
 export async function syncFullTags(): Promise<InternalSyncResult> {
     const data = await apiAllTags();
     await tagsAdministrator().deleteAndRecreate();
-    await tagsRepository().addDataBulks(data.tags);
+    await tagsRepository().addDataBulks(data.tags); //TODO test exception and error handling inside addDataBulks
     clearAndInitInMemoryTags(data.tags); //we are dependent on summary from indexDb, so have to sync in memory after indexDb is done :(
     populateLevTrieWithTags(data.tags.map((item) => item.tagNo));
 
-    const result = syncUpdateTags(data.dataSyncedAt);
-    return { ...result, itemsSyncedCount: inMemoryTagCount() };
+    const updateSyncResult = await syncUpdateTags(data.dataSyncedAt);
+    if (updateSyncResult.isSuccess) {
+        return { ...updateSyncResult, itemsSyncedCount: inMemoryTagCount() };
+    }
+
+    return { isSuccess: true, newestItemDate: data.dataSyncedAt, itemsSyncedCount: inMemoryTagCount() }; //full sync was successful
 }
 
 export async function syncUpdateTags(lastChangedDate: Date): Promise<InternalSyncResult> {
