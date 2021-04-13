@@ -55,7 +55,7 @@
     "rollup-plugin-html2": "^2.0.0",
     "rollup-plugin-live-server": "^2.0.0",
     "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-server": "^0.7.0",
     "rollup-plugin-typescript2": "^0.27.1",
     "rollup-plugin-web-worker-loader": "^1.6.1",
     "tslib": "^2.2.0",

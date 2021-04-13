@@ -7,7 +7,7 @@ import del from 'rollup-plugin-delete';
 import dt from 'rollup-plugin-dts';
 import html2 from 'rollup-plugin-html2';
 import livereload from 'rollup-plugin-livereload';
-import serve from 'rollup-plugin-serve';
+import server from 'rollup-plugin-server';
 import typescript from 'rollup-plugin-typescript2';
 import workerLoader from 'rollup-plugin-web-worker-loader';
 import pkg from './package.json';
@@ -55,7 +55,7 @@ const config = {
 
         replace({
             preventAssignment: false,
-            'process.env.NODE_ENV': JSON.stringify('development')
+            'process.env.NODE_ENV': JSON.stringify('production')
         }),
         html2({
             template: 'public/index.html'
@@ -85,12 +85,12 @@ const types = {
         }),
 
         /**https://www.npmjs.com/package/rollup-plugin-serve */
-        serve({
+        server({
             contentBase: ['lib', 'public'],
             port: 3000,
             verbose: true,
             open: true,
-            https: true,
+            ssl: true,
             host: 'localhost'
         }),
         livereload({ watch: 'lib' })
