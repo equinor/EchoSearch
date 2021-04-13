@@ -1,3 +1,4 @@
+import EchoCore from '@equinor/echo-core';
 import { search, syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
@@ -63,10 +64,18 @@ async function doStuffBtn2Clicked() {
     await echoSearchWorker.doStuff2();
 }
 
-async function handleClick() {
+function authenticate(): void {
+    EchoCore.EchoAuthProvider.handleLogin();
+}
+authenticate();
+
+async function handleClick(): Promise<void> {
+    const token = await EchoCore.EchoClient.getAccessToken();
+    //const token = EchoCore.EchoClient.getAccessToken();
     //const result = authenticatorHelper.getToken();
     //console.log('echoClientId', echoClientId);
-    console.log('clicked - do nothing');
+    //const token = '';
+    console.log('clicked - do nothing ' + token);
     // try {
     //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
     //     console.log(result2);
