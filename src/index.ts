@@ -1,6 +1,7 @@
 import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';
+import { getApiTokenInMainThread } from './tokenHelperMainThread';
 
 //This file contains Everything that should be exported to consumers of this library.
 
@@ -16,7 +17,8 @@ class Search {
 
 class Syncer {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<void> {
-        await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey);
+        const token = await getApiTokenInMainThread();
+        await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     }
     async setEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
         await echoSearchWorker.setEnabled(offlineSystemKey, isEnabled);

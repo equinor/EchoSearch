@@ -7,15 +7,12 @@ import { workerFetch } from '../service/workerFetch';
 import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
-    externalCancelSync,
-    externalDeleteAllData,
     externalInitialize,
     externalMcPackSearch,
     externalPunchesSearch,
-    externalRunSync,
     externalSearchForClosestTagNo,
-    externalSetEnabled,
-    externalTagSearch
+    externalTagSearch,
+    syncContract
 } from './externalCalls';
 
 function expensive(time: number): number {
@@ -46,10 +43,6 @@ async function placeholderApi(): Promise<string> {
     return data;
 }
 
-async function throwErrorForTesting(): Promise<void> {
-    await sleep(100);
-    throw new Error('this is a test error');
-}
 export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
 
 async function ourApi(): Promise<void> {
@@ -67,14 +60,12 @@ export interface EchoWorker {
     changePlantAsync(instCode: string): Promise<void>;
     searchTags(searchText: string, maxHits: number): Promise<TagSummaryDb[]>;
     searchForClosestTagNo(searchText: string): Promise<string | undefined>;
-    runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<SyncResult>;
+    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
 
     cancelSync(): void;
     runExpensive: () => string;
-
-    sayHi: (name: string) => Promise<string>;
 
     doStuff2(): Promise<void>;
 }
@@ -99,40 +90,18 @@ const echoWorker: EchoWorker = {
 
     async changePlantAsync(instCode: string): Promise<void> {
         await saveInstCode(instCode);
-        await externalDeleteAllData();
+        await syncContract.externalDeleteAllData();
     },
 
-    async runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<SyncResult> {
-        return await externalRunSync(offlineSystemKey);
+    async runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
+        return await syncContract.externalRunSync(offlineSystemKey, apiAccessToken);
     },
     cancelSync(): void {
-        externalCancelSync(OfflineSystem.McPack);
+        syncContract.externalCancelSync(OfflineSystem.McPack);
     },
 
     async setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-        await externalSetEnabled(offlineSystemKey, isEnabled);
-    },
-
-    // async function sayHi:(name: string) Promise<string>
-    // {
-    //     return "hello 222 " + name;
-    // }
-    async sayHi(name: string): Promise<string> {
-        try {
-            await throwErrorForTesting();
-        } catch (e) {
-            console.error('error caught' + name);
-            console.log(e);
-        }
-
-        // try {
-        return await callApis();
-        // } catch (e) {
-        //     console.error('are we able to catch api errors?');
-        //     console.log(e);
-        // }
-
-        //return 'error caught and handled';
+        await syncContract.externalSetEnabled(offlineSystemKey, isEnabled);
     },
 
     runExpensive(): string {

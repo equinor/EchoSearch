@@ -32,6 +32,7 @@ import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
 import { tagsAdministrator } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer';
+import { setToken } from '../tokenHelper';
 import { SearchSystem } from './searchSystem';
 
 let _counter = 0;
@@ -182,7 +183,8 @@ export async function externalSearchForClosestTagNo(searchText: string): Promise
     return possibleTag ? possibleTag.word : undefined;
 }
 
-export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<SyncResult> {
+async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
+    setToken(apiAccessToken);
     if (offlineSystemKey === OfflineSystem.McPack) {
         return await runSync(mcPacksSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
@@ -209,7 +211,7 @@ export async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<
 
 export class NotImplementedError extends BaseError {}
 
-export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
+async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
     if (offlineSystemKey === OfflineSystem.McPack) {
         setMcPacksIsEnabled(isEnabled);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
@@ -223,12 +225,12 @@ export async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnab
     );
 }
 
-export function externalCancelSync(offlineSystemKey: OfflineSystem): void {
+function externalCancelSync(offlineSystemKey: OfflineSystem): void {
     if (offlineSystemKey === OfflineSystem.McPack) mcPacksRepository().cancelSync();
     else throw new NotImplementedError('cancel not implemented for ' + offlineSystemKey);
 }
 
-export async function externalDeleteAllData(): Promise<void> {
+async function externalDeleteAllData(): Promise<void> {
     ClearSettings(OfflineSystem.Tags);
     await tagsAdministrator().deleteAndRecreate();
     clearInMemoryTags();
@@ -247,3 +249,10 @@ function ClearSettings(offlineSystemKey: OfflineSystem): void {
     const settings = CreateDefaultSettings(offlineSystemKey);
     SaveSettings(settings);
 }
+
+export const syncContract = {
+    externalDeleteAllData,
+    externalCancelSync,
+    externalSetEnabled,
+    externalRunSync
+};
