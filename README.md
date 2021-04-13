@@ -1,4 +1,4 @@
-![logo](./public/ee.png)
+![logo](https://raw.githubusercontent.com/equinor/EchoSearch/master/public/ee.png)
 
 # EchoSearch
 
