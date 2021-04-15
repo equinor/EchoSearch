@@ -1,4 +1,7 @@
 import * as Comlink from 'comlink';
+import { SearchResult } from '../inMemory/searchResult';
+import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { SyncResult } from '../offlineSync/syncResult';
 import { baseApiUrl, OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
@@ -58,7 +61,10 @@ async function ourApi(): Promise<void> {
 export interface EchoWorker {
     initialize(): Promise<void>;
     changePlantAsync(instCode: string): Promise<void>;
-    searchTags(searchText: string, maxHits: number): Promise<TagSummaryDb[]>;
+    searchTags(searchText: string, maxHits: number): Promise<SearchResult<TagSummaryDb>>;
+    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResult<McPackDb>>;
+    searchPunches(searchText: string, maxHits: number): Promise<SearchResult<PunchDb>>;
+
     searchForClosestTagNo(searchText: string): Promise<string | undefined>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
 
@@ -71,11 +77,9 @@ export interface EchoWorker {
 }
 
 const echoWorker: EchoWorker = {
-    async initialize(): Promise<void> {
-        console.log('worker calling externalInitialize');
-        await externalInitialize();
-    },
-    async searchTags(searchText: string, maxHits = 100): Promise<TagSummaryDb[]> {
+    initialize: externalInitialize,
+
+    async searchTags(searchText: string, maxHits = 100): Promise<SearchResult<TagSummaryDb>> {
         await testSearchMcPacks();
         await testSearchPunches();
 
@@ -84,25 +88,23 @@ const echoWorker: EchoWorker = {
         return tags;
     },
 
-    async searchForClosestTagNo(searchText: string): Promise<string | undefined> {
-        return await externalSearchForClosestTagNo(searchText);
-    },
+    searchMcPacks: externalMcPackSearch,
+    searchPunches: externalPunchesSearch,
+
+    searchForClosestTagNo: externalSearchForClosestTagNo,
 
     async changePlantAsync(instCode: string): Promise<void> {
         await saveInstCode(instCode);
         await syncContract.externalDeleteAllData();
     },
 
-    async runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
-        return await syncContract.externalRunSync(offlineSystemKey, apiAccessToken);
-    },
+    runSyncWorkerAsync: syncContract.externalRunSync,
+
     cancelSync(): void {
         syncContract.externalCancelSync(OfflineSystem.McPack);
     },
 
-    async setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-        await syncContract.externalSetEnabled(offlineSystemKey, isEnabled);
-    },
+    setEnabled: syncContract.externalSetEnabled,
 
     runExpensive(): string {
         expensive(2000);
@@ -121,20 +123,28 @@ Comlink.expose(echoWorker, ctx);
 
 async function testSearchMcPacks() {
     const mcPacks = await externalMcPackSearch('0001-A01', 2);
-    console.log(
-        'mc packs search',
-        mcPacks.map((item) =>
-            [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
-        )
-    );
+    if (mcPacks.isSuccess) {
+        console.log(
+            'mc packs search',
+            mcPacks.data.map((item) =>
+                [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
+            )
+        );
+    } else {
+        console.log('mc packs search ', mcPacks.errorType.toString());
+    }
 }
 
 async function testSearchPunches() {
     const punches = await externalPunchesSearch('A-73MA001', 2);
-    console.log(
-        'punches search',
-        punches.map((item) =>
-            [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
-        )
-    );
+    if (punches.isSuccess) {
+        console.log(
+            'punches search',
+            punches.data.map((item) =>
+                [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
+            )
+        );
+    } else {
+        console.log('punches search ', punches.errorType.toString());
+    }
 }

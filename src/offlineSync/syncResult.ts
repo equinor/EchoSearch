@@ -15,3 +15,17 @@ export const createSuccess = (): SyncResult => {
 export const createError = (error: Error | string): SyncResult => {
     return { isSuccess: false, error } as SyncResult;
 };
+
+interface BaseResult {
+    isSuccess: boolean;
+    errorType?: ErrorType;
+    message?: string;
+    error?: Error | string;
+}
+
+enum ErrorType {
+    SyncIsNotEnabled,
+    NetworkErrorForbidden,
+    NetworkErrorInternalServerError,
+    NetworkErrorBadRequest
+}

@@ -1,5 +1,5 @@
 import EchoCore from '@equinor/echo-core';
-import { search, syncer } from '.';
+import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
 
@@ -20,37 +20,41 @@ document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Cli
 
 let count = 0;
 async function runSyncClicked() {
-    await syncer.runSyncAsync(OfflineSystem.Tags);
+    await Syncer.runSyncAsync(OfflineSystem.Tags);
 }
 
 async function runSyncMcPacksClicked() {
-    await syncer.runSyncAsync(OfflineSystem.McPack);
-    await syncer.runSyncAsync(OfflineSystem.Punches);
+    await Syncer.runSyncAsync(OfflineSystem.McPack);
+    await Syncer.runSyncAsync(OfflineSystem.Punches);
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
-    await syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
+    await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
     console.log('set punches enabled');
-    await syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
+    await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
     console.log('set punches enabled done');
 }
 
 async function changePlantBtnClicked() {
-    await syncer.changePlantAsync('JSV');
+    await Syncer.changePlantAsync('JSV');
 }
 
 async function cameraSearchClicked() {
     const similarTag = 'A73MAO0l';
-    const tag = await search.closestTagSearchAsync(similarTag);
+    const tag = await Search.closestTagSearchAsync(similarTag);
     console.log(similarTag, 'camera search: found tag', tag);
 }
 
 async function searchBtnClicked() {
-    const tags = await search.searchAsync(OfflineSystem.Tags, 'a73 pedes cran', 5);
-    console.log(
-        'found tags:',
-        tags.map((i) => i.tagNo)
-    );
+    const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
+    if (tags.isSuccess) {
+        console.log(
+            'found tags:',
+            tags.data.map((i) => i.tagNo)
+        );
+    } else {
+        console.log('tags search ', tags.errorType.toString());
+    }
 }
 
 async function expensiveBtnClicked() {
