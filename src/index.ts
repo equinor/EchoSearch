@@ -9,6 +9,11 @@ export const Search = {
     searchPunchesAsync: echoSearchWorker.searchPunches
 };
 
+export const Lookup = {
+    lookupTagAsync: echoSearchWorker.lookupTagAsync,
+    lookupTagsAsync: echoSearchWorker.lookupTagsAsync
+};
+
 export const Syncer = {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<void> {
         const token = await getApiTokenInMainThread();

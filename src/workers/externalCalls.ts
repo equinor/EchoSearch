@@ -11,7 +11,7 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
-import { SearchResult } from '../inMemory/searchResult';
+import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { BaseError } from '../offlineSync/baseError';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
@@ -30,7 +30,7 @@ import {
     SaveSettings
 } from '../offlineSync/syncSettings';
 import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
-import { tagsAdministrator } from '../offlineSync/tagSyncer/tagRepository';
+import { tagsAdministrator, tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
@@ -148,12 +148,22 @@ async function internalInitialize(): Promise<void> {
     initDone = true;
 }
 
-export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResult<TagSummaryDb>> {
+export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
     const results = await tagSearchSystem.search(searchText, maxHits);
     return results;
 }
 
-export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResult<McPackDb>> {
+export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
+    const result = await tagsRepository().get(tagNo);
+    return { isSuccess: true, data: result };
+}
+
+export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
+    const result = await tagsRepository().bulkGet(tagNos);
+    return searchSuccess(result);
+}
+
+export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
     // if (mcPacksSearcher === undefined) {
     //     return [];
     // }
@@ -161,7 +171,7 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
     return results;
 }
 
-export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResult<PunchDb>> {
+export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
     const results = await punchSearchSystem.search(searchText, maxHits);
     return results;
 }

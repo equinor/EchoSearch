@@ -2,6 +2,7 @@ import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { logPerformance, logVerbose, logWarn } from '../logger';
 import { BaseError } from './baseError';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
+import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
 
 class SyncCanceledError extends BaseError {
@@ -29,6 +30,11 @@ export class OfflineDataDexieBase<T> extends Dexie {
     async bulkGet(keys: string[]): Promise<T[]> {
         const tagResults = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
         return tagResults.filter((item) => item !== undefined) as T[];
+    }
+
+    async get(key: string): Promise<T | undefined> {
+        if (isNullOrEmpty(key)) return undefined;
+        return await this.table(this.tableName).get(key);
     }
 
     cancelSync(): void {
@@ -88,6 +94,10 @@ export class Repository<T> {
 
     async bulkGet(keys: string[]): Promise<T[]> {
         return await this.database.bulkGet(keys);
+    }
+
+    async get(key: string): Promise<T | undefined> {
+        return await this.database.get(key);
     }
 
     cancelSync(): void {

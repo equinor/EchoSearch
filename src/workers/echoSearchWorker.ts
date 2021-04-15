@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import { SearchResult } from '../inMemory/searchResult';
+import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { SyncResult } from '../offlineSync/syncResult';
@@ -11,6 +11,8 @@ import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
     externalInitialize,
+    externalLookupTag,
+    externalLookupTags,
     externalMcPackSearch,
     externalPunchesSearch,
     externalSearchForClosestTagNo,
@@ -61,9 +63,13 @@ async function ourApi(): Promise<void> {
 export interface EchoWorker {
     initialize(): Promise<void>;
     changePlantAsync(instCode: string): Promise<void>;
-    searchTags(searchText: string, maxHits: number): Promise<SearchResult<TagSummaryDb>>;
-    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResult<McPackDb>>;
-    searchPunches(searchText: string, maxHits: number): Promise<SearchResult<PunchDb>>;
+
+    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
+    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
+    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDb>>;
+
+    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>>;
+    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
 
     searchForClosestTagNo(searchText: string): Promise<string | undefined>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
@@ -79,14 +85,9 @@ export interface EchoWorker {
 const echoWorker: EchoWorker = {
     initialize: externalInitialize,
 
-    async searchTags(searchText: string, maxHits = 100): Promise<SearchResult<TagSummaryDb>> {
-        await testSearchMcPacks();
-        await testSearchPunches();
-
-        const tags = await externalTagSearch(searchText, maxHits);
-
-        return tags;
-    },
+    searchTags: externalTagSearch,
+    lookupTagAsync: externalLookupTag,
+    lookupTagsAsync: externalLookupTags,
 
     searchMcPacks: externalMcPackSearch,
     searchPunches: externalPunchesSearch,
@@ -120,31 +121,3 @@ const echoWorker: EchoWorker = {
 export const echoWorkerDebugDontUseThis = echoWorker;
 
 Comlink.expose(echoWorker, ctx);
-
-async function testSearchMcPacks() {
-    const mcPacks = await externalMcPackSearch('0001-A01', 2);
-    if (mcPacks.isSuccess) {
-        console.log(
-            'mc packs search',
-            mcPacks.data.map((item) =>
-                [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
-            )
-        );
-    } else {
-        console.log('mc packs search ', mcPacks.errorType.toString());
-    }
-}
-
-async function testSearchPunches() {
-    const punches = await externalPunchesSearch('A-73MA001', 2);
-    if (punches.isSuccess) {
-        console.log(
-            'punches search',
-            punches.data.map((item) =>
-                [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
-            )
-        );
-    } else {
-        console.log('punches search ', punches.errorType.toString());
-    }
-}

@@ -55,6 +55,30 @@ async function searchBtnClicked() {
     } else {
         console.log('tags search ', tags.errorType.toString());
     }
+
+    const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);
+    if (mcPacks.isSuccess) {
+        console.log(
+            'mc packs search',
+            mcPacks.data.map((item) =>
+                [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
+            )
+        );
+    } else {
+        console.log('mc packs search ', mcPacks.errorType.toString());
+    }
+
+    const punches = await Search.searchPunchesAsync('A-73MA001', 2);
+    if (punches.isSuccess) {
+        console.log(
+            'punches search',
+            punches.data.map((item) =>
+                [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
+            )
+        );
+    } else {
+        console.log('punches search ', punches.errorType.toString());
+    }
 }
 
 async function expensiveBtnClicked() {
