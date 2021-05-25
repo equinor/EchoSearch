@@ -11,7 +11,13 @@ export const Search = {
 
 export const Lookup = {
     lookupTagAsync: echoSearchWorker.lookupTagAsync,
-    lookupTagsAsync: echoSearchWorker.lookupTagsAsync
+    lookupTagsAsync: echoSearchWorker.lookupTagsAsync,
+
+    lookupPunchAsync: echoSearchWorker.lookupPunchAsync,
+    lookupPunchesAsync: echoSearchWorker.lookupPunchesAsync,
+
+    lookupMcPackAsync: echoSearchWorker.lookupMcPackAsync,
+    lookupMcPacksAsync: echoSearchWorker.lookupMcPacksAsync
 };
 
 export const Syncer = {

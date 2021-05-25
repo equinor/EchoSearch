@@ -18,7 +18,7 @@ import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { punchesAdministrator } from '../offlineSync/punchSyncer/punchRepository';
+import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { SyncResult } from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
@@ -170,10 +170,29 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
     const results = await mcPacksSystem.search(searchText, maxHits);
     return results;
 }
+export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
+    const result = await mcPacksRepository().get(id);
+    return { isSuccess: true, data: result };
+}
+
+export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
+    const result = await mcPacksRepository().bulkGet(ids);
+    return searchSuccess(result);
+}
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
     const results = await punchSearchSystem.search(searchText, maxHits);
     return results;
+}
+
+export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
+    const result = await punchesRepository().get(id);
+    return { isSuccess: true, data: result };
+}
+
+export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
+    const result = await punchesRepository().bulkGet(ids);
+    return searchSuccess(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
@@ -189,8 +208,8 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
     ];
 }
 
-export async function externalSearchForClosestTagNo(searchText: string): Promise<string | undefined> {
-    const possibleTag = searchForClosestTagNo(searchText);
+export async function externalSearchForClosestTagNo(tagNo: string): Promise<string | undefined> {
+    const possibleTag = searchForClosestTagNo(tagNo);
     return possibleTag ? possibleTag.word : undefined;
 }
 

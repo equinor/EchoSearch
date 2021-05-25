@@ -28,8 +28,9 @@ export class OfflineDataDexieBase<T> extends Dexie {
     }
 
     async bulkGet(keys: string[]): Promise<T[]> {
-        const tagResults = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
-        return tagResults.filter((item) => item !== undefined) as T[];
+        const items = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
+        const result = items.filter((item) => item) as T[];
+        return result ? result : [];
     }
 
     async get(key: string): Promise<T | undefined> {

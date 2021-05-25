@@ -11,6 +11,10 @@ import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
     externalInitialize,
+    externalLookupMcPack,
+    externalLookupMcPacks,
+    externalLookupPunch,
+    externalLookupPunches,
     externalLookupTag,
     externalLookupTags,
     externalMcPackSearch,
@@ -69,9 +73,14 @@ export interface EchoWorker {
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDb>>;
 
     searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>>;
-    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
+    lookupMcPackAsync(tagNo: string): Promise<SearchResult<McPackDb>>;
+    lookupMcPacksAsync(tagNos: string[]): Promise<SearchResults<McPackDb>>;
 
-    searchForClosestTagNo(searchText: string): Promise<string | undefined>;
+    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
+    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
+
+    searchForClosestTagNo(tagNo: string): Promise<string | undefined>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
@@ -90,7 +99,12 @@ const echoWorker: EchoWorker = {
     lookupTagsAsync: externalLookupTags,
 
     searchMcPacks: externalMcPackSearch,
+    lookupMcPackAsync: externalLookupMcPack,
+    lookupMcPacksAsync: externalLookupMcPacks,
+
     searchPunches: externalPunchesSearch,
+    lookupPunchAsync: externalLookupPunch,
+    lookupPunchesAsync: externalLookupPunches,
 
     searchForClosestTagNo: externalSearchForClosestTagNo,
 
