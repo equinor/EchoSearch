@@ -74,5 +74,31 @@ export const workerFetch = async (
 };
 
 export async function apiFetch(url: string): Promise<Response> {
-    return await workerFetch(url, getToken());
+    console.log('Fetch:', url);
+    const result = await workerFetch(url, getToken());
+    console.log(result.status, url);
+    return result;
+}
+
+/**
+ * Fetch url and deserialize the json to array of specified return type.
+ * Throws NetworkError on none successful response
+ * @param url The url to fetch
+ * @returns An array of the specified return type
+ */
+export async function apiFetchJsonToArray<T>(url: string): Promise<T[]> {
+    console.log('Fetch:', url);
+    const response = await workerFetch(url, getToken());
+    if (response.status === 204) return [];
+    if (response.status === 200) {
+        const result = (await response.json()) as T[];
+        console.log(response.status, 'items:', result.length, url);
+        return result;
+    } else {
+        console.log(response.status, url);
+    }
+    const message = await response.text();
+    //throw new NetworkError({ message, httpStatusCode: response.status, url, exception: {} }); //Not availble in worker :( //LaterDo - might never happen, test this..
+    throw new Error(message); //LaterDo - might never happen, test this..
+    //json parse error is possible..
 }

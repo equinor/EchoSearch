@@ -89,6 +89,7 @@ export interface EchoWorker {
     runExpensive: () => string;
 
     doStuff2(): Promise<void>;
+    toggleMockDataClicked(): void;
 }
 
 const echoWorker: EchoWorker = {
@@ -128,6 +129,10 @@ const echoWorker: EchoWorker = {
 
     async doStuff2(): Promise<void> {
         createFakeDatabases();
+    },
+
+    toggleMockDataClicked(): void {
+        syncContract.externalToggleMockData();
     }
 };
 

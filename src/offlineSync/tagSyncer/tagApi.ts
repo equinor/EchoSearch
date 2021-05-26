@@ -3,11 +3,13 @@ import { apiFetch } from '../../service/workerFetch';
 import { BaseError } from '../baseError';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode } from '../syncSettings';
+import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
-const _useMockedTags = true;
+const _mock = new ToggleState(true);
+export const tagsMock = _mock;
 
 export interface TagsData {
     tags: TagSummaryDb[];
@@ -31,13 +33,13 @@ function cleanupTags(tags: TagSummaryDb[]): TagSummaryDb[] {
 }
 
 export async function apiAllTags(): Promise<TagsData> {
-    const tagData = _useMockedTags ? getMockedTags() : await getAllTagsFromApi(getInstCode());
+    const tagData = _mock.isEnabled ? getMockedTags() : await getAllTagsFromApi(getInstCode());
     tagData.tags = cleanupTags(tagData.tags);
     return tagData;
 }
 
 export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
-    const tags = _useMockedTags ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
+    const tags = _mock.isEnabled ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
     return { tags: cleanupTags(tags), dataSyncedAt: new Date() } as TagsData;
 }
 

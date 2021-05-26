@@ -50,7 +50,6 @@ export class OfflineDataDexieBase<T> extends Dexie {
         const chunks = chunkArray(data, CHUNK_SIZE);
         const database = this.table(this.tableName);
 
-        console.log('now trying put instead of add');
         for await (const chunk of chunks) {
             if (this.cancelSyncFlag) {
                 throw new SyncCanceledError('Sync was canceled');

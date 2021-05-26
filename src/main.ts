@@ -1,6 +1,7 @@
 import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
+import { SearchErrorType } from './inMemory/searchResult';
 import { OfflineSystem } from './offlineSync/syncSettings';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
@@ -17,6 +18,8 @@ document.getElementById('startBtn')?.addEventListener('click', handleClick);
 document.getElementById('CancelBtn')?.addEventListener('click', cancelBtnClicked);
 document.getElementById('ExpensiveBtn')?.addEventListener('click', expensiveBtnClicked);
 document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Clicked);
+
+document.getElementById('toggleUseMockDataBtn')?.addEventListener('click', toggleMockDataClicked);
 
 let count = 0;
 async function runSyncClicked() {
@@ -65,7 +68,11 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log('mc packs search ', mcPacks.errorType.toString());
+        console.log(
+            'mc packs search ',
+            mcPacks.errorType.toString(),
+            mcPacks.errorType === SearchErrorType.SyncDisabled
+        );
     }
 
     const punches = await Search.searchPunchesAsync('A-73MA001', 2);
@@ -90,6 +97,10 @@ async function expensiveBtnClicked() {
 async function doStuffBtn2Clicked() {
     console.log('doStuffBtn2Clicked', count++);
     await echoSearchWorker.doStuff2();
+}
+
+async function toggleMockDataClicked() {
+    await echoSearchWorker.toggleMockDataClicked();
 }
 
 function authenticate(): void {

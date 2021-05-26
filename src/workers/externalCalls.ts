@@ -14,10 +14,10 @@ import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer
 import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { BaseError } from '../offlineSync/baseError';
-import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
-import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
+import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { SyncResult } from '../offlineSync/syncResult';
@@ -29,7 +29,7 @@ import {
     OfflineSystem,
     SaveSettings
 } from '../offlineSync/syncSettings';
-import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
+import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
 import { tagsAdministrator, tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer';
@@ -280,9 +280,24 @@ function ClearSettings(offlineSystemKey: OfflineSystem): void {
     SaveSettings(settings);
 }
 
+function externalToggleMockData(): void {
+    mcPacksMock.toggle();
+    punchesMock.toggle();
+    tagsMock.toggle();
+    console.log(
+        'use mock tags:',
+        tagsMock.isEnabled,
+        'mcPacks',
+        mcPacksMock.isEnabled,
+        'punches',
+        punchesMock.isEnabled
+    );
+}
+
 export const syncContract = {
     externalDeleteAllData,
     externalCancelSync,
     externalSetEnabled,
-    externalRunSync
+    externalRunSync,
+    externalToggleMockData
 };

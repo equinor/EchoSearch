@@ -26,6 +26,9 @@ let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
 let _instCode: string;
 
 export function getInstCode(): string {
+    if (!_instCode) {
+        throw new Error('instCode is not defined');
+    }
     return _instCode;
 }
 
