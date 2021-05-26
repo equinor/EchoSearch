@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import Node from './node';
 
 export interface TrieResult {
@@ -9,10 +8,11 @@ export interface TrieResult {
 // and https://github.com/jedwards1211/js-levenshtein-trie
 export class LevTrie {
     result: TrieResult | undefined = undefined;
-    lowest: number | undefined;
+    lowest: number;
     rootNode: Node;
     defaultCost = 5;
     constructor() {
+        this.lowest = Number.MAX_VALUE;
         this.rootNode = new Node('');
     }
 
@@ -23,14 +23,14 @@ export class LevTrie {
             if (!node.children.hasOwnProperty(letter)) {
                 node.children[letter] = new Node(letter);
             }
-            node = node.children[letter] as Node;
+            node = node.children[letter];
         }
 
         node.word = word;
         node.leaf = true;
     }
 
-    getSubstituteCost(fromValue: string, toValue: string): number {
+    private getSubstituteCost(fromValue: string, toValue: string): number {
         function swap(x: string, y: string): boolean {
             return (fromValue === x && toValue === y) || (fromValue === y && toValue === x);
         }
@@ -73,8 +73,7 @@ export class LevTrie {
         return this.defaultCost;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    closestRecursive(this: any, node: Node, letter: string, word: string, previousRow: Array<number>): void {
+    private closestRecursive(node: Node, letter: string, word: string, previousRow: Array<number>): void {
         const currentRow = [previousRow[0] + this.defaultCost];
 
         const col: number[] = [];
@@ -127,14 +126,7 @@ export class LevTrie {
         for (let i = 0; i < currentRow.length; i++) {
             if (currentRow[i] < this.lowest) {
                 for (const childLetter in node.children) {
-                    this.closestRecursive(
-                        node.children[childLetter] as Node,
-                        childLetter,
-                        word,
-                        currentRow,
-                        this.result,
-                        this.lowest
-                    );
+                    this.closestRecursive(node.children[childLetter], childLetter, word, currentRow);
                 }
                 break;
             }
@@ -150,14 +142,8 @@ export class LevTrie {
             currentRow.push(i * this.defaultCost);
         }
         for (const letter in this.rootNode.children) {
-            this.closestRecursive(this.rootNode.children[letter] as Node, letter, word, currentRow);
+            this.closestRecursive(this.rootNode.children[letter], letter, word, currentRow);
         }
         return this.result;
-    }
-
-    addChildObj(char: string): Node {
-        const newNode = new Node(char);
-        this.rootNode.children[char] = newNode;
-        return newNode;
     }
 }

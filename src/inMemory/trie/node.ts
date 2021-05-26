@@ -2,8 +2,7 @@ export default class Node {
     word!: string;
     letter: string;
     children: {
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        [key: string]: {};
+        [key: string]: Node;
     };
     leaf!: boolean;
 
