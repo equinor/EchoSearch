@@ -22,13 +22,7 @@ import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyn
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { SyncResult } from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
-import {
-    CreateDefaultSettings,
-    GetSetting,
-    loadOfflineSettings,
-    OfflineSystem,
-    SaveSettings
-} from '../offlineSync/syncSettings';
+import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
 import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
 import { tagsAdministrator, tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
@@ -248,11 +242,11 @@ async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: bo
         setPunchesIsEnabled(isEnabled);
     }
 
-    const setting = GetSetting(offlineSystemKey);
-    console.log(
-        'Setting: ',
-        [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
-    );
+    // const setting = GetSetting(offlineSystemKey);
+    // console.log(
+    //     'Setting: ',
+    //     [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
+    // );
 }
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {

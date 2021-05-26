@@ -1,5 +1,5 @@
 import { logPerformance } from '../../logger';
-import { apiFetch } from '../../service/workerFetch';
+import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { BaseError } from '../baseError';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode } from '../syncSettings';
@@ -91,8 +91,7 @@ async function getUpdatedTagFromApi(instCode: string, updatedSince: Date): Promi
     //const date = '2020-11-27T06:52:57.199Z'; //for testing
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
-    const result = await apiFetch(url);
-    return (await result.json()) as TagSummaryDb[];
+    return await apiFetchJsonToArray<TagSummaryDb>(url);
 }
 
 function getMockedTags(): TagsData {

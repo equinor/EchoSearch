@@ -27,15 +27,14 @@ async function runSyncClicked() {
 }
 
 async function runSyncMcPacksClicked() {
-    await Syncer.runSyncAsync(OfflineSystem.McPack);
-    await Syncer.runSyncAsync(OfflineSystem.Punches);
+    const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
+    const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
+    await Promise.all([mcPackSync, punchesSync]);
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
     await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
-    console.log('set punches enabled');
     await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
-    console.log('set punches enabled done');
 }
 
 async function changePlantBtnClicked() {

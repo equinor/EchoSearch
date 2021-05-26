@@ -76,7 +76,7 @@ export const workerFetch = async (
 export async function apiFetch(url: string): Promise<Response> {
     console.log('Fetch:', url);
     const result = await workerFetch(url, getToken());
-    console.log(result.status, url);
+    console.log('Done: ', result.status, url);
     return result;
 }
 
@@ -92,10 +92,10 @@ export async function apiFetchJsonToArray<T>(url: string): Promise<T[]> {
     if (response.status === 204) return [];
     if (response.status === 200) {
         const result = (await response.json()) as T[];
-        console.log(response.status, 'items:', result.length, url);
+        console.log('Done: ', response.status, 'items:', result.length, url);
         return result;
     } else {
-        console.log(response.status, url);
+        console.log('Done: ', response.status, url);
     }
     const message = await response.text();
     //throw new NetworkError({ message, httpStatusCode: response.status, url, exception: {} }); //Not availble in worker :( //LaterDo - might never happen, test this..

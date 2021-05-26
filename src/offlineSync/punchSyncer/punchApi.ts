@@ -1,5 +1,5 @@
 import { logPerformance } from '../../logger';
-import { apiFetch } from '../../service/workerFetch';
+import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { verifyCount } from '../dataVerification';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl, OfflineSystem } from '../syncSettings';
@@ -101,13 +101,11 @@ function mockedUpdatedPunches(): PunchDb[] {
 
 async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
     const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    const response = await apiFetch(url);
-    return (await response.json()) as PunchDb[];
+    return await apiFetchJsonToArray<PunchDb>(url);
 }
 
 async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    const response = await apiFetch(url);
-    return (await response.json()) as PunchDb[];
+    return await apiFetchJsonToArray<PunchDb>(url);
 }
