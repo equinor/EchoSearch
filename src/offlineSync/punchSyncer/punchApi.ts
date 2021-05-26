@@ -1,12 +1,14 @@
 import { logPerformance } from '../../logger';
-import { apiFetch } from '../../service/workerFetch';
+import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { verifyCount } from '../dataVerification';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl, OfflineSystem } from '../syncSettings';
+import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
 
-const useMockData = true;
+const _mock = new ToggleState(true);
+export const punchesMock = _mock;
 
 export interface PunchDb {
     id: number;
@@ -60,10 +62,10 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 
 export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
     const performanceLogger = logPerformance();
-    const items: PunchDb[] = useMockData
+    const items: PunchDb[] = _mock.isEnabled
         ? JSON.parse(mockedOpenClosedRejectedPunches())
         : await getAllPunchesFromApi(instCode);
-    performanceLogger.forceLogDelta(useMockData ? 'Got mocked data' : ' Got api data');
+    performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupPunch(item));
     performanceLogger.forceLogDelta('Cleanup mc Packs');
@@ -71,7 +73,9 @@ export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
 }
 
 export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promise<PunchDb[]> {
-    const items: PunchDb[] = useMockData ? mockedUpdatedPunches() : await getUpdatedPunchesFromApi(instCode, fromDate);
+    const items: PunchDb[] = _mock.isEnabled
+        ? mockedUpdatedPunches()
+        : await getUpdatedPunchesFromApi(instCode, fromDate);
 
     return items.map((item) => cleanupPunch(item));
 }
@@ -85,7 +89,7 @@ export async function apiEstimatedPunchCount(instCode: string): Promise<number> 
 }
 
 export async function verifyPunchCount(instCode: string, punchesCount: number): Promise<boolean> {
-    if (useMockData) return true;
+    if (_mock.isEnabled) return true;
     return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode), OfflineSystem.Punches);
 }
 
@@ -97,13 +101,11 @@ function mockedUpdatedPunches(): PunchDb[] {
 
 async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
     const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    const response = await apiFetch(url);
-    return (await response.json()) as PunchDb[];
+    return await apiFetchJsonToArray<PunchDb>(url);
 }
 
 async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    const response = await apiFetch(url);
-    return (await response.json()) as PunchDb[];
+    return await apiFetchJsonToArray<PunchDb>(url);
 }

@@ -26,6 +26,9 @@ let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
 let _instCode: string;
 
 export function getInstCode(): string {
+    if (!_instCode) {
+        throw new Error('instCode is not defined');
+    }
     return _instCode;
 }
 
@@ -46,7 +49,15 @@ function instance(): SettingsDexieDB {
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
     await instance()
         .offlineStatus.put(offlineSettingItem)
-        .then(() => logVerbose(offlineSettingItem.offlineSystemKey, 'settings done saving'));
+        .then(() =>
+            logVerbose(
+                offlineSettingItem.offlineSystemKey,
+                'settings done saving. IsEnabled:',
+                offlineSettingItem.isEnable,
+                offlineSettingItem.lastSyncedAtDate?.toISOString(),
+                offlineSettingItem.newestItemDate?.toISOString()
+            )
+        );
 }
 
 export async function loadOfflineSettings(): Promise<void> {

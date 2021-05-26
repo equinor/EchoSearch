@@ -1,4 +1,7 @@
 import * as Comlink from 'comlink';
+import { SearchResult, SearchResults } from '../inMemory/searchResult';
+import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { SyncResult } from '../offlineSync/syncResult';
 import { baseApiUrl, OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
@@ -8,6 +11,12 @@ import ctx from '../setup/setup';
 import { getToken } from '../tokenHelper';
 import {
     externalInitialize,
+    externalLookupMcPack,
+    externalLookupMcPacks,
+    externalLookupPunch,
+    externalLookupPunches,
+    externalLookupTag,
+    externalLookupTags,
     externalMcPackSearch,
     externalPunchesSearch,
     externalSearchForClosestTagNo,
@@ -58,8 +67,20 @@ async function ourApi(): Promise<void> {
 export interface EchoWorker {
     initialize(): Promise<void>;
     changePlantAsync(instCode: string): Promise<void>;
-    searchTags(searchText: string, maxHits: number): Promise<TagSummaryDb[]>;
-    searchForClosestTagNo(searchText: string): Promise<string | undefined>;
+
+    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
+    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
+    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDb>>;
+
+    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>>;
+    lookupMcPackAsync(tagNo: string): Promise<SearchResult<McPackDb>>;
+    lookupMcPacksAsync(tagNos: string[]): Promise<SearchResults<McPackDb>>;
+
+    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
+    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
+
+    searchForClosestTagNo(tagNo: string): Promise<string | undefined>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
@@ -68,41 +89,38 @@ export interface EchoWorker {
     runExpensive: () => string;
 
     doStuff2(): Promise<void>;
+    toggleMockDataClicked(): void;
 }
 
 const echoWorker: EchoWorker = {
-    async initialize(): Promise<void> {
-        console.log('worker calling externalInitialize');
-        await externalInitialize();
-    },
-    async searchTags(searchText: string, maxHits = 100): Promise<TagSummaryDb[]> {
-        await testSearchMcPacks();
-        await testSearchPunches();
+    initialize: externalInitialize,
 
-        const tags = await externalTagSearch(searchText, maxHits);
+    searchTags: externalTagSearch,
+    lookupTagAsync: externalLookupTag,
+    lookupTagsAsync: externalLookupTags,
 
-        return tags;
-    },
+    searchMcPacks: externalMcPackSearch,
+    lookupMcPackAsync: externalLookupMcPack,
+    lookupMcPacksAsync: externalLookupMcPacks,
 
-    async searchForClosestTagNo(searchText: string): Promise<string | undefined> {
-        return await externalSearchForClosestTagNo(searchText);
-    },
+    searchPunches: externalPunchesSearch,
+    lookupPunchAsync: externalLookupPunch,
+    lookupPunchesAsync: externalLookupPunches,
+
+    searchForClosestTagNo: externalSearchForClosestTagNo,
 
     async changePlantAsync(instCode: string): Promise<void> {
         await saveInstCode(instCode);
         await syncContract.externalDeleteAllData();
     },
 
-    async runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
-        return await syncContract.externalRunSync(offlineSystemKey, apiAccessToken);
-    },
+    runSyncWorkerAsync: syncContract.externalRunSync,
+
     cancelSync(): void {
         syncContract.externalCancelSync(OfflineSystem.McPack);
     },
 
-    async setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-        await syncContract.externalSetEnabled(offlineSystemKey, isEnabled);
-    },
+    setEnabled: syncContract.externalSetEnabled,
 
     runExpensive(): string {
         expensive(2000);
@@ -111,6 +129,10 @@ const echoWorker: EchoWorker = {
 
     async doStuff2(): Promise<void> {
         createFakeDatabases();
+    },
+
+    toggleMockDataClicked(): void {
+        syncContract.externalToggleMockData();
     }
 };
 
@@ -118,23 +140,3 @@ const echoWorker: EchoWorker = {
 export const echoWorkerDebugDontUseThis = echoWorker;
 
 Comlink.expose(echoWorker, ctx);
-
-async function testSearchMcPacks() {
-    const mcPacks = await externalMcPackSearch('0001-A01', 2);
-    console.log(
-        'mc packs search',
-        mcPacks.map((item) =>
-            [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
-        )
-    );
-}
-
-async function testSearchPunches() {
-    const punches = await externalPunchesSearch('A-73MA001', 2);
-    console.log(
-        'punches search',
-        punches.map((item) =>
-            [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
-        )
-    );
-}

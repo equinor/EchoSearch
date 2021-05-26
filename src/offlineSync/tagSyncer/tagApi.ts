@@ -1,13 +1,15 @@
 import { logPerformance } from '../../logger';
-import { apiFetch } from '../../service/workerFetch';
+import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { BaseError } from '../baseError';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode } from '../syncSettings';
+import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
-const _useMockedTags = true;
+const _mock = new ToggleState(true);
+export const tagsMock = _mock;
 
 export interface TagsData {
     tags: TagSummaryDb[];
@@ -31,13 +33,13 @@ function cleanupTags(tags: TagSummaryDb[]): TagSummaryDb[] {
 }
 
 export async function apiAllTags(): Promise<TagsData> {
-    const tagData = _useMockedTags ? getMockedTags() : await getAllTagsFromApi(getInstCode());
+    const tagData = _mock.isEnabled ? getMockedTags() : await getAllTagsFromApi(getInstCode());
     tagData.tags = cleanupTags(tagData.tags);
     return tagData;
 }
 
 export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
-    const tags = _useMockedTags ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
+    const tags = _mock.isEnabled ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
     return { tags: cleanupTags(tags), dataSyncedAt: new Date() } as TagsData;
 }
 
@@ -89,8 +91,7 @@ async function getUpdatedTagFromApi(instCode: string, updatedSince: Date): Promi
     //const date = '2020-11-27T06:52:57.199Z'; //for testing
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
-    const result = await apiFetch(url);
-    return (await result.json()) as TagSummaryDb[];
+    return await apiFetchJsonToArray<TagSummaryDb>(url);
 }
 
 function getMockedTags(): TagsData {

@@ -1,11 +1,13 @@
 import { logPerformance } from '../../logger';
-import { apiFetch } from '../../service/workerFetch';
+import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
+import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedMcPacksString } from './mcPacksMocked';
 
-const useMockData = true;
+const _mock = new ToggleState(true);
+export const mcPacksMock = _mock;
 
 export interface McPackDb {
     id: number;
@@ -29,10 +31,10 @@ function cleanupMcPack(mcPack: McPackDb): McPackDb {
 
 export async function apiAllMcPacks(instCode: string): Promise<McPackDb[]> {
     const performanceLogger = logPerformance();
-    const items: McPackDb[] = useMockData
+    const items: McPackDb[] = _mock.isEnabled
         ? JSON.parse(getMockedMcPacksString(0))
         : await getAllMcPacksFromApi(instCode);
-    performanceLogger.forceLogDelta(useMockData ? 'Got mocked data' : ' Got api data');
+    performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupMcPack(item));
     performanceLogger.forceLogDelta('Cleanup mc Packs');
@@ -40,7 +42,7 @@ export async function apiAllMcPacks(instCode: string): Promise<McPackDb[]> {
 }
 
 export async function apiUpdatedMcPacks(instCode: string, fromDate: Date): Promise<McPackDb[]> {
-    const items: McPackDb[] = useMockData
+    const items: McPackDb[] = _mock.isEnabled
         ? JSON.parse(getMockedMcPacksString(50000))
         : await getUpdatedMcPacksFromApi(instCode, fromDate);
 
@@ -49,13 +51,11 @@ export async function apiUpdatedMcPacks(instCode: string, fromDate: Date): Promi
 
 async function getAllMcPacksFromApi(instCode: string): Promise<McPackDb[]> {
     const url = `${baseApiUrl}/${instCode}/mcPks?paging=false`;
-    const result = await apiFetch(url);
-    return (await result.json()) as McPackDb[];
+    return await apiFetchJsonToArray<McPackDb>(url);
 }
 
 async function getUpdatedMcPacksFromApi(instCode: string, updatedSince: Date): Promise<McPackDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/mcPks?updatedSince=${date}&paging=false`;
-    const result = await apiFetch(url);
-    return (await result.json()) as McPackDb[];
+    return await apiFetchJsonToArray<McPackDb>(url);
 }

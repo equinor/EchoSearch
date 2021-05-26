@@ -11,25 +11,20 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
+import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { BaseError } from '../offlineSync/baseError';
-import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
-import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { punchesAdministrator } from '../offlineSync/punchSyncer/punchRepository';
+import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
+import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { SyncResult } from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
-import {
-    CreateDefaultSettings,
-    GetSetting,
-    loadOfflineSettings,
-    OfflineSystem,
-    SaveSettings
-} from '../offlineSync/syncSettings';
-import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
-import { tagsAdministrator } from '../offlineSync/tagSyncer/tagRepository';
+import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
+import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
+import { tagsAdministrator, tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
@@ -147,22 +142,51 @@ async function internalInitialize(): Promise<void> {
     initDone = true;
 }
 
-export async function externalTagSearch(searchText: string, maxHits: number): Promise<TagSummaryDb[]> {
+export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
     const results = await tagSearchSystem.search(searchText, maxHits);
     return results;
 }
 
-export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<McPackDb[]> {
+export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
+    const result = await tagsRepository().get(tagNo);
+    return { isSuccess: true, data: result };
+}
+
+export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
+    const result = await tagsRepository().bulkGet(tagNos);
+    return searchSuccess(result);
+}
+
+export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
     // if (mcPacksSearcher === undefined) {
     //     return [];
     // }
     const results = await mcPacksSystem.search(searchText, maxHits);
     return results;
 }
+export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
+    const result = await mcPacksRepository().get(id);
+    return { isSuccess: true, data: result };
+}
 
-export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<PunchDb[]> {
+export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
+    const result = await mcPacksRepository().bulkGet(ids);
+    return searchSuccess(result);
+}
+
+export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
     const results = await punchSearchSystem.search(searchText, maxHits);
     return results;
+}
+
+export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
+    const result = await punchesRepository().get(id);
+    return { isSuccess: true, data: result };
+}
+
+export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
+    const result = await punchesRepository().bulkGet(ids);
+    return searchSuccess(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
@@ -178,8 +202,8 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
     ];
 }
 
-export async function externalSearchForClosestTagNo(searchText: string): Promise<string | undefined> {
-    const possibleTag = searchForClosestTagNo(searchText);
+export async function externalSearchForClosestTagNo(tagNo: string): Promise<string | undefined> {
+    const possibleTag = searchForClosestTagNo(tagNo);
     return possibleTag ? possibleTag.word : undefined;
 }
 
@@ -218,11 +242,11 @@ async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: bo
         setPunchesIsEnabled(isEnabled);
     }
 
-    const setting = GetSetting(offlineSystemKey);
-    console.log(
-        'Setting: ',
-        [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
-    );
+    // const setting = GetSetting(offlineSystemKey);
+    // console.log(
+    //     'Setting: ',
+    //     [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
+    // );
 }
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {
@@ -250,9 +274,24 @@ function ClearSettings(offlineSystemKey: OfflineSystem): void {
     SaveSettings(settings);
 }
 
+function externalToggleMockData(): void {
+    mcPacksMock.toggle();
+    punchesMock.toggle();
+    tagsMock.toggle();
+    console.log(
+        'use mock tags:',
+        tagsMock.isEnabled,
+        'mcPacks',
+        mcPacksMock.isEnabled,
+        'punches',
+        punchesMock.isEnabled
+    );
+}
+
 export const syncContract = {
     externalDeleteAllData,
     externalCancelSync,
     externalSetEnabled,
-    externalRunSync
+    externalRunSync,
+    externalToggleMockData
 };
