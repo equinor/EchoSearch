@@ -1,3 +1,4 @@
+import { NetworkError } from '@equinor/echo-base';
 import { getToken } from '../tokenHelper';
 
 type Body =
@@ -98,7 +99,7 @@ export async function apiFetchJsonToArray<T>(url: string): Promise<T[]> {
         console.log('Done: ', response.status, url);
     }
     const message = await response.text();
-    //throw new NetworkError({ message, httpStatusCode: response.status, url, exception: {} }); //Not availble in worker :( //LaterDo - might never happen, test this..
-    throw new Error(message); //LaterDo - might never happen, test this..
-    //json parse error is possible..
+    throw new NetworkError({ message, httpStatusCode: response.status, url, exception: {} }); //LaterDo - might never happen, test this..
+
+    //LaterDo json parse error is possible..
 }

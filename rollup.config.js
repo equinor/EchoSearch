@@ -1,11 +1,11 @@
 import commonJs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
 import babel from 'rollup-plugin-babel';
 import copy from 'rollup-plugin-copy';
 import del from 'rollup-plugin-delete';
 import dt from 'rollup-plugin-dts';
 import html2 from 'rollup-plugin-html2';
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import livereload from 'rollup-plugin-livereload';
 import server from 'rollup-plugin-server';
 import typescript from 'rollup-plugin-typescript2';
@@ -53,9 +53,10 @@ const config = {
         }),
         commonJs(),
 
-        replace({
-            preventAssignment: false,
-            'process.env.NODE_ENV': JSON.stringify('production')
+        injectProcessEnv({
+            NODE_ENV: 'production',
+            SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
+            UNUSED: null
         }),
         html2({
             template: 'public/index.html'
