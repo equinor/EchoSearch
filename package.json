@@ -22,7 +22,7 @@
   "license": "MIT",
   "peerDependencies": {},
   "dependencies": {
-    "comlink": "^4.3.0",
+    "comlink": "^4.3.1",
     "dexie": "^3.0.3"
   },
   "devDependencies": {
@@ -37,15 +37,15 @@
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-replace": "^2.4.2",
     "@rollup/plugin-typescript": "^8.2.1",
-    "@types/jest": "^26.0.22",
+    "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "babel": "^6.23.0",
     "eslint": "^7.24.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "jest": "^26.6.3",
-    "jest-expo": "^40.0.1",
+    "jest": "^27.0.1",
+    "jest-expo": "^41.0.0",
     "prettier": "2.2.1",
     "react": "^17.0.2",
     "rollup": "^2.45.2",
