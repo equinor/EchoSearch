@@ -3,12 +3,10 @@ import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { SyncResult } from '../offlineSync/syncResult';
-import { baseApiUrl, OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
+import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
-import { workerFetch } from '../service/workerFetch';
 import ctx from '../setup/setup';
-import { getToken } from '../tokenHelper';
 import {
     externalInitialize,
     externalLookupMcPack,
@@ -37,32 +35,7 @@ function expensive(time: number): number {
     return count;
 }
 
-async function callApis(): Promise<string> {
-    const placeHolderApiResult = await placeholderApi();
-    await ourApi();
-    return placeHolderApiResult;
-}
-
-async function placeholderApi(): Promise<string> {
-    console.log('dostuff');
-
-    const response = await workerFetch('https://jsonplaceholder.typicode.com/todos/1', '');
-    const data = await JSON.parse(await response.text());
-    console.log('Got:', data);
-    return data;
-}
-
 export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
-
-async function ourApi(): Promise<void> {
-    console.log('dostuff');
-
-    const date = '2021-02-07T06:52:57.199Z'; //for testing
-    const url = `${baseApiUrl}/JSV/tags?updatedSince=${date}&take=1`;
-    const response = await workerFetch(url, getToken());
-    const result = await JSON.parse(await response.text());
-    console.log('result', result);
-}
 
 export interface EchoWorker {
     initialize(): Promise<void>;
