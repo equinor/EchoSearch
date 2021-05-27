@@ -52,7 +52,8 @@ describe('toNumber', () => {
     });
 
     it('should return NaN if string is undefined', () => {
-        const undefinedString: string = (undefined as unknown) as string;
+        const undefinedAsUnknown = undefined as unknown;
+        const undefinedString: string = undefinedAsUnknown as string;
         expect(toNumber(undefinedString)).toEqual(NaN);
     });
 

@@ -8,6 +8,16 @@ import {
     updateInMemoryTags
 } from './inMemoryTags';
 
+const globalPerformanceMethod = global.performance;
+beforeAll(() => {
+    const mockedPerformance = { now: jest.fn() } as unknown;
+    global.performance = mockedPerformance as Performance;
+});
+
+afterAll(() => {
+    global.performance = globalPerformanceMethod;
+});
+
 // jest.mock('@equinor/echo-core', () => {
 //     return {
 //         EchoEnv: jest.fn(() => {
