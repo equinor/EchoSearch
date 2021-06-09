@@ -13,14 +13,18 @@ import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inM
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
 import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
-import { BaseError } from '../offlineSync/baseError';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
-import { SyncResult } from '../offlineSync/syncResult';
+import {
+    createError,
+    createNotImplementedError,
+    NotImplementedError,
+    SearchModuleResult
+} from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
 import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
 import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
@@ -78,6 +82,7 @@ async function initTags(): Promise<void> {
 }
 
 async function internalInitialize(): Promise<void> {
+    externalToggleMockData();
     if (initDone) {
         console.warn('internalInitialize already done, returning');
         return;
@@ -207,17 +212,22 @@ export async function externalSearchForClosestTagNo(tagNo: string): Promise<stri
     return possibleTag ? possibleTag.word : undefined;
 }
 
-async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
-    setToken(apiAccessToken);
-    if (offlineSystemKey === OfflineSystem.McPack) {
-        return await runSync(mcPacksSystem);
-    } else if (offlineSystemKey === OfflineSystem.Tags) {
-        return await runSync(tagSearchSystem);
-    } else if (offlineSystemKey === OfflineSystem.Punches) {
-        return await runSync(punchSearchSystem);
-    }
+async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SearchModuleResult> {
+    try {
+        setToken(apiAccessToken);
+        if (offlineSystemKey === OfflineSystem.McPack) {
+            return await runSync(mcPacksSystem);
+        } else if (offlineSystemKey === OfflineSystem.Tags) {
+            return await runSync(tagSearchSystem);
+        } else if (offlineSystemKey === OfflineSystem.Punches) {
+            return await runSync(punchSearchSystem);
+        }
 
-    return { isSuccess: false, error: 'sync has not been implemented for ' + offlineSystemKey } as SyncResult;
+        return createNotImplementedError('sync has not been implemented for ' + offlineSystemKey);
+    } catch (e) {
+        console.log('--error caught', e);
+        return createError(e);
+    }
 }
 
 // function getSearchSystem<T>(offlineSystemKey: OfflineSystem) : SearchSystem<T> {
@@ -233,20 +243,12 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 //     throw new NotImplementedError('getSearchSystem has not been implemented for ', offlineSystemKey);
 // }
 
-export class NotImplementedError extends BaseError {}
-
 async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
     if (offlineSystemKey === OfflineSystem.McPack) {
         setMcPacksIsEnabled(isEnabled);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
         setPunchesIsEnabled(isEnabled);
     }
-
-    // const setting = GetSetting(offlineSystemKey);
-    // console.log(
-    //     'Setting: ',
-    //     [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
-    // );
 }
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {

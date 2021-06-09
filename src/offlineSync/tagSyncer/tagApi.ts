@@ -1,7 +1,7 @@
 import { logPerformance } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
-import { BaseError } from '../baseError';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
+import { JsonParseError } from '../syncResult';
 import { baseApiUrl, getInstCode } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
@@ -46,8 +46,7 @@ export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
 function ExtractDate(stringWithDate: string): Date {
     const regex = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/g;
     const dateStrings = stringWithDate?.match(regex) as string[];
-    const date = new Date(dateStrings[0]);
-    return date;
+    return new Date(dateStrings[0]);
 }
 
 export async function searchTagsOnline(searchText: string, maxHits: number): Promise<TagSummaryDb[]> {
@@ -71,8 +70,6 @@ function extractDateFromHeader(response: Response, headerName: string): Date {
     throw new Error(`header (${headerName}) doesn't exist`);
 }
 
-export class JsonParseError extends BaseError {}
-
 async function getAllTagsFromApi(instCode: string): Promise<TagsData> {
     const url = `${baseApiUrl}/${instCode}/archived-tags-file`;
     let tags: TagSummaryDb[] = [];
@@ -88,7 +85,7 @@ async function getAllTagsFromApi(instCode: string): Promise<TagsData> {
 }
 
 async function getUpdatedTagFromApi(instCode: string, updatedSince: Date): Promise<TagSummaryDb[]> {
-    //const date = '2020-11-27T06:52:57.199Z'; //for testing
+    //used for testing const date = '2020-11-27T06:52:57.199Z';
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
     return await apiFetchJsonToArray<TagSummaryDb>(url);

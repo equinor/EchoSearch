@@ -20,14 +20,7 @@ export interface SearchResult<T> extends BaseResult {
 //     reason: string;
 // }
 
-export enum ErrorType {}
-
 export enum SearchErrorType {
-    None = 'None',
-    SyncDisabled = 'SyncDisabled'
-}
-
-export enum NetworkErrorType {
     None = 'None',
     SyncDisabled = 'SyncDisabled'
 }

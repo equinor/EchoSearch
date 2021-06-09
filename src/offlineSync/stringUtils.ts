@@ -1,4 +1,4 @@
-import { BaseError } from './baseError';
+import { SearchModuleError } from './syncResult';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values
@@ -8,8 +8,7 @@ export function extractPositiveFirstNumbers(values: string[]): number[] {
 
 export function getMaxNumberInCollectionOrOne(databaseNames: string[]): number {
     const versions = extractPositiveFirstNumbers(databaseNames);
-    const currentVersion = Math.max(1, ...versions);
-    return currentVersion;
+    return Math.max(1, ...versions);
 }
 
 export function orEmpty(value?: string): string {
@@ -35,4 +34,4 @@ export function toDateOrThrowError(date?: string | Date): Date {
     return properDate;
 }
 
-export class ArgumentDateError extends BaseError {}
+export class ArgumentDateError extends SearchModuleError {}
