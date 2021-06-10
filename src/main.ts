@@ -1,7 +1,6 @@
 import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
-import { SearchErrorType } from './inMemory/searchResult';
 import { OfflineSystem } from './offlineSync/syncSettings';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
@@ -55,7 +54,7 @@ async function searchBtnClicked() {
             tags.data.map((i) => i.tagNo)
         );
     } else {
-        console.log('tags search ', tags.errorType.toString());
+        console.log('tags search ', tags.error?.message.toString());
     }
 
     const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);
@@ -67,11 +66,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log(
-            'mc packs search ',
-            mcPacks.errorType.toString(),
-            mcPacks.errorType === SearchErrorType.SyncDisabled
-        );
+        console.log('mc packs search ', mcPacks.error?.message.toString());
     }
 
     const punches = await Search.searchPunchesAsync('A-73MA001', 2);
@@ -83,7 +78,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log('punches search ', punches.errorType.toString());
+        console.log('punches search ', punches.error?.message.toString());
     }
 }
 

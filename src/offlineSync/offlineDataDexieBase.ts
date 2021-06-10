@@ -1,7 +1,7 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
+import { DbError, SyncCanceledError } from '../baseResult';
 import { logPerformance, logVerbose, logWarn } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
-import { DbError, SyncCanceledError } from './syncResult';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
 

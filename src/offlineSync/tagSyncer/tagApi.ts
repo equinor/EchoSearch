@@ -1,7 +1,7 @@
+import { JsonParseError } from '../../baseResult';
 import { logPerformance } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { JsonParseError } from '../syncResult';
 import { baseApiUrl, getInstCode } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';

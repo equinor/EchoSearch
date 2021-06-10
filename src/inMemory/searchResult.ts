@@ -1,34 +1,37 @@
-interface BaseResult {
-    isSuccess: boolean;
-}
-
 //interface FailureType extends string{}
 
-export interface SearchResults<T> extends BaseResult {
-    errorType: SearchErrorType;
+import { Result, SyncNotEnabledError } from '../baseResult';
+import { OfflineSystem } from '../offlineSync/syncSettings';
+
+export interface SearchResults<T> extends Result {
     data: T[];
 }
 
-//type Failure = string;
-
-export interface SearchResult<T> extends BaseResult {
+export interface SearchResult<T> extends Result {
     data?: T;
+    isNotFound: boolean;
 }
+
+export function createSearchSuccesses<T>(data: T[]): SearchResults<T> {
+    return { isSuccess: true, data };
+}
+
+export function createSearchSuccess<T>(data: T | undefined): SearchResult<T> {
+    return { isSuccess: true, data: data, isNotFound: data !== undefined };
+}
+
+export function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
+    return {
+        isSuccess: false,
+        data: [],
+        error: new SyncNotEnabledError('Sync is not enabled for ' + offlineSystem)
+    };
+}
+
+//ErrorType worth considering
+//type Failure = string;
 
 // export interface Failure<FailureType extends string> {
 //     type: FailureType;
 //     reason: string;
 // }
-
-export enum SearchErrorType {
-    None = 'None',
-    SyncDisabled = 'SyncDisabled'
-}
-
-export function searchSuccess<T>(data: T[]): SearchResults<T> {
-    return { isSuccess: true, data, errorType: SearchErrorType.None };
-}
-
-export function searchErrorNotEnabled<T>(): SearchResults<T> {
-    return { isSuccess: false, data: [], errorType: SearchErrorType.SyncDisabled };
-}

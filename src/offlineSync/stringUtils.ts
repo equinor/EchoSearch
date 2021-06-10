@@ -1,4 +1,4 @@
-import { SearchModuleError } from './syncResult';
+import { SearchModuleError } from '../baseResult';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values

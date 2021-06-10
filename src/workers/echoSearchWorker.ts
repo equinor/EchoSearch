@@ -1,8 +1,8 @@
 import * as Comlink from 'comlink';
+import { Result } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { SearchModuleResult } from '../offlineSync/syncResult';
 import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
@@ -54,7 +54,7 @@ export interface EchoWorker {
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
 
     searchForClosestTagNo(tagNo: string): Promise<string | undefined>;
-    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SearchModuleResult>;
+    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
 

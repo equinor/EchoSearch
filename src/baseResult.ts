@@ -1,6 +1,6 @@
 import { BaseError, BaseErrorArgs } from '@equinor/echo-base';
 
-export interface SearchModuleResult {
+export interface Result {
     readonly isSuccess: boolean;
     readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
 }
@@ -11,7 +11,7 @@ export class SearchModuleError extends BaseError {
     }
 }
 
-export interface InternalSyncResult extends SearchModuleResult {
+export interface InternalSyncResult extends Result {
     newestItemDate?: Date;
     itemsSyncedCount: number;
 }
@@ -21,6 +21,7 @@ export class DbError extends SearchModuleError {}
 export class NotImplementedError extends SearchModuleError {}
 export class JsonParseError extends SearchModuleError {}
 export class SyncError extends SearchModuleError {}
+export class SyncNotEnabledError extends SyncError {}
 
 export class SyncCanceledError extends SyncError {
     constructor(message: string) {
@@ -29,19 +30,19 @@ export class SyncCanceledError extends SyncError {
     }
 }
 
-export const createSuccess = (): SearchModuleResult => {
-    return { isSuccess: true } as SearchModuleResult;
+export const createSuccess = (): Result => {
+    return { isSuccess: true } as Result;
 };
 
-export const createError = (error: SearchModuleError): SearchModuleResult => {
-    return { isSuccess: false, error } as SearchModuleResult;
+export const createError = (error: SearchModuleError): Result => {
+    return { isSuccess: false, error } as Result;
 };
 
-export function createNotImplementedError(message: string): SearchModuleResult {
+export function createNotImplementedError(message: string): Result {
     return createError(new NotImplementedError(message));
 }
 
-export function createSyncError(message: string): SearchModuleResult {
+export function createSyncError(message: string): Result {
     return createError(new SyncError(message));
 }
 

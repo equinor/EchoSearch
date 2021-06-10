@@ -1,3 +1,4 @@
+import { createError, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -11,7 +12,7 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
-import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
+import { createSearchSuccess, createSearchSuccesses, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
@@ -19,12 +20,6 @@ import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offl
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
-import {
-    createError,
-    createNotImplementedError,
-    NotImplementedError,
-    SearchModuleResult
-} from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
 import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
 import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
@@ -154,12 +149,12 @@ export async function externalTagSearch(searchText: string, maxHits: number): Pr
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
     const result = await tagsRepository().get(tagNo);
-    return { isSuccess: true, data: result };
+    return createSearchSuccess(result);
 }
 
 export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
     const result = await tagsRepository().bulkGet(tagNos);
-    return searchSuccess(result);
+    return createSearchSuccesses(result);
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
@@ -171,12 +166,12 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
 }
 export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
     const result = await mcPacksRepository().get(id);
-    return { isSuccess: true, data: result };
+    return createSearchSuccess(result);
 }
 
 export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
     const result = await mcPacksRepository().bulkGet(ids);
-    return searchSuccess(result);
+    return createSearchSuccesses(result);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
@@ -186,12 +181,12 @@ export async function externalPunchesSearch(searchText: string, maxHits: number)
 
 export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
     const result = await punchesRepository().get(id);
-    return { isSuccess: true, data: result };
+    return createSearchSuccess(result);
 }
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     const result = await punchesRepository().bulkGet(ids);
-    return searchSuccess(result);
+    return createSearchSuccesses(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
@@ -212,7 +207,7 @@ export async function externalSearchForClosestTagNo(tagNo: string): Promise<stri
     return possibleTag ? possibleTag.word : undefined;
 }
 
-async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SearchModuleResult> {
+async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
     try {
         setToken(apiAccessToken);
         if (offlineSystemKey === OfflineSystem.McPack) {
