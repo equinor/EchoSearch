@@ -1,3 +1,4 @@
+import { NotFoundError } from '@equinor/echo-base';
 import { createSyncError, InternalSyncResult, Result } from '../baseResult';
 import { logPerformance, logWarn } from '../logger';
 import { SearchSystem } from '../workers/searchSystem';
@@ -28,20 +29,22 @@ export async function runSync<T>(searchSystem: SearchSystem<T>): Promise<Result>
         return createSyncError(message); //TODO Ove, convert to error enum type?
     }
 
-    // try {
-    const result = await asyncUsing(
-        async () => {
-            setIsSyncing(searchSystem.offlineSystemKey, true);
-            return await runSyncInternal(searchSystem);
-        },
-        () => setIsSyncing(searchSystem.offlineSystemKey, false)
-    );
+    try {
+        const result = await asyncUsing(
+            async () => {
+                setIsSyncing(searchSystem.offlineSystemKey, true);
+                return await runSyncInternal(searchSystem);
+            },
+            () => setIsSyncing(searchSystem.offlineSystemKey, false)
+        );
 
-    return result;
-    // } catch (e) {
-    //     console.log(e);
-    //     throw new SyncError('Something went wrong when syncing ' + searchSystem.offlineSystemKey, e); //TODO fix printing of proper error
-    // }
+        return result;
+    } catch (e) {
+        console.log(e);
+        console.log('___-in sync is not found??', e instanceof NotFoundError);
+        //throw new SyncError('Something went wrong when syncing ' + searchSystem.offlineSystemKey, e); //TODO fix printing of proper error
+        throw e;
+    }
 }
 
 function isSyncing(offlineSystemKey: OfflineSystem): boolean {

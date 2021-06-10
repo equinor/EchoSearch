@@ -1,4 +1,5 @@
-import { createError, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
+import { BaseError, NotFoundError } from '@equinor/echo-base';
+import { createError, createNotImplementedError, NotImplementedError, Result, SearchModuleError } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -220,8 +221,13 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 
         return createNotImplementedError('sync has not been implemented for ' + offlineSystemKey);
     } catch (e) {
-        console.log('--error caught', e);
-        return createError(e);
+        const error = createError(e);
+        console.log('--is SearchModuleError', error instanceof SearchModuleError);
+        console.log('--is BaseError', error instanceof BaseError);
+        console.log('--is NotFoundError', error instanceof NotFoundError);
+        console.log('--error caught with', error);
+        console.log('--error more props', { ...error });
+        return error;
     }
 }
 

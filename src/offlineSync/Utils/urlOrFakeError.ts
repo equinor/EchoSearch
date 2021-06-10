@@ -5,7 +5,7 @@ const _randomApiError = new ToggleState(true);
 /**
  * If random api error is enabled, the specified or random error is returned from the api.
  */
-export function urlOrFakeError(url: string, httpStatusCode = 401, errorMessage = 'errorMessage'): string {
+export function urlOrFakeError(url: string, httpStatusCode = 404, errorMessage = 'errorMessage'): string {
     if (!_randomApiError.isEnabled) return url;
     return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
 }

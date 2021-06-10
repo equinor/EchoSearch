@@ -1,4 +1,4 @@
-import { ForbiddenError, initializeError, NetworkErrorArgs } from '@equinor/echo-base';
+import { initializeError, NetworkError, NetworkErrorArgs, NotFoundError } from '@equinor/echo-base';
 import { getToken } from '../tokenHelper';
 
 type Body =
@@ -57,17 +57,18 @@ async function throwErrorIfNotSuccess(response: Response, url: string): Promise<
                 ? await response.json()
                 : await response.text();
 
-        //throw new Error(response.status + ' ' + endpoint + ' ' + moreInfo);
-        console.log('initializeError');
+        console.log('more info: ', moreInfo);
+
         const args: NetworkErrorArgs = {
-            message: moreInfo ?? 'no info..',
-            httpStatusCode: 401,
+            message: `${response.status} ${response.statusText}`.trim(),
+            httpStatusCode: response.status,
             url: url,
-            exception: {}
+            exception: moreInfo
         };
-        const error = initializeError(ForbiddenError, args);
-        console.log('done initializeError', error instanceof ForbiddenError, error);
-        const realError = error as Error;
+        console.log('args', args);
+        const error = initializeError(NetworkError, args);
+        console.log('done initializeError', error instanceof NotFoundError, error);
+
         console.log('real', JSON.parse(JSON.stringify(error)));
         throw error;
     }

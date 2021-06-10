@@ -28,7 +28,11 @@ async function runSyncClicked() {
 async function runSyncMcPacksClicked() {
     const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
-    await Promise.all([mcPackSync, punchesSync]);
+    const results = await Promise.all([mcPackSync, punchesSync]);
+    for (const result of results) {
+        console.log('Sync result:', result);
+        if (!result.isSuccess) console.log({ ...result.error });
+    }
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {

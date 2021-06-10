@@ -1,3 +1,4 @@
+import { Result } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
@@ -21,9 +22,9 @@ export const Lookup = {
 };
 
 export const Syncer = {
-    async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<void> {
+    async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<Result> {
         const token = await getApiTokenInMainThread();
-        await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
+        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     },
     setEnabledAsync: echoSearchWorker.setEnabled,
     changePlantAsync: echoSearchWorker.changePlantAsync
