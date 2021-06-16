@@ -2,6 +2,7 @@ import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
+import { ErrorForTesting } from './workers/externalCalls';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
 document.getElementById('SearchBtn')?.addEventListener('click', searchBtnClicked);
@@ -19,6 +20,8 @@ document.getElementById('ExpensiveBtn')?.addEventListener('click', expensiveBtnC
 document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Clicked);
 
 document.getElementById('toggleUseMockDataBtn')?.addEventListener('click', toggleMockDataClicked);
+
+document.getElementById('testCommReturnTypes')?.addEventListener('click', testCommReturnTypesClicked);
 
 let count = 0;
 async function runSyncClicked() {
@@ -58,7 +61,7 @@ async function searchBtnClicked() {
             tags.data.map((i) => i.tagNo)
         );
     } else {
-        console.log('tags search ', tags.error?.message.toString());
+        console.log('tags search ', tags.error?.message?.toString());
     }
 
     const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);
@@ -70,7 +73,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log('mc packs search ', mcPacks.error?.message.toString());
+        console.log('mc packs search ', mcPacks.error?.message?.toString());
     }
 
     const punches = await Search.searchPunchesAsync('A-73MA001', 2);
@@ -82,7 +85,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log('punches search ', punches.error?.message.toString());
+        console.log('punches search ', punches.error?.message?.toString());
     }
 }
 
@@ -99,6 +102,12 @@ async function doStuffBtn2Clicked() {
 
 async function toggleMockDataClicked() {
     await echoSearchWorker.toggleMockDataClicked();
+}
+
+async function testCommReturnTypesClicked(): Promise<void> {
+    const result = (await echoSearchWorker.testCommReturnTypes()) as ErrorForTesting;
+    console.log('in main', result);
+    console.log({ ...result });
 }
 
 function authenticate(): void {

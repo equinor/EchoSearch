@@ -1,5 +1,5 @@
 import { BaseError, NotFoundError } from '@equinor/echo-base';
-import { createError, createNotImplementedError, NotImplementedError, Result, SearchModuleError } from '../baseResult';
+import { createError, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -221,8 +221,8 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 
         return createNotImplementedError('sync has not been implemented for ' + offlineSystemKey);
     } catch (e) {
+        console.log('-----is e NotFoundError', e instanceof NotFoundError);
         const error = createError(e);
-        console.log('--is SearchModuleError', error instanceof SearchModuleError);
         console.log('--is BaseError', error instanceof BaseError);
         console.log('--is NotFoundError', error instanceof NotFoundError);
         console.log('--error caught with', error);
@@ -298,3 +298,52 @@ export const syncContract = {
     externalRunSync,
     externalToggleMockData
 };
+
+export function externalTestCommReturnTypes(): ErrorForTesting {
+    const err = new NotFoundError({
+        message: 'a message',
+        httpStatusCode: 404,
+        url: 'https://',
+        exception: { aTestProp: 'value 1' }
+    });
+
+    console.log("error'en", { ...err });
+
+    const moreProps = Object.entries(err).filter((item) => typeof item[1] !== 'function');
+    const recordsProp: Record<string, unknown> = {};
+    for (const prop of moreProps) {
+        recordsProp[prop[0]] = prop[1];
+    }
+    console.log(recordsProp);
+
+    for (const prop of moreProps) {
+        console.log(prop, typeof prop[1]);
+    }
+
+    const temp: ErrorForTesting = { type: ErrorType.ApiNotFound, ...recordsProp };
+    console.log('tempppppp', temp);
+
+    return {
+        message: err.message,
+        name: err.name,
+        httpStatusCode: 404,
+        url: err.getUrl(),
+        properties: { ...moreProps },
+        type: ErrorType.ApiNotFound,
+        stack: err.stack
+    };
+}
+
+export enum ErrorType {
+    ApiNotFound = 'ApiNotFound'
+}
+
+export interface ErrorForTesting {
+    type: ErrorType;
+    name?: string;
+    message?: string;
+    stack?: string;
+    httpStatusCode?: number;
+    url?: string;
+    properties?: Record<string, unknown>;
+}

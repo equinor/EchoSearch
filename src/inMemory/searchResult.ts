@@ -1,6 +1,6 @@
 //interface FailureType extends string{}
 
-import { Result, SyncNotEnabledError } from '../baseResult';
+import { ErrorType, Result } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
 export interface SearchResults<T> extends Result {
@@ -24,7 +24,10 @@ export function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchRe
     return {
         isSuccess: false,
         data: [],
-        error: new SyncNotEnabledError('Sync is not enabled for ' + offlineSystem)
+        error: {
+            type: ErrorType.SyncIsNotEnabled,
+            message: `To search you first have to enable sync for ${offlineSystem}`
+        }
     };
 }
 

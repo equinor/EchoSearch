@@ -5,22 +5,30 @@ export interface Result {
     readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
 }
 
-export class SearchModuleError extends BaseError {
-    constructor(message: string, exception?: Error) {
-        super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
-    }
-}
+// export class SearchModuleError extends BaseError {
+//     constructor(message: string, exception?: Error) {
+//         super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
+//     }
+// }
 
 export interface InternalSyncResult extends Result {
     newestItemDate?: Date;
     itemsSyncedCount: number;
 }
 
-export class DbError extends SearchModuleError {}
+export class SyncError extends BaseError {
+    constructor(message: string, exception?: Error) {
+        super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
+    }
+}
 
-export class NotImplementedError extends SearchModuleError {}
-export class JsonParseError extends SearchModuleError {}
-export class SyncError extends SearchModuleError {}
+export class DbError extends SyncError {}
+
+export class NotImplementedError extends SyncError {}
+export class JsonParseError extends SyncError {}
+
+export class ArgumentDateError extends SyncError {}
+
 export class SyncNotEnabledError extends SyncError {}
 
 export class SyncCanceledError extends SyncError {
@@ -39,11 +47,20 @@ export const createError = (error: SearchModuleError): Result => {
 };
 
 export function createNotImplementedError(message: string): Result {
-    return createError(new NotImplementedError(message));
+    return createError({ type: ErrorType.NotImplemented, message: message });
 }
 
 export function createSyncError(message: string): Result {
-    return createError(new SyncError(message));
+    return createError({ type: ErrorType.SyncFailed, message: message });
+}
+
+export function createSearchModuleErrorFromError(error: Error | BaseError): Result {
+    let errorType = ErrorType.SyncFailed;
+    if (error instanceof SyncCanceledError) {
+        errorType = ErrorType.SyncCanceled;
+    }
+    //todo url and statusCode?
+    return createError({ type: errorType, message: error.message, name: error.name, stack: error.stack });
 }
 
 // enum ErrorType {
@@ -52,3 +69,22 @@ export function createSyncError(message: string): Result {
 //     NetworkErrorInternalServerError,
 //     NetworkErrorBadRequest
 // }
+
+export enum ErrorType {
+    ApiNotFound = 'ApiNotFound',
+    ApiForbidden = 'ApiForbidden',
+    NotImplemented = 'NotImplemented',
+    SyncFailed = 'SyncFailed',
+    SyncCanceled = 'SyncCanceled',
+    SyncIsNotEnabled = 'SyncIsNotEnabled'
+}
+
+export interface SearchModuleError {
+    type: ErrorType;
+    name?: string;
+    message?: string;
+    stack?: string;
+    httpStatusCode?: number;
+    url?: string;
+    properties?: Record<string, unknown>;
+}

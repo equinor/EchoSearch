@@ -1,4 +1,4 @@
-import { SearchModuleError } from '../baseResult';
+import { ArgumentDateError } from '../baseResult';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values
@@ -33,5 +33,3 @@ export function toDateOrThrowError(date?: string | Date): Date {
     if (!properDate) throw new ArgumentDateError('Invalid date: ' + date);
     return properDate;
 }
-
-export class ArgumentDateError extends SearchModuleError {}

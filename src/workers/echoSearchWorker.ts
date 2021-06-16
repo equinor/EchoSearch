@@ -19,6 +19,7 @@ import {
     externalPunchesSearch,
     externalSearchForClosestTagNo,
     externalTagSearch,
+    externalTestCommReturnTypes,
     syncContract
 } from './externalCalls';
 
@@ -63,6 +64,7 @@ export interface EchoWorker {
 
     doStuff2(): Promise<void>;
     toggleMockDataClicked(): void;
+    testCommReturnTypes(): unknown;
 }
 
 const echoWorker: EchoWorker = {
@@ -106,6 +108,13 @@ const echoWorker: EchoWorker = {
 
     toggleMockDataClicked(): void {
         syncContract.externalToggleMockData();
+    },
+
+    testCommReturnTypes(): unknown {
+        const result = externalTestCommReturnTypes();
+        console.log('EchoWorker', result);
+        console.log('EchoWorker props', { ...result });
+        return result;
     }
 };
 

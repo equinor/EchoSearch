@@ -1,6 +1,5 @@
-import { InternalSyncResult } from '../baseResult';
+import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { createSearchSuccesses, searchErrorNotEnabled, SearchResults } from '../inMemory/searchResult';
-import { ArgumentDateError } from '../offlineSync/stringUtils';
 import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
 
 export class SearchSystem<T> {
