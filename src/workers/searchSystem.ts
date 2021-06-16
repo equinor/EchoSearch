@@ -1,5 +1,5 @@
 import { ArgumentDateError, InternalSyncResult } from '../baseResult';
-import { createSearchSuccesses, searchErrorNotEnabled, SearchResults } from '../inMemory/searchResult';
+import { createSearchSuccessesOrEmpty, searchErrorNotEnabled, SearchResults } from '../inMemory/searchResult';
 import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
 
 export class SearchSystem<T> {
@@ -44,7 +44,7 @@ export class SearchSystem<T> {
         const data = this._isOfflineSearchReady()
             ? await this._offlineSearch(searchText, maxHits)
             : await this._onlineSearch(searchText, maxHits);
-        return createSearchSuccesses(data);
+        return createSearchSuccessesOrEmpty(data);
     }
 
     async runFullSync(): Promise<InternalSyncResult> {

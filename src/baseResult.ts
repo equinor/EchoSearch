@@ -1,4 +1,4 @@
-import { BaseError, BaseErrorArgs } from '@equinor/echo-base';
+import { BaseError, BaseErrorArgs, NotFoundError } from '@equinor/echo-base';
 
 export interface Result {
     readonly isSuccess: boolean;
@@ -42,7 +42,7 @@ export const createSuccess = (): Result => {
     return { isSuccess: true } as Result;
 };
 
-export const createError = (error: SearchModuleError): Result => {
+const createError = (error: SearchModuleError): Result => {
     return { isSuccess: false, error } as Result;
 };
 
@@ -54,13 +54,28 @@ export function createSyncError(message: string): Result {
     return createError({ type: ErrorType.SyncFailed, message: message });
 }
 
-export function createSearchModuleErrorFromError(error: Error | BaseError): Result {
-    let errorType = ErrorType.SyncFailed;
-    if (error instanceof SyncCanceledError) {
-        errorType = ErrorType.SyncCanceled;
-    }
+export function createErrorFromException(error: Error | BaseError): Result {
+    let errorType = ErrorType.Unknown;
+
+    if (error instanceof SyncCanceledError) errorType = ErrorType.SyncCanceled;
+    if (error instanceof NotFoundError) errorType = ErrorType.ApiNotFound;
+
+    let allProperties = {};
+    if (error instanceof BaseError) {
+        allProperties = error.getProperties(); //TODO unit test, are we missing any custom properties?
+    } else if (error instanceof Error) {
+        allProperties = JSON.parse(JSON.stringify(error)); //TODO unit test how this iw working
+    } //TODO handled unknown types as string
+
+    const searchModuleError: SearchModuleError = {
+        type: errorType,
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        properties: { ...allProperties }
+    };
     //todo url and statusCode?
-    return createError({ type: errorType, message: error.message, name: error.name, stack: error.stack });
+    return createError(searchModuleError);
 }
 
 // enum ErrorType {
@@ -71,6 +86,7 @@ export function createSearchModuleErrorFromError(error: Error | BaseError): Resu
 // }
 
 export enum ErrorType {
+    Unknown = 'Unknown',
     ApiNotFound = 'ApiNotFound',
     ApiForbidden = 'ApiForbidden',
     NotImplemented = 'NotImplemented',

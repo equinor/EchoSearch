@@ -54,7 +54,7 @@ export interface EchoWorker {
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
 
-    searchForClosestTagNo(tagNo: string): Promise<string | undefined>;
+    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;

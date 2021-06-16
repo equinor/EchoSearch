@@ -12,12 +12,12 @@ export interface SearchResult<T> extends Result {
     isNotFound: boolean;
 }
 
-export function createSearchSuccesses<T>(data: T[]): SearchResults<T> {
+export function createSearchSuccessesOrEmpty<T>(data: T[]): SearchResults<T> {
     return { isSuccess: true, data };
 }
 
-export function createSearchSuccess<T>(data: T | undefined): SearchResult<T> {
-    return { isSuccess: true, data: data, isNotFound: data !== undefined };
+export function createSearchSuccessOrNotFound<T>(data: T | undefined): SearchResult<T> {
+    return { isSuccess: true, data: data, isNotFound: data === undefined };
 }
 
 export function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {

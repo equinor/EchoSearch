@@ -1,4 +1,5 @@
-import { initializeError, NetworkError, NetworkErrorArgs, NotFoundError } from '@equinor/echo-base';
+import { initializeError, NetworkError, NetworkErrorArgs } from '@equinor/echo-base';
+import { logInfo, logPerformance } from '../logger';
 import { getToken } from '../tokenHelper';
 
 type Body =
@@ -35,15 +36,15 @@ export const workerFetch = async (
               ...headerOptions
           };
 
-    logFetchToConsole && console.log('Fetch', endpoint);
+    logFetchToConsole && logInfo('Fetch', endpoint);
+    const performanceLogger = logPerformance();
     const response: Response = await fetch(endpoint, {
         method,
         headers: headers,
         body: body,
         signal
     });
-    logFetchToConsole && console.log('Done', response.status, response.statusText, endpoint);
-    await throwErrorIfNotSuccess(response, endpoint);
+    logFetchToConsole && performanceLogger.forceLog(`Done ${response.status} ${endpoint}`);
 
     return response;
 };
@@ -51,13 +52,12 @@ export const workerFetch = async (
 async function throwErrorIfNotSuccess(response: Response, url: string): Promise<void> {
     if (response && !response.ok) {
         const contentType = response.headers.get('content-type');
-        console.warn('response not ok', response.status, response.statusText);
         const moreInfo =
             contentType && contentType.indexOf('application/json') !== -1
                 ? await response.json()
                 : await response.text();
 
-        console.log('more info: ', moreInfo);
+        // keep console.log('more info: ', moreInfo);
 
         const args: NetworkErrorArgs = {
             message: `${response.status} ${response.statusText}`.trim(),
@@ -65,28 +65,16 @@ async function throwErrorIfNotSuccess(response: Response, url: string): Promise<
             url: url,
             exception: moreInfo
         };
-        console.log('args', args);
         const error = initializeError(NetworkError, args);
-        console.log('done initializeError', error instanceof NotFoundError, error);
-
-        console.log('real', JSON.parse(JSON.stringify(error)));
+        // keep console.log('real', JSON.parse(JSON.stringify(error)));
         throw error;
     }
 }
 
-/*
-            const errorInstance = initializeError(NetworkError, {
-                httpStatusCode: statusCode,
-                url: endpoint,
-                exception
-            });
-            throw errorInstance;
-
-*/
-
 export async function apiFetch(url: string): Promise<Response> {
-    const result = await workerFetch(url, getToken());
-    return result;
+    const response = await workerFetch(url, getToken());
+    await throwErrorIfNotSuccess(response, url);
+    return response;
 }
 
 /**
@@ -96,17 +84,18 @@ export async function apiFetch(url: string): Promise<Response> {
  * @returns An array of the specified return type
  */
 export async function apiFetchJsonToArray<T>(url: string): Promise<T[]> {
-    console.log('Fetch:', url);
+    logInfo('Fetch:', url);
+    const performanceLogger = logPerformance();
     const response = await workerFetch(url, getToken(), false);
     if (response.status === 200) {
         const result = (await response.json()) as T[];
-        console.log('Done: ', response.status, 'items:', result.length, url);
+        performanceLogger.forceLog(`Done ${response.status} items: ${result.length} ${url}`);
         return result;
     } else {
-        console.log('Done: ', response.status, url);
+        performanceLogger.forceLog(`Done ${response.status} ${url}`);
     }
 
     await throwErrorIfNotSuccess(response, url);
-    return [];
+    return []; //no data returned in response
     //LaterDo json parse error is possible..
 }

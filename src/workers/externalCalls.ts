@@ -1,5 +1,5 @@
-import { BaseError, NotFoundError } from '@equinor/echo-base';
-import { createError, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
+import { NotFoundError } from '@equinor/echo-base';
+import { createErrorFromException, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -13,7 +13,12 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
-import { createSearchSuccess, createSearchSuccesses, SearchResult, SearchResults } from '../inMemory/searchResult';
+import {
+    createSearchSuccessesOrEmpty,
+    createSearchSuccessOrNotFound,
+    SearchResult,
+    SearchResults
+} from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
@@ -150,12 +155,12 @@ export async function externalTagSearch(searchText: string, maxHits: number): Pr
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
     const result = await tagsRepository().get(tagNo);
-    return createSearchSuccess(result);
+    return createSearchSuccessOrNotFound(result);
 }
 
 export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
     const result = await tagsRepository().bulkGet(tagNos);
-    return createSearchSuccesses(result);
+    return createSearchSuccessesOrEmpty(result);
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
@@ -167,12 +172,12 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
 }
 export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
     const result = await mcPacksRepository().get(id);
-    return createSearchSuccess(result);
+    return createSearchSuccessOrNotFound(result);
 }
 
 export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
     const result = await mcPacksRepository().bulkGet(ids);
-    return createSearchSuccesses(result);
+    return createSearchSuccessesOrEmpty(result);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
@@ -182,15 +187,16 @@ export async function externalPunchesSearch(searchText: string, maxHits: number)
 
 export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
     const result = await punchesRepository().get(id);
-    return createSearchSuccess(result);
+    return createSearchSuccessOrNotFound(result);
 }
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     const result = await punchesRepository().bulkGet(ids);
-    return createSearchSuccesses(result);
+    return createSearchSuccessesOrEmpty(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
+    //TODO
     return [
         {
             commPkgNo: '1',
@@ -203,9 +209,9 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
     ];
 }
 
-export async function externalSearchForClosestTagNo(tagNo: string): Promise<string | undefined> {
+export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
-    return possibleTag ? possibleTag.word : undefined;
+    return createSearchSuccessOrNotFound(possibleTag?.word ?? undefined);
 }
 
 async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
@@ -222,12 +228,10 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
         return createNotImplementedError('sync has not been implemented for ' + offlineSystemKey);
     } catch (e) {
         console.log('-----is e NotFoundError', e instanceof NotFoundError);
-        const error = createError(e);
-        console.log('--is BaseError', error instanceof BaseError);
-        console.log('--is NotFoundError', error instanceof NotFoundError);
-        console.log('--error caught with', error);
-        console.log('--error more props', { ...error });
-        return error;
+        const resultError = createErrorFromException(e);
+        console.log('--error caught with', resultError);
+        console.log('--error more props', { ...resultError });
+        return resultError;
     }
 }
 
