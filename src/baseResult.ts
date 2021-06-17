@@ -44,7 +44,9 @@ function createResultErrorFromException(error: Error | BaseError): Result {
     let errorType = ErrorType.Unknown;
 
     if (error instanceof SyncCanceledError) errorType = ErrorType.SyncCanceled;
-    if (error instanceof NotFoundError) errorType = ErrorType.ApiNotFound;
+    else if (error instanceof NotFoundError) errorType = ErrorType.ApiNotFound;
+    else if (error instanceof Error && error.message.toLowerCase().includes('abort'))
+        errorType = ErrorType.SyncCanceled; //fetch url call was aborted
 
     let allProperties = {};
     if (error instanceof BaseError) {

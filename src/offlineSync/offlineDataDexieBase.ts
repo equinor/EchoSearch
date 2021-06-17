@@ -1,6 +1,6 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { DbError, SyncCanceledError } from '../baseResult';
-import { logPerformance, logVerbose, logWarn } from '../logger';
+import { logInfo, logPerformance, logVerbose, logWarn } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
@@ -16,12 +16,10 @@ async function tryOrThrow<Tr>(runMainFunc: () => Promise<Tr>): Promise<Tr> {
 export class OfflineDataDexieBase<T> extends Dexie {
     databaseName: string;
     tableName: string;
-    cancelSyncFlag: boolean;
     constructor(databaseName: string, tableName: string) {
         super(databaseName);
         this.databaseName = databaseName;
         this.tableName = tableName;
-        this.cancelSyncFlag = false;
     }
 
     async tryToGet(key: string): Promise<T | undefined> {
@@ -40,26 +38,31 @@ export class OfflineDataDexieBase<T> extends Dexie {
         return await this.table(this.tableName).get(key);
     }
 
-    cancelSync(): void {
-        this.cancelSyncFlag = true;
-    }
-
-    async addDataBulks(data: T[]): Promise<void> {
-        this.cancelSyncFlag = false;
+    async addDataBulks(data: T[], abortSignal: AbortSignal): Promise<void> {
         const CHUNK_SIZE = 1250; //ChunkSize of 1250 or 5000: it takes the same amount of time to put data into indexDb. But with smaller chunk size, the read will be a lot faster, since indexDb prioritize read before chunk write.
         if (!data) data = [];
 
         const chunks = chunkArray(data, CHUNK_SIZE);
         const database = this.table(this.tableName);
 
+        let index = 0;
         for await (const chunk of chunks) {
-            if (this.cancelSyncFlag) {
+            if (abortSignal.aborted) {
+                this.log('Sync canceled');
                 throw new SyncCanceledError('Sync was canceled');
             }
+
+            if (index % 10 === 0) this.log(`adding data.. ${chunks.length}`);
+            index++;
+
             await database.bulkPut(chunk); //bulkAdd doesn't make any speed difference with 500k items with id as number.
             //TODO Ove - do we need retry?
             // currentIndex++;
             // if (currentIndex == 15) throw new Error('Testing failing dexie syncing');
+        }
+        if (abortSignal.aborted) {
+            this.log('Sync canceled');
+            throw new SyncCanceledError('Sync was canceled');
         }
     }
 
@@ -75,6 +78,10 @@ export class OfflineDataDexieBase<T> extends Dexie {
     async slowlyGetAllData(): Promise<T[]> {
         return await this.table(this.tableName).toArray();
     }
+
+    private log(message: string) {
+        logInfo(`[DB ${this.tableName}]`, message);
+    }
 }
 
 /**
@@ -86,8 +93,8 @@ export class Repository<T> {
         this.database = database;
     }
 
-    async addDataBulks(data: T[]): Promise<void> {
-        await this.database.addDataBulks(data);
+    async addDataBulks(data: T[], abortSignal: AbortSignal): Promise<void> {
+        await this.database.addDataBulks(data, abortSignal);
     }
 
     async bulkDeleteData(keys: IndexableTypeArrayReadonly): Promise<void> {
@@ -100,10 +107,6 @@ export class Repository<T> {
 
     async get(key: string): Promise<T | undefined> {
         return await this.database.get(key);
-    }
-
-    cancelSync(): void {
-        this.database.cancelSync();
     }
 
     /**
@@ -159,8 +162,7 @@ export class DatabaseAdministrator<T> {
 
 export async function getCurrentVersion(databaseNamePreFix: string): Promise<number> {
     const databaseNames = await getDatabaseNames(databaseNamePreFix);
-    const currentVersion = getMaxNumberInCollectionOrOne(databaseNames);
-    return currentVersion;
+    return getMaxNumberInCollectionOrOne(databaseNames);
 }
 
 export async function getDatabaseNames(databaseNamePreFix: string): Promise<string[]> {

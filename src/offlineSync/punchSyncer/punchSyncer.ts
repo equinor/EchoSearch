@@ -16,44 +16,44 @@ export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
     }
 }
 
-export async function syncFullPunches(): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance();
-    const data = await apiAllPunches(getInstCode());
-    performanceLogger.forceLogDelta('Punches Api');
+export async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncResult> {
+    const performanceLogger = logPerformance('[Punches]');
+    const data = await apiAllPunches(getInstCode(), abortSignal);
+    performanceLogger.forceLogDelta(' Api');
 
     inMemoryPunchesInstance().clearAndInit(data);
-    performanceLogger.forceLogDelta('Punches clear and init inMemoryData');
+    performanceLogger.forceLogDelta(' clear and init inMemoryData');
 
     await punchesAdministrator().deleteAndRecreate();
-    performanceLogger.forceLogDelta('Punches deleteAndRecreate');
+    performanceLogger.forceLogDelta(' deleteAndRecreate');
 
-    await punchesRepository().addDataBulks(data);
-    performanceLogger.forceLogDelta('Punches addDataBulks ' + data.length);
+    await punchesRepository().addDataBulks(data, abortSignal);
+    performanceLogger.forceLogDelta(' addDataBulks ' + data.length);
 
     const newestItemDate = getNewestItemDate(data);
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdatePunches(newestItemDate: Date): Promise<InternalSyncResult> {
+export async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const lastSyncedAtDate = GetSetting(OfflineSystem.Punches).lastSyncedAtDate;
     const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
     const daysBackInTime = 2;
     if (daysSinceLastUpdate >= daysBackInTime) {
         console.log('------ running full punch sync');
-        return await syncFullPunches();
+        return await syncFullPunches(abortSignal);
     }
 
-    const performanceLogger = logPerformance();
-    const punches = await apiUpdatedPunches(getInstCode(), newestItemDate);
-    performanceLogger.forceLogDelta('Punches Api');
+    const performanceLogger = logPerformance('[Punches]');
+    const punches = await apiUpdatedPunches(getInstCode(), newestItemDate, abortSignal);
+    performanceLogger.forceLogDelta(' Api');
     inMemoryPunchesInstance().updateItems(punches);
 
     const repository = punchesRepository();
-    await repository.addDataBulks(punches);
+    await repository.addDataBulks(punches, abortSignal);
     await deleteClosedPunches(punches, repository);
 
-    if (!(await verifyPunchCount(getInstCode(), inMemoryPunchesInstance().length()))) {
-        return syncFullPunches();
+    if (!(await verifyPunchCount(getInstCode(), inMemoryPunchesInstance().length(), abortSignal))) {
+        return syncFullPunches(abortSignal);
     }
 
     return { isSuccess: true, itemsSyncedCount: punches.length, newestItemDate: getNewestItemDate(punches) };

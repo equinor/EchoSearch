@@ -42,7 +42,7 @@ function isSyncing(offlineSystemKey: OfflineSystem): boolean {
 }
 
 function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
-    console.log('setIsSyncing', offlineSystemKey, syncEnabledState);
+    console.log(`[${offlineSystemKey} isSyncing]`, syncEnabledState);
     if (syncEnabledState) {
         currentlySyncing.push(offlineSystemKey);
         return;
@@ -72,7 +72,7 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<Result
     }
 
     const tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
-    logPerformanceToConsole.forceLog(`${searchSystem.offlineSystemKey} Sync ${tagSyncStatus}`);
+    logPerformanceToConsole.forceLog(`[${searchSystem.offlineSystemKey}] Sync ${tagSyncStatus}`);
     return { ...result };
 }
 

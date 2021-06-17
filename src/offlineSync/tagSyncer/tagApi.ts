@@ -32,14 +32,16 @@ function cleanupTags(tags: TagSummaryDb[]): TagSummaryDb[] {
     return tags.map((tag) => cleanupTag(tag));
 }
 
-export async function apiAllTags(): Promise<TagsData> {
-    const tagData = _mock.isEnabled ? getMockedTags() : await getAllTagsFromApi(getInstCode());
+export async function apiAllTags(abortSignal: AbortSignal): Promise<TagsData> {
+    const tagData = _mock.isEnabled ? getMockedTags() : await getAllTagsFromApi(getInstCode(), abortSignal);
     tagData.tags = cleanupTags(tagData.tags);
     return tagData;
 }
 
-export async function apiUpdatedTags(fromDate: Date): Promise<TagsData> {
-    const tags = _mock.isEnabled ? getMockedUpdatedTags() : await getUpdatedTagFromApi(getInstCode(), fromDate);
+export async function apiUpdatedTags(fromDate: Date, abortSignal: AbortSignal): Promise<TagsData> {
+    const tags = _mock.isEnabled
+        ? getMockedUpdatedTags()
+        : await getUpdatedTagFromApi(getInstCode(), fromDate, abortSignal);
     return { tags: cleanupTags(tags), dataSyncedAt: new Date() } as TagsData;
 }
 
@@ -70,10 +72,10 @@ function extractDateFromHeader(response: Response, headerName: string): Date {
     throw new Error(`header (${headerName}) doesn't exist`);
 }
 
-async function getAllTagsFromApi(instCode: string): Promise<TagsData> {
+async function getAllTagsFromApi(instCode: string, abortSignal: AbortSignal): Promise<TagsData> {
     const url = `${baseApiUrl}/${instCode}/archived-tags-file`;
     let tags: TagSummaryDb[] = [];
-    const response = await apiFetch(url); //TODO handle not ok, forbidden, etc
+    const response = await apiFetch(url, abortSignal); //TODO handle not ok, forbidden, etc
 
     try {
         tags = await JSON.parse(await response.text());
@@ -84,11 +86,15 @@ async function getAllTagsFromApi(instCode: string): Promise<TagsData> {
     return { tags, dataSyncedAt: extractDateFromHeader(response, 'content-disposition') } as TagsData;
 }
 
-async function getUpdatedTagFromApi(instCode: string, updatedSince: Date): Promise<TagSummaryDb[]> {
+async function getUpdatedTagFromApi(
+    instCode: string,
+    updatedSince: Date,
+    abortSignal: AbortSignal
+): Promise<TagSummaryDb[]> {
     //used for testing const date = '2020-11-27T06:52:57.199Z';
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
-    return await apiFetchJsonToArray<TagSummaryDb>(url);
+    return await apiFetchJsonToArray<TagSummaryDb>(url, abortSignal);
 }
 
 function getMockedTags(): TagsData {

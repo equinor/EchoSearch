@@ -72,8 +72,8 @@ export function logPerformance(preText?: string): LogPerformance {
     const preTextMessage = preText ? preText : '';
 
     function internalLogPerformanceToConsole(message: string, startTime: number, forceLog: boolean): void {
-        const text = preTextMessage + message;
-        logPerformanceToConsole(text, startTime, forceLog);
+        const text = preTextMessage.trim() + ' ' + message;
+        logPerformanceToConsole(text.trim(), startTime, forceLog);
         tDelta = performance.now();
     }
 

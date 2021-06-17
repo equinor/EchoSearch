@@ -29,11 +29,11 @@ function cleanupMcPack(mcPack: McPackDb): McPackDb {
     };
 }
 
-export async function apiAllMcPacks(instCode: string): Promise<McPackDb[]> {
+export async function apiAllMcPacks(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
     const performanceLogger = logPerformance();
     const items: McPackDb[] = _mock.isEnabled
         ? JSON.parse(getMockedMcPacksString(0))
-        : await getAllMcPacksFromApi(instCode);
+        : await getAllMcPacksFromApi(instCode, abortSignal);
     performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupMcPack(item));
@@ -41,21 +41,29 @@ export async function apiAllMcPacks(instCode: string): Promise<McPackDb[]> {
     return results;
 }
 
-export async function apiUpdatedMcPacks(instCode: string, fromDate: Date): Promise<McPackDb[]> {
+export async function apiUpdatedMcPacks(
+    instCode: string,
+    fromDate: Date,
+    abortSignal: AbortSignal
+): Promise<McPackDb[]> {
     const items: McPackDb[] = _mock.isEnabled
         ? JSON.parse(getMockedMcPacksString(50000))
-        : await getUpdatedMcPacksFromApi(instCode, fromDate);
+        : await getUpdatedMcPacksFromApi(instCode, fromDate, abortSignal);
 
     return items.map((item) => cleanupMcPack(item));
 }
 
-async function getAllMcPacksFromApi(instCode: string): Promise<McPackDb[]> {
+async function getAllMcPacksFromApi(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
     const url = `${baseApiUrl}/${instCode}/mcPks?paging=false`;
-    return await apiFetchJsonToArray<McPackDb>(url);
+    return await apiFetchJsonToArray<McPackDb>(url, abortSignal);
 }
 
-async function getUpdatedMcPacksFromApi(instCode: string, updatedSince: Date): Promise<McPackDb[]> {
+async function getUpdatedMcPacksFromApi(
+    instCode: string,
+    updatedSince: Date,
+    abortSignal: AbortSignal
+): Promise<McPackDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/mcPks?updatedSince=${date}&paging=false`;
-    return await apiFetchJsonToArray<McPackDb>(url);
+    return await apiFetchJsonToArray<McPackDb>(url, abortSignal);
 }

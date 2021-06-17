@@ -15,33 +15,33 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
     }
 }
 
-export async function syncFullMcPacks(): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance();
-    const data = await apiAllMcPacks(getInstCode());
-    performanceLogger.forceLogDelta('McPacks Api');
+export async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncResult> {
+    const performanceLogger = logPerformance('[McPacks]');
+    const data = await apiAllMcPacks(getInstCode(), abortSignal);
+    performanceLogger.forceLogDelta('Api');
 
     inMemoryMcPacksInstance().clearAndInit(data);
-    performanceLogger.forceLogDelta('McPacks clear and init inMemoryData');
+    performanceLogger.forceLogDelta('clear and init inMemoryData');
 
     await mcPacksAdministrator().deleteAndRecreate();
-    performanceLogger.forceLogDelta('McPacks deleteAndRecreate');
+    performanceLogger.forceLogDelta('deleteAndRecreate');
 
-    await mcPacksRepository().addDataBulks(data);
-    performanceLogger.forceLogDelta('McPacks addDataBulks ' + data.length);
+    await mcPacksRepository().addDataBulks(data, abortSignal);
+    performanceLogger.forceLogDelta('addDataBulks ' + data.length);
     const newestItemDate = getNewestItemDate(data);
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdateMcPacks(lastChangedDate: Date): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance();
-    const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate);
-    performanceLogger.forceLogDelta('McPacks Api');
+export async function syncUpdateMcPacks(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
+    const performanceLogger = logPerformance('[McPacks]');
+    const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate, abortSignal);
+    performanceLogger.forceLogDelta('Api');
 
     inMemoryMcPacksInstance().updateItems(data);
-    performanceLogger.forceLogDelta('McPacks Add to inMemory, total: ' + inMemoryMcPacksInstance().length());
+    performanceLogger.forceLogDelta('Add to inMemory, total: ' + inMemoryMcPacksInstance().length());
 
-    await mcPacksRepository().addDataBulks(data);
-    performanceLogger.forceLogDelta('McPacks Add to Dexie');
+    await mcPacksRepository().addDataBulks(data, abortSignal);
+    performanceLogger.forceLogDelta('Add to Dexie');
 
     const newestItemDate = getNewestItemDate(data);
 
