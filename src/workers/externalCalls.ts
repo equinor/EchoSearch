@@ -13,12 +13,7 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
-import {
-    createSearchArraySuccessOrEmpty,
-    createSearchSuccessOrNotFound,
-    SearchResult,
-    SearchResults
-} from '../inMemory/searchResult';
+import { searchResult, SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
@@ -155,13 +150,13 @@ export async function externalTagSearch(searchText: string, maxHits: number): Pr
 }
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
-    const result = await tagsRepository().get(tagNo);
-    return createSearchSuccessOrNotFound(result);
+    const tag = await tagsRepository().get(tagNo);
+    return searchResult.successOrNotFound(tag);
 }
 
 export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
-    const result = await tagsRepository().bulkGet(tagNos);
-    return createSearchArraySuccessOrEmpty(result);
+    const tagSummaries = await tagsRepository().bulkGet(tagNos);
+    return searchResults.successOrEmpty(tagSummaries);
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
@@ -173,12 +168,12 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
 }
 export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
     const result = await mcPacksRepository().get(id);
-    return createSearchSuccessOrNotFound(result);
+    return searchResult.successOrNotFound(result);
 }
 
 export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
     const result = await mcPacksRepository().bulkGet(ids);
-    return createSearchArraySuccessOrEmpty(result);
+    return searchResults.successOrEmpty(result);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
@@ -188,12 +183,12 @@ export async function externalPunchesSearch(searchText: string, maxHits: number)
 
 export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
     const result = await punchesRepository().get(id);
-    return createSearchSuccessOrNotFound(result);
+    return searchResult.successOrNotFound(result);
 }
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     const result = await punchesRepository().bulkGet(ids);
-    return createSearchArraySuccessOrEmpty(result);
+    return searchResults.successOrEmpty(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
@@ -212,7 +207,7 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
 
 export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
-    return createSearchSuccessOrNotFound(possibleTag?.word ?? undefined);
+    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
 async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {

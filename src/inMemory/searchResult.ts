@@ -13,20 +13,20 @@ export interface SearchResult<T> extends Result {
     isNotFound: boolean;
 }
 
-export function createSearchArrayError<T>(exception: Error | BaseError): SearchResults<T> {
+function createFromError<T>(exception: Error | BaseError): SearchResults<T> {
     const errorResult = result.errorFromException(exception);
     return { isSuccess: false, data: [], error: errorResult.error };
 }
 
-export function createSearchArraySuccessOrEmpty<T>(data: T[]): SearchResults<T> {
+function createSearchArraySuccessOrEmpty<T>(data: T[]): SearchResults<T> {
     return { isSuccess: true, data };
 }
 
-export function createSearchSuccessOrNotFound<T>(data: T | undefined): SearchResult<T> {
+function createSearchSuccessOrNotFound<T>(data: T | undefined): SearchResult<T> {
     return { isSuccess: true, data: data, isNotFound: data === undefined };
 }
 
-export function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
+function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
     return {
         isSuccess: false,
         data: [],
@@ -36,6 +36,16 @@ export function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchRe
         }
     };
 }
+
+export const searchResult = {
+    successOrNotFound: createSearchSuccessOrNotFound
+};
+
+export const searchResults = {
+    error: createFromError,
+    successOrEmpty: createSearchArraySuccessOrEmpty,
+    syncNotEnabledError: searchErrorNotEnabled
+};
 
 //ErrorType worth considering
 //type Failure = string;
