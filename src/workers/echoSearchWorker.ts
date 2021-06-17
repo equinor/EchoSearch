@@ -59,7 +59,7 @@ export interface EchoWorker {
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
 
-    cancelSync(): void;
+    cancelSync(offlineSystemKey: OfflineSystem): void;
     runExpensive: () => string;
 
     doStuff2(): Promise<void>;
@@ -99,8 +99,8 @@ const echoWorker: EchoWorker = {
 
     runSyncWorkerAsync: syncContract.externalRunSync,
 
-    cancelSync(): void {
-        syncContract.externalCancelSync(OfflineSystem.McPack);
+    cancelSync(offlineSystemKey: OfflineSystem): void {
+        syncContract.externalCancelSync(offlineSystemKey);
     },
 
     setEnabled: syncContract.externalSetEnabled,

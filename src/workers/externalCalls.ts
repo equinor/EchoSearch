@@ -1,4 +1,4 @@
-import { NetworkError, NotFoundError } from '@equinor/echo-base';
+import { NotFoundError } from '@equinor/echo-base';
 import { NotImplementedError, result, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
@@ -144,7 +144,7 @@ async function internalInitialize(): Promise<void> {
 }
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
-    throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
+    //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     const results = await tagSearchSystem.search(searchText, maxHits);
     return results;
 }
@@ -250,15 +250,21 @@ async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: bo
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {
     if (offlineSystemKey === OfflineSystem.McPack) mcPacksRepository().cancelSync();
+    else if (offlineSystemKey === OfflineSystem.Tags) tagsRepository().cancelSync();
+    else if (offlineSystemKey === OfflineSystem.Punches) punchesRepository().cancelSync();
     else throw new NotImplementedError('cancel not implemented for ' + offlineSystemKey);
 }
 
 async function externalDeleteAllData(): Promise<void> {
+    const performanceLogger = logPerformance('..Delete All Data');
+    performanceLogger.forceLog(' - Started');
+    externalCancelSync(OfflineSystem.McPack);
     ClearSettings(OfflineSystem.Tags);
     await tagsAdministrator().deleteAndRecreate();
     clearInMemoryTags();
     clearLevTrie();
 
+    externalCancelSync(OfflineSystem.McPack);
     ClearSettings(OfflineSystem.McPack);
     await mcPacksAdministrator().deleteAndRecreate();
     inMemoryMcPacksInstance().clearData();
@@ -266,6 +272,7 @@ async function externalDeleteAllData(): Promise<void> {
     ClearSettings(OfflineSystem.Punches);
     await punchesAdministrator().deleteAndRecreate();
     inMemoryPunchesInstance().clearData();
+    performanceLogger.forceLog(' - Done');
 }
 
 function ClearSettings(offlineSystemKey: OfflineSystem): void {

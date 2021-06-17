@@ -13,14 +13,13 @@ type Body =
     | null
     | undefined;
 
-export const workerFetch = async (
+const workerFetch = async (
     endpoint: string,
     token: string,
     logFetchToConsole = true,
-    headerOptions: Record<string, unknown> = {},
     method = 'GET',
+    headerOptions: Record<string, unknown> = {},
     body?: Body,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     signal?: AbortSignal
 ): Promise<Response> => {
     if (!token.toLowerCase().includes('bearer')) token = 'Bearer ' + token;
@@ -83,10 +82,10 @@ export async function apiFetch(url: string): Promise<Response> {
  * @param url The url to fetch
  * @returns An array of the specified return type
  */
-export async function apiFetchJsonToArray<T>(url: string): Promise<T[]> {
+export async function apiFetchJsonToArray<T>(url: string, abortSignal?: AbortSignal): Promise<T[]> {
     logInfo('Fetch:', url);
     const performanceLogger = logPerformance();
-    const response = await workerFetch(url, getToken(), false);
+    const response = await workerFetch(url, getToken(), false, 'GET', undefined, undefined, abortSignal);
     if (response.status === 200) {
         const result = (await response.json()) as T[];
         performanceLogger.forceLog(`Done ${response.status} items: ${result.length} ${url}`);

@@ -1,6 +1,6 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { DbError, SyncCanceledError } from '../baseResult';
-import { logPerformance, logVerbose, logWarn } from '../logger';
+import { logInfo, logPerformance, logVerbose, logWarn } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
@@ -52,14 +52,24 @@ export class OfflineDataDexieBase<T> extends Dexie {
         const chunks = chunkArray(data, CHUNK_SIZE);
         const database = this.table(this.tableName);
 
+        let index = 0;
         for await (const chunk of chunks) {
             if (this.cancelSyncFlag) {
+                log('Sync canceled ' + this.tableName);
                 throw new SyncCanceledError('Sync was canceled');
             }
+
+            if (index % 10 === 0) log('adding data.. ' + this.tableName + ' ' + chunks.length);
+            index++;
+
             await database.bulkPut(chunk); //bulkAdd doesn't make any speed difference with 500k items with id as number.
             //TODO Ove - do we need retry?
             // currentIndex++;
             // if (currentIndex == 15) throw new Error('Testing failing dexie syncing');
+        }
+        if (this.cancelSyncFlag) {
+            log('Sync canceled ' + this.tableName);
+            throw new SyncCanceledError('Sync was canceled');
         }
     }
 
@@ -75,6 +85,10 @@ export class OfflineDataDexieBase<T> extends Dexie {
     async slowlyGetAllData(): Promise<T[]> {
         return await this.table(this.tableName).toArray();
     }
+}
+
+function log(message: string) {
+    logInfo('[DB]', message);
 }
 
 /**

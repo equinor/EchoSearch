@@ -25,7 +25,8 @@ document.getElementById('testCommReturnTypes')?.addEventListener('click', testCo
 
 let count = 0;
 async function runSyncClicked() {
-    await Syncer.runSyncAsync(OfflineSystem.Tags);
+    const result = await Syncer.runSyncAsync(OfflineSystem.Tags);
+    console.info(result);
 }
 
 async function runSyncMcPacksClicked() {
@@ -144,5 +145,8 @@ async function handleClick(): Promise<void> {
 
 async function cancelBtnClicked() {
     console.log('CancelBtnClicked', count++);
-    echoSearchWorker.cancelSync();
+
+    echoSearchWorker.cancelSync(OfflineSystem.Tags);
+    echoSearchWorker.cancelSync(OfflineSystem.McPack);
+    echoSearchWorker.cancelSync(OfflineSystem.Punches);
 }
