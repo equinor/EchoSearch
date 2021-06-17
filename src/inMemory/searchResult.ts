@@ -1,6 +1,7 @@
 //interface FailureType extends string{}
 
-import { ErrorType, Result } from '../baseResult';
+import { BaseError } from '@equinor/echo-base';
+import { ErrorType, result, Result } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
 export interface SearchResults<T> extends Result {
@@ -12,7 +13,12 @@ export interface SearchResult<T> extends Result {
     isNotFound: boolean;
 }
 
-export function createSearchSuccessesOrEmpty<T>(data: T[]): SearchResults<T> {
+export function createSearchArrayError<T>(exception: Error | BaseError): SearchResults<T> {
+    const errorResult = result.errorFromException(exception);
+    return { isSuccess: false, data: [], error: errorResult.error };
+}
+
+export function createSearchArraySuccessOrEmpty<T>(data: T[]): SearchResults<T> {
     return { isSuccess: true, data };
 }
 

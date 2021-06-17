@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { Result } from '../baseResult';
-import { SearchResult, SearchResults } from '../inMemory/searchResult';
+import { createSearchArrayError, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
@@ -70,7 +70,15 @@ export interface EchoWorker {
 const echoWorker: EchoWorker = {
     initialize: externalInitialize,
 
-    searchTags: externalTagSearch,
+    async searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
+        try {
+            return await externalTagSearch(searchText, maxHits);
+        } catch (e) {
+            console.log('caught in echoWorker', JSON.parse(JSON.stringify(e)));
+            return createSearchArrayError(e);
+            //throw e;
+        }
+    },
     lookupTagAsync: externalLookupTag,
     lookupTagsAsync: externalLookupTags,
 

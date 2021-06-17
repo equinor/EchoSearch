@@ -1,4 +1,4 @@
-import { createSyncError, InternalSyncResult, Result } from '../baseResult';
+import { InternalSyncResult, result, Result } from '../baseResult';
 import { logPerformance, logWarn } from '../logger';
 import { SearchSystem } from '../workers/searchSystem';
 import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
@@ -19,13 +19,13 @@ export async function runSync<T>(searchSystem: SearchSystem<T>): Promise<Result>
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
         const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
         logWarn(message);
-        return createSyncError(message); //TODO Ove, convert to error enum type?
+        return result.syncError(message);
     }
 
     if (isSyncing(searchSystem.offlineSystemKey)) {
         const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
         logWarn(message);
-        return createSyncError(message); //TODO Ove, convert to error enum type?
+        return result.syncError(message);
     }
 
     return await asyncUsing(

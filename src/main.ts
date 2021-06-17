@@ -54,14 +54,18 @@ async function cameraSearchClicked() {
 }
 
 async function searchBtnClicked() {
-    const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
-    if (tags.isSuccess) {
-        console.log(
-            'found tags:',
-            tags.data.map((i) => i.tagNo)
-        );
-    } else {
-        console.log('tags search ', tags.error?.message?.toString());
+    try {
+        const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
+        if (tags.isSuccess) {
+            console.log(
+                'found tags:',
+                tags.data.map((i) => i.tagNo)
+            );
+        } else {
+            console.log('tags search error', tags.error);
+        }
+    } catch (e) {
+        console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
     const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);

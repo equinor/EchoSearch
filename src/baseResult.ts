@@ -5,12 +5,6 @@ export interface Result {
     readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
 }
 
-// export class SearchModuleError extends BaseError {
-//     constructor(message: string, exception?: Error) {
-//         super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
-//     }
-// }
-
 export interface InternalSyncResult extends Result {
     newestItemDate?: Date;
     itemsSyncedCount: number;
@@ -38,23 +32,15 @@ export class SyncCanceledError extends SyncError {
     }
 }
 
-export const createSuccess = (): Result => {
-    return { isSuccess: true } as Result;
+const createSuccess = (): Result => {
+    return { isSuccess: true };
 };
 
 const createError = (error: SearchModuleError): Result => {
-    return { isSuccess: false, error } as Result;
+    return { isSuccess: false, error };
 };
 
-export function createNotImplementedError(message: string): Result {
-    return createError({ type: ErrorType.NotImplemented, message: message });
-}
-
-export function createSyncError(message: string): Result {
-    return createError({ type: ErrorType.SyncFailed, message: message });
-}
-
-export function createErrorFromException(error: Error | BaseError): Result {
+function createResultErrorFromException(error: Error | BaseError): Result {
     let errorType = ErrorType.Unknown;
 
     if (error instanceof SyncCanceledError) errorType = ErrorType.SyncCanceled;
@@ -77,6 +63,13 @@ export function createErrorFromException(error: Error | BaseError): Result {
     //todo url and statusCode?
     return createError(searchModuleError);
 }
+
+export const result = {
+    success: createSuccess,
+    errorFromException: createResultErrorFromException,
+    syncError: (message: string): Result => createError({ type: ErrorType.SyncFailed, message: message }),
+    notImplementedError: (message: string): Result => createError({ type: ErrorType.NotImplemented, message: message })
+};
 
 // enum ErrorType {
 //     SyncIsNotEnabled,

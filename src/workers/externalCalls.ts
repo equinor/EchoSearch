@@ -1,5 +1,5 @@
-import { NotFoundError } from '@equinor/echo-base';
-import { createErrorFromException, createNotImplementedError, NotImplementedError, Result } from '../baseResult';
+import { NetworkError, NotFoundError } from '@equinor/echo-base';
+import { NotImplementedError, result, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -14,7 +14,7 @@ import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
 import {
-    createSearchSuccessesOrEmpty,
+    createSearchArraySuccessOrEmpty,
     createSearchSuccessOrNotFound,
     SearchResult,
     SearchResults
@@ -149,6 +149,7 @@ async function internalInitialize(): Promise<void> {
 }
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
+    throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     const results = await tagSearchSystem.search(searchText, maxHits);
     return results;
 }
@@ -160,7 +161,7 @@ export async function externalLookupTag(tagNo: string): Promise<SearchResult<Tag
 
 export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
     const result = await tagsRepository().bulkGet(tagNos);
-    return createSearchSuccessesOrEmpty(result);
+    return createSearchArraySuccessOrEmpty(result);
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
@@ -177,7 +178,7 @@ export async function externalLookupMcPack(id: string): Promise<SearchResult<McP
 
 export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
     const result = await mcPacksRepository().bulkGet(ids);
-    return createSearchSuccessesOrEmpty(result);
+    return createSearchArraySuccessOrEmpty(result);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
@@ -192,7 +193,7 @@ export async function externalLookupPunch(id: string): Promise<SearchResult<Punc
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     const result = await punchesRepository().bulkGet(ids);
-    return createSearchSuccessesOrEmpty(result);
+    return createSearchArraySuccessOrEmpty(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
@@ -225,10 +226,10 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
             return await runSync(punchSearchSystem);
         }
 
-        return createNotImplementedError('sync has not been implemented for ' + offlineSystemKey);
+        return result.notImplementedError('sync has not been implemented for ' + offlineSystemKey);
     } catch (e) {
         console.log('-----is e NotFoundError', e instanceof NotFoundError);
-        const resultError = createErrorFromException(e);
+        const resultError = result.errorFromException(e);
         console.log('--error caught with', resultError);
         console.log('--error more props', { ...resultError });
         return resultError;
