@@ -223,11 +223,7 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 
         return result.notImplementedError('sync has not been implemented for ' + offlineSystemKey);
     } catch (e) {
-        console.log('-----is e NotFoundError', e instanceof NotFoundError);
-        const resultError = result.errorFromException(e);
-        console.log('--error caught with', resultError);
-        console.log('--error more props', { ...resultError });
-        return resultError;
+        return result.errorFromException(e);
     }
 }
 

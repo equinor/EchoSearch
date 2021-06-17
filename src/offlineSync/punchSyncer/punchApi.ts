@@ -78,7 +78,6 @@ export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promi
         ? mockedUpdatedPunches()
         : await getUpdatedPunchesFromApi(instCode, fromDate);
 
-    console.log('item.......', items);
     return items.map((item) => cleanupPunch(item));
 }
 
