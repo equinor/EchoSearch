@@ -1,7 +1,7 @@
+import { InternalSyncResult } from '../../baseResult';
 import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
 import { logInfo, logPerformance } from '../../logger';
 import { Repository } from '../offlineDataDexieBase';
-import { InternalSyncResult } from '../syncResult';
 import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllPunches, apiUpdatedPunches, PunchDb, verifyPunchCount } from './punchApi';

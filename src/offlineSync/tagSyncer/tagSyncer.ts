@@ -1,10 +1,10 @@
+import { InternalSyncResult } from '../../baseResult';
 import {
     clearAndInitInMemoryTags,
     inMemoryTagsCount as inMemoryTagCount,
     updateInMemoryTags
 } from '../../inMemory/inMemoryTags';
 import { populateLevTrieWithTags } from '../../inMemory/inMemoryTagSearch';
-import { InternalSyncResult } from '../syncResult';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllTags, apiUpdatedTags } from './tagApi';
 import { tagsAdministrator, tagsRepository } from './tagRepository';

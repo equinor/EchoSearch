@@ -1,6 +1,6 @@
+import { InternalSyncResult } from '../../baseResult';
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
 import { logPerformance } from '../../logger';
-import { InternalSyncResult } from '../syncResult';
 import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';

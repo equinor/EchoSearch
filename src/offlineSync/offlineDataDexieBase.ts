@@ -1,14 +1,15 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
+import { DbError, SyncCanceledError } from '../baseResult';
 import { logPerformance, logVerbose, logWarn } from '../logger';
-import { BaseError } from './baseError';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
 
-class SyncCanceledError extends BaseError {
-    constructor(message: string) {
-        super(message);
-        this.hasBeenLogged = true; //expected - should not be logged
+async function tryOrThrow<Tr>(runMainFunc: () => Promise<Tr>): Promise<Tr> {
+    try {
+        return await runMainFunc();
+    } catch (exception) {
+        throw new DbError((exception?.name + ' ' + exception?.message).trim(), exception);
     }
 }
 
@@ -24,13 +25,14 @@ export class OfflineDataDexieBase<T> extends Dexie {
     }
 
     async tryToGet(key: string): Promise<T | undefined> {
-        return await this.table(this.tableName).get(key);
+        return await tryOrThrow(() => this.table(this.tableName).get(key));
     }
-
     async bulkGet(keys: string[]): Promise<T[]> {
-        const items = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
-        const result = items.filter((item) => item) as T[];
-        return result ? result : [];
+        return await tryOrThrow(async () => {
+            const items = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
+            const result = items.filter((item) => item) as T[];
+            return result ? result : [];
+        });
     }
 
     async get(key: string): Promise<T | undefined> {

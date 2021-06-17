@@ -1,3 +1,5 @@
+import { NetworkError, NotFoundError } from '@equinor/echo-base';
+import { NotImplementedError, result, Result } from '../baseResult';
 import {
     inMemoryMcPacksInit,
     inMemoryMcPacksInstance,
@@ -11,16 +13,14 @@ import {
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
-import { SearchResult, SearchResults, searchSuccess } from '../inMemory/searchResult';
+import { searchResult, SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
 import { logPerformance } from '../logger';
-import { BaseError } from '../offlineSync/baseError';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
-import { SyncResult } from '../offlineSync/syncResult';
 import { runSync } from '../offlineSync/syncRunner';
 import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
 import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
@@ -78,6 +78,7 @@ async function initTags(): Promise<void> {
 }
 
 async function internalInitialize(): Promise<void> {
+    externalToggleMockData();
     if (initDone) {
         console.warn('internalInitialize already done, returning');
         return;
@@ -143,18 +144,19 @@ async function internalInitialize(): Promise<void> {
 }
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
+    throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     const results = await tagSearchSystem.search(searchText, maxHits);
     return results;
 }
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
-    const result = await tagsRepository().get(tagNo);
-    return { isSuccess: true, data: result };
+    const tag = await tagsRepository().get(tagNo);
+    return searchResult.successOrNotFound(tag);
 }
 
 export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
-    const result = await tagsRepository().bulkGet(tagNos);
-    return searchSuccess(result);
+    const tagSummaries = await tagsRepository().bulkGet(tagNos);
+    return searchResults.successOrEmpty(tagSummaries);
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
@@ -166,12 +168,12 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
 }
 export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
     const result = await mcPacksRepository().get(id);
-    return { isSuccess: true, data: result };
+    return searchResult.successOrNotFound(result);
 }
 
 export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
     const result = await mcPacksRepository().bulkGet(ids);
-    return searchSuccess(result);
+    return searchResults.successOrEmpty(result);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
@@ -181,15 +183,16 @@ export async function externalPunchesSearch(searchText: string, maxHits: number)
 
 export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
     const result = await punchesRepository().get(id);
-    return { isSuccess: true, data: result };
+    return searchResult.successOrNotFound(result);
 }
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     const result = await punchesRepository().bulkGet(ids);
-    return searchSuccess(result);
+    return searchResults.successOrEmpty(result);
 }
 
 async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
+    //TODO
     return [
         {
             commPkgNo: '1',
@@ -202,22 +205,26 @@ async function searchMcPacksOnline(searchText: string, maxHits: number): Promise
     ];
 }
 
-export async function externalSearchForClosestTagNo(tagNo: string): Promise<string | undefined> {
+export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
-    return possibleTag ? possibleTag.word : undefined;
+    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
-async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult> {
-    setToken(apiAccessToken);
-    if (offlineSystemKey === OfflineSystem.McPack) {
-        return await runSync(mcPacksSystem);
-    } else if (offlineSystemKey === OfflineSystem.Tags) {
-        return await runSync(tagSearchSystem);
-    } else if (offlineSystemKey === OfflineSystem.Punches) {
-        return await runSync(punchSearchSystem);
-    }
+async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
+    try {
+        setToken(apiAccessToken);
+        if (offlineSystemKey === OfflineSystem.McPack) {
+            return await runSync(mcPacksSystem);
+        } else if (offlineSystemKey === OfflineSystem.Tags) {
+            return await runSync(tagSearchSystem);
+        } else if (offlineSystemKey === OfflineSystem.Punches) {
+            return await runSync(punchSearchSystem);
+        }
 
-    return { isSuccess: false, error: 'sync has not been implemented for ' + offlineSystemKey } as SyncResult;
+        return result.notImplementedError('sync has not been implemented for ' + offlineSystemKey);
+    } catch (e) {
+        return result.errorFromException(e);
+    }
 }
 
 // function getSearchSystem<T>(offlineSystemKey: OfflineSystem) : SearchSystem<T> {
@@ -233,20 +240,12 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 //     throw new NotImplementedError('getSearchSystem has not been implemented for ', offlineSystemKey);
 // }
 
-export class NotImplementedError extends BaseError {}
-
 async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
     if (offlineSystemKey === OfflineSystem.McPack) {
         setMcPacksIsEnabled(isEnabled);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
         setPunchesIsEnabled(isEnabled);
     }
-
-    // const setting = GetSetting(offlineSystemKey);
-    // console.log(
-    //     'Setting: ',
-    //     [setting.offlineSystemKey, setting.isEnable, setting.lastSyncedAtDate, setting.newestItemDate].join(' ')
-    // );
 }
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {
@@ -295,3 +294,52 @@ export const syncContract = {
     externalRunSync,
     externalToggleMockData
 };
+
+export function externalTestCommReturnTypes(): ErrorForTesting {
+    const err = new NotFoundError({
+        message: 'a message',
+        httpStatusCode: 404,
+        url: 'https://',
+        exception: { aTestProp: 'value 1' }
+    });
+
+    console.log("error'en", { ...err });
+
+    const moreProps = Object.entries(err).filter((item) => typeof item[1] !== 'function');
+    const recordsProp: Record<string, unknown> = {};
+    for (const prop of moreProps) {
+        recordsProp[prop[0]] = prop[1];
+    }
+    console.log(recordsProp);
+
+    for (const prop of moreProps) {
+        console.log(prop, typeof prop[1]);
+    }
+
+    const temp: ErrorForTesting = { type: ErrorType.ApiNotFound, ...recordsProp };
+    console.log('tempppppp', temp);
+
+    return {
+        message: err.message,
+        name: err.name,
+        httpStatusCode: 404,
+        url: err.getUrl(),
+        properties: { ...moreProps },
+        type: ErrorType.ApiNotFound,
+        stack: err.stack
+    };
+}
+
+export enum ErrorType {
+    ApiNotFound = 'ApiNotFound'
+}
+
+export interface ErrorForTesting {
+    type: ErrorType;
+    name?: string;
+    message?: string;
+    stack?: string;
+    httpStatusCode?: number;
+    url?: string;
+    properties?: Record<string, unknown>;
+}

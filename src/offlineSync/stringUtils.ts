@@ -1,4 +1,4 @@
-import { BaseError } from './baseError';
+import { ArgumentDateError } from '../baseResult';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values
@@ -8,8 +8,7 @@ export function extractPositiveFirstNumbers(values: string[]): number[] {
 
 export function getMaxNumberInCollectionOrOne(databaseNames: string[]): number {
     const versions = extractPositiveFirstNumbers(databaseNames);
-    const currentVersion = Math.max(1, ...versions);
-    return currentVersion;
+    return Math.max(1, ...versions);
 }
 
 export function orEmpty(value?: string): string {
@@ -34,5 +33,3 @@ export function toDateOrThrowError(date?: string | Date): Date {
     if (!properDate) throw new ArgumentDateError('Invalid date: ' + date);
     return properDate;
 }
-
-export class ArgumentDateError extends BaseError {}

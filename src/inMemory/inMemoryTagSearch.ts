@@ -15,6 +15,7 @@ let hasTagsInLevTrie = false;
 
 export function clearLevTrie(): void {
     levTrie = new LevTrie();
+    hasTagsInLevTrie = false;
 }
 
 export async function populateLevTrieWithTags(tagNos: string[]): Promise<void> {

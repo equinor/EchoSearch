@@ -1,8 +1,8 @@
 import * as Comlink from 'comlink';
-import { SearchResult, SearchResults } from '../inMemory/searchResult';
+import { Result } from '../baseResult';
+import { SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { SyncResult } from '../offlineSync/syncResult';
 import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
@@ -19,6 +19,7 @@ import {
     externalPunchesSearch,
     externalSearchForClosestTagNo,
     externalTagSearch,
+    externalTestCommReturnTypes,
     syncContract
 } from './externalCalls';
 
@@ -53,8 +54,8 @@ export interface EchoWorker {
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
 
-    searchForClosestTagNo(tagNo: string): Promise<string | undefined>;
-    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<SyncResult>;
+    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
+    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
 
@@ -63,12 +64,21 @@ export interface EchoWorker {
 
     doStuff2(): Promise<void>;
     toggleMockDataClicked(): void;
+    testCommReturnTypes(): unknown;
 }
 
 const echoWorker: EchoWorker = {
     initialize: externalInitialize,
 
-    searchTags: externalTagSearch,
+    async searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
+        try {
+            return await externalTagSearch(searchText, maxHits);
+        } catch (e) {
+            console.log('caught in echoWorker', JSON.parse(JSON.stringify(e)));
+            return searchResults.error(e);
+            //throw e;
+        }
+    },
     lookupTagAsync: externalLookupTag,
     lookupTagsAsync: externalLookupTags,
 
@@ -106,6 +116,13 @@ const echoWorker: EchoWorker = {
 
     toggleMockDataClicked(): void {
         syncContract.externalToggleMockData();
+    },
+
+    testCommReturnTypes(): unknown {
+        const result = externalTestCommReturnTypes();
+        console.log('EchoWorker', result);
+        console.log('EchoWorker props', { ...result });
+        return result;
     }
 };
 

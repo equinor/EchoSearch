@@ -1,8 +1,8 @@
 import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
-import { SearchErrorType } from './inMemory/searchResult';
 import { OfflineSystem } from './offlineSync/syncSettings';
+import { ErrorForTesting } from './workers/externalCalls';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
 document.getElementById('SearchBtn')?.addEventListener('click', searchBtnClicked);
@@ -21,6 +21,8 @@ document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Cli
 
 document.getElementById('toggleUseMockDataBtn')?.addEventListener('click', toggleMockDataClicked);
 
+document.getElementById('testCommReturnTypes')?.addEventListener('click', testCommReturnTypesClicked);
+
 let count = 0;
 async function runSyncClicked() {
     await Syncer.runSyncAsync(OfflineSystem.Tags);
@@ -29,7 +31,11 @@ async function runSyncClicked() {
 async function runSyncMcPacksClicked() {
     const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
-    await Promise.all([mcPackSync, punchesSync]);
+    const results = await Promise.all([mcPackSync, punchesSync]);
+    for (const result of results) {
+        console.log('Sync result main:', result);
+        if (!result.isSuccess) console.log({ ...result.error });
+    }
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
@@ -48,14 +54,18 @@ async function cameraSearchClicked() {
 }
 
 async function searchBtnClicked() {
-    const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
-    if (tags.isSuccess) {
-        console.log(
-            'found tags:',
-            tags.data.map((i) => i.tagNo)
-        );
-    } else {
-        console.log('tags search ', tags.errorType.toString());
+    try {
+        const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
+        if (tags.isSuccess) {
+            console.log(
+                'found tags:',
+                tags.data.map((i) => i.tagNo)
+            );
+        } else {
+            console.log('tags search error', tags.error);
+        }
+    } catch (e) {
+        console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
     const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);
@@ -67,11 +77,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log(
-            'mc packs search ',
-            mcPacks.errorType.toString(),
-            mcPacks.errorType === SearchErrorType.SyncDisabled
-        );
+        console.log('mc packs search ', mcPacks.error?.message?.toString());
     }
 
     const punches = await Search.searchPunchesAsync('A-73MA001', 2);
@@ -83,7 +89,7 @@ async function searchBtnClicked() {
             )
         );
     } else {
-        console.log('punches search ', punches.errorType.toString());
+        console.log('punches search ', punches.error?.message?.toString());
     }
 }
 
@@ -100,6 +106,12 @@ async function doStuffBtn2Clicked() {
 
 async function toggleMockDataClicked() {
     await echoSearchWorker.toggleMockDataClicked();
+}
+
+async function testCommReturnTypesClicked(): Promise<void> {
+    const result = (await echoSearchWorker.testCommReturnTypes()) as ErrorForTesting;
+    console.log('in main', result);
+    console.log({ ...result });
 }
 
 function authenticate(): void {

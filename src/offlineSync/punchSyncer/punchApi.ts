@@ -5,6 +5,7 @@ import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../str
 import { baseApiUrl, OfflineSystem } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
+import { urlOrFakeError } from '../Utils/urlOrFakeError';
 import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
 
 const _mock = new ToggleState(true);
@@ -107,5 +108,5 @@ async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
 async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    return await apiFetchJsonToArray<PunchDb>(url);
+    return await apiFetchJsonToArray<PunchDb>(urlOrFakeError(url));
 }

@@ -1,6 +1,5 @@
-import { searchErrorNotEnabled, SearchResults, searchSuccess } from '../inMemory/searchResult';
-import { ArgumentDateError } from '../offlineSync/stringUtils';
-import { InternalSyncResult } from '../offlineSync/syncResult';
+import { ArgumentDateError, InternalSyncResult } from '../baseResult';
+import { searchResults, SearchResults } from '../inMemory/searchResult';
 import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
 
 export class SearchSystem<T> {
@@ -39,13 +38,13 @@ export class SearchSystem<T> {
 
     async search(searchText: string, maxHits: number): Promise<SearchResults<T>> {
         if (!isSyncEnabled(this._offlineSystemKey)) {
-            return searchErrorNotEnabled<T>();
+            return searchResults.syncNotEnabledError<T>(this._offlineSystemKey);
         }
         await this._initTask;
         const data = this._isOfflineSearchReady()
             ? await this._offlineSearch(searchText, maxHits)
             : await this._onlineSearch(searchText, maxHits);
-        return searchSuccess(data);
+        return searchResults.successOrEmpty(data);
     }
 
     async runFullSync(): Promise<InternalSyncResult> {
