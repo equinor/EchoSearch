@@ -101,8 +101,8 @@ async function internalInitialize(): Promise<void> {
         () => inMemoryMcPacksInstance().isReady(),
         async (searchText, maxHits) => searchInMemoryMcPacksWithText(searchText, maxHits),
         async (searchText, maxHits) => searchMcPacksOnline(searchText, maxHits),
-        async () => syncFullMcPacks(),
-        async (lastChangedDate) => syncUpdateMcPacks(lastChangedDate)
+        async (abortSignal) => syncFullMcPacks(abortSignal),
+        async (lastChangedDate, abortSignal) => syncUpdateMcPacks(lastChangedDate, abortSignal)
     );
 
     tagSearchSystem = new SearchSystem<TagSummaryDb>(
@@ -111,8 +111,8 @@ async function internalInitialize(): Promise<void> {
         () => isInMemoryTagsReady(),
         async (searchText, maxHits) => searchTags(searchText, maxHits),
         async (searchText, maxHits) => searchTagsOnline(searchText, maxHits),
-        async () => syncFullTags(),
-        async (lastChangedDate) => syncUpdateTags(lastChangedDate)
+        async (abortSignal) => syncFullTags(abortSignal),
+        async (lastChangedDate, abortSignal) => syncUpdateTags(lastChangedDate, abortSignal)
     );
 
     punchSearchSystem = new SearchSystem<PunchDb>(
@@ -122,8 +122,8 @@ async function internalInitialize(): Promise<void> {
         async (searchText, maxHits) => searchInMemoryPunchesWithText(searchText, maxHits),
         async () => [],
         //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
-        async () => syncFullPunches(),
-        async (lastChangedDate) => syncUpdatePunches(lastChangedDate)
+        async (abortSignal) => syncFullPunches(abortSignal),
+        async (lastChangedDate, abortSignal) => syncUpdatePunches(lastChangedDate, abortSignal)
     );
 
     performanceLogger.forceLog('SearchSystems instantiated');
@@ -145,8 +145,7 @@ async function internalInitialize(): Promise<void> {
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
-    const results = await tagSearchSystem.search(searchText, maxHits);
-    return results;
+    return await tagSearchSystem.search(searchText, maxHits);
 }
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
@@ -249,9 +248,9 @@ async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: bo
 }
 
 function externalCancelSync(offlineSystemKey: OfflineSystem): void {
-    if (offlineSystemKey === OfflineSystem.McPack) mcPacksRepository().cancelSync();
-    else if (offlineSystemKey === OfflineSystem.Tags) tagsRepository().cancelSync();
-    else if (offlineSystemKey === OfflineSystem.Punches) punchesRepository().cancelSync();
+    if (offlineSystemKey === OfflineSystem.McPack) mcPacksSystem.cancelSync();
+    else if (offlineSystemKey === OfflineSystem.Tags) tagSearchSystem.cancelSync();
+    else if (offlineSystemKey === OfflineSystem.Punches) punchSearchSystem.cancelSync();
     else throw new NotImplementedError('cancel not implemented for ' + offlineSystemKey);
 }
 

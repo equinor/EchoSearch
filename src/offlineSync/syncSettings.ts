@@ -47,17 +47,14 @@ function instance(): SettingsDexieDB {
 }
 
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
-    await instance()
-        .offlineStatus.put(offlineSettingItem)
-        .then(() =>
-            logVerbose(
-                offlineSettingItem.offlineSystemKey,
-                'settings done saving. IsEnabled:',
-                offlineSettingItem.isEnable,
-                offlineSettingItem.lastSyncedAtDate?.toISOString(),
-                offlineSettingItem.newestItemDate?.toISOString()
-            )
-        );
+    await instance().offlineStatus.put(offlineSettingItem);
+
+    logVerbose(
+        `[${offlineSettingItem.offlineSystemKey}] settings done saving. IsEnabled:`,
+        offlineSettingItem.isEnable,
+        offlineSettingItem.lastSyncedAtDate?.toISOString(),
+        offlineSettingItem.newestItemDate?.toISOString()
+    );
 }
 
 export async function loadOfflineSettings(): Promise<void> {

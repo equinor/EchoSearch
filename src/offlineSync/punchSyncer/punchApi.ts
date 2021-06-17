@@ -61,11 +61,11 @@ function cleanupPunch(punch: PunchDb): PunchDb {
     };
 }
 
-export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
+export async function apiAllPunches(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
     const performanceLogger = logPerformance();
     const items: PunchDb[] = _mock.isEnabled
         ? JSON.parse(mockedOpenClosedRejectedPunches())
-        : await getAllPunchesFromApi(instCode);
+        : await getAllPunchesFromApi(instCode, abortSignal);
     performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupPunch(item));
@@ -73,25 +73,33 @@ export async function apiAllPunches(instCode: string): Promise<PunchDb[]> {
     return results;
 }
 
-export async function apiUpdatedPunches(instCode: string, fromDate: Date): Promise<PunchDb[]> {
+export async function apiUpdatedPunches(
+    instCode: string,
+    fromDate: Date,
+    abortSignal: AbortSignal
+): Promise<PunchDb[]> {
     const items: PunchDb[] = _mock.isEnabled
         ? mockedUpdatedPunches()
-        : await getUpdatedPunchesFromApi(instCode, fromDate);
+        : await getUpdatedPunchesFromApi(instCode, fromDate, abortSignal);
 
     return items.map((item) => cleanupPunch(item));
 }
 
-export async function apiEstimatedPunchCount(instCode: string): Promise<number> {
+export async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {
     //Statistics/open-punches-estimated-count?instCode=JSV
     const url = `${baseApiUrl}/${instCode}/statistics/open-punches-estimated-count`;
-    const response = await apiFetch(url);
+    const response = await apiFetch(url, abortSignal);
     if (response.ok) return Number.parseInt(await response.text());
     return 0;
 }
 
-export async function verifyPunchCount(instCode: string, punchesCount: number): Promise<boolean> {
+export async function verifyPunchCount(
+    instCode: string,
+    punchesCount: number,
+    abortSignal: AbortSignal
+): Promise<boolean> {
     if (_mock.isEnabled) return true;
-    return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode), OfflineSystem.Punches);
+    return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode, abortSignal), OfflineSystem.Punches);
 }
 
 function mockedUpdatedPunches(): PunchDb[] {
@@ -100,13 +108,17 @@ function mockedUpdatedPunches(): PunchDb[] {
     return punches.concat(randomPunches);
 }
 
-async function getAllPunchesFromApi(instCode: string): Promise<PunchDb[]> {
+async function getAllPunchesFromApi(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
     const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    return await apiFetchJsonToArray<PunchDb>(url);
+    return await apiFetchJsonToArray<PunchDb>(url, abortSignal);
 }
 
-async function getUpdatedPunchesFromApi(instCode: string, updatedSince: Date): Promise<PunchDb[]> {
+async function getUpdatedPunchesFromApi(
+    instCode: string,
+    updatedSince: Date,
+    abortSignal: AbortSignal
+): Promise<PunchDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    return await apiFetchJsonToArray<PunchDb>(urlOrFakeError(url));
+    return await apiFetchJsonToArray<PunchDb>(urlOrFakeError(url), abortSignal);
 }

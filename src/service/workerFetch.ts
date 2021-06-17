@@ -16,11 +16,11 @@ type Body =
 const workerFetch = async (
     endpoint: string,
     token: string,
+    signal: AbortSignal,
     logFetchToConsole = true,
     method = 'GET',
     headerOptions: Record<string, unknown> = {},
-    body?: Body,
-    signal?: AbortSignal
+    body?: Body
 ): Promise<Response> => {
     if (!token.toLowerCase().includes('bearer')) token = 'Bearer ' + token;
 
@@ -64,14 +64,13 @@ async function throwErrorIfNotSuccess(response: Response, url: string): Promise<
             url: url,
             exception: moreInfo
         };
-        const error = initializeError(NetworkError, args);
-        // keep console.log('real', JSON.parse(JSON.stringify(error)));
-        throw error;
+        throw initializeError(NetworkError, args);
+        // keep console.log('real error', JSON.parse(JSON.stringify(error)));
     }
 }
 
-export async function apiFetch(url: string): Promise<Response> {
-    const response = await workerFetch(url, getToken());
+export async function apiFetch(url: string, abortSignal: AbortSignal): Promise<Response> {
+    const response = await workerFetch(url, getToken(), abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return response;
 }
@@ -82,10 +81,10 @@ export async function apiFetch(url: string): Promise<Response> {
  * @param url The url to fetch
  * @returns An array of the specified return type
  */
-export async function apiFetchJsonToArray<T>(url: string, abortSignal?: AbortSignal): Promise<T[]> {
+export async function apiFetchJsonToArray<T>(url: string, abortSignal: AbortSignal): Promise<T[]> {
     logInfo('Fetch:', url);
     const performanceLogger = logPerformance();
-    const response = await workerFetch(url, getToken(), false, 'GET', undefined, undefined, abortSignal);
+    const response = await workerFetch(url, getToken(), abortSignal, false);
     if (response.status === 200) {
         const result = (await response.json()) as T[];
         performanceLogger.forceLog(`Done ${response.status} items: ${result.length} ${url}`);
