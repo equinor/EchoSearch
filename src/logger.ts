@@ -59,14 +59,14 @@ export function logPerformanceFunc(message: string, func: () => void): void {
     logPerformanceToConsole(message, tStart);
 }
 
-export interface LogPerformance {
+export interface PerformanceFunctions {
     log: (message: string) => void;
     logDelta: (message: string) => void;
     forceLog: (message: string) => void;
     forceLogDelta: (message: string) => void;
 }
 
-export function logPerformance(preText?: string): LogPerformance {
+export function logPerformance(preText?: string): PerformanceFunctions {
     const tStart = performance.now();
     let tDelta = tStart;
     const preTextMessage = preText ? preText : '';
@@ -82,5 +82,77 @@ export function logPerformance(preText?: string): LogPerformance {
         logDelta: (message) => internalLogPerformanceToConsole(message, tDelta, false),
         forceLog: (message) => internalLogPerformanceToConsole(message, tStart, true),
         forceLogDelta: (message) => internalLogPerformanceToConsole(message, tDelta, true)
+    };
+}
+
+export interface LoggerFunctions {
+    trace: (message: string) => void;
+    debug: (message: string) => void;
+    info: (message: string) => void;
+    log: (...args: any[]) => void;
+    warn: (message: string) => void;
+    error: (...args: any[]) => void;
+
+    create: (childContext: string) => LoggerFunctions;
+    performance: (preText?: string) => PerformanceFunctions;
+}
+
+/*
+        trace: 1,
+        debug: 2,
+        info: 3,
+        warn: 4,
+        error: 5
+
+    private readonly levels: { [key: string]: number } = {
+        trace: 1,
+        debug: 2,
+        info: 3,
+        warn: 4,
+        error: 5
+    };
+    
+    private levelToInt(minLevel: string): number {
+        if (minLevel.toLowerCase() in this.levels) return this.levels[minLevel.toLowerCase()];
+        else return 99;
+    }    
+*/
+
+/**
+ * Creates a logger with the specific context, eg: [SearchModule]. Use create
+ * to create a new logger with nested child context, eg: [SearchModule.Sync]
+ *
+ * Example:
+ * ```typescript
+ * const logger = createLogger('SearchModule');
+ * logger.Info('This is a log message'); // => [SearchModule] This is a log message
+ * const syncLogger = logger.create('Sync');
+ * syncLogger.Info('Done'); // => [SearchModule.Sync] Done
+ * // Performance
+ * performanceLogger = logger.performance('Tag Search');
+ * searchTags();
+ * performanceLogger.log('Done'); // => [SearchModule] Tag Search Done 0.106 sec(s)
+ * ```
+ * @param context The context/scope of the logger
+ * @returns Functions for logging or monitor performance.
+ */
+export function createLogger(context: string): LoggerFunctions {
+    function format(message = ''): string {
+        return `[${context}] ${message}`.trim();
+    }
+
+    return {
+        trace: (message: string) => console.log(format(message)),
+        debug: (message: string) => console.log(format(message)),
+        info: (message: string) => console.log(format(message)),
+        log: (...args: any[]) => console.log(format(''), ...args),
+        warn: (message: string) => console.warn(format(message)),
+        error: (...args: any[]) => console.error(format(), ...args),
+        create: (childContext: string) => createLogger(`${context}.${childContext}`),
+        performance: (preText?: string) => logPerformance(format(preText))
+        // performance: (childContext?: string) =>
+        //     childContext
+        //         ? createLogger(`${context}.${childContext}`).performance(format(''))
+        //         : logPerformance(format(''))
     };
 }
