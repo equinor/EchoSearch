@@ -2,38 +2,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 
-export function logVerbose(...args: any[]): void {
-    logWithType(LogType.Verbose, ...args);
-}
-
-export function logInfo(...args: any[]): void {
-    logWithType(LogType.Info, ...args);
-}
-
-export function logWarn(...args: any[]): void {
-    logWithType(LogType.Warn, ...args);
-}
-
-export function logError(...args: any[]): void {
-    logWithType(LogType.Error, ...args);
-}
-
 function logWithType(logType: LogType, ...args: any[]): void {
     if (logType === LogType.Info) console.log(...args);
     else if (logType === LogType.Warn) console.warn(...args);
     else if (logType === LogType.Error) console.error(...args);
-    else if (logType === LogType.Verbose) console.log(...args);
+    else if (logType === LogType.Trace) console.log(...args);
 }
+
+/*
+    private readonly levels: { [key: string]: number } = {
+        trace: 1,
+        debug: 2,
+        info: 3,
+        warn: 4,
+        error: 5
+    };
+    
+    private levelToInt(minLevel: string): number {
+        if (minLevel.toLowerCase() in this.levels) return this.levels[minLevel.toLowerCase()];
+        else return 99;
+    }    
+*/
 
 enum LogType {
+    Trace,
+    Debug,
     Info,
     Warn,
-    Error,
-    Verbose
-}
-
-export function postNotificationPerformance(message: string, startTime: number, forcePrintToConsole = false): void {
-    logPerformanceToConsole(message, startTime, forcePrintToConsole);
+    Error
 }
 
 function logPerformanceToConsole(message: string, startTime: number, forcePrintToConsole = false): void {
@@ -45,12 +41,6 @@ function logPerformanceToConsole(message: string, startTime: number, forcePrintT
     if (timeInSeconds > 1) color = 'red';
 
     console.log('%c%s %c%s', `color: black;`, message, `color: ${color};`, timeInSeconds.toFixed(3) + ' sec(s)');
-}
-
-//TODO Ove - proper error handling
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function handleErrors(e: any): void {
-    console.error(e);
 }
 
 export function logPerformanceFunc(message: string, func: () => void): void {
@@ -89,34 +79,12 @@ export interface LoggerFunctions {
     trace: (...args: any[]) => void;
     debug: (...args: any[]) => void;
     info: (...args: any[]) => void;
-    log: (...args: any[]) => void;
     warn: (...args: any[]) => void;
     error: (...args: any[]) => void;
 
     create: (childContext: string) => LoggerFunctions;
     performance: (preText?: string) => PerformanceFunctions;
 }
-
-/*
-        trace: 1,
-        debug: 2,
-        info: 3,
-        warn: 4,
-        error: 5
-
-    private readonly levels: { [key: string]: number } = {
-        trace: 1,
-        debug: 2,
-        info: 3,
-        warn: 4,
-        error: 5
-    };
-    
-    private levelToInt(minLevel: string): number {
-        if (minLevel.toLowerCase() in this.levels) return this.levels[minLevel.toLowerCase()];
-        else return 99;
-    }    
-*/
 
 /**
  * Creates a logger with the specific context, eg: [SearchModule]. Use create
@@ -142,12 +110,11 @@ export function createLogger(context: string): LoggerFunctions {
     }
 
     return {
-        trace: (...args: any[]) => console.log(getContext(), ...args),
-        debug: (...args: any[]) => console.log(getContext(), ...args),
-        info: (...args: any[]) => console.log(getContext(), ...args),
-        log: (...args: any[]) => console.log(getContext(), ...args),
-        warn: (...args: any[]) => console.warn(getContext(), ...args),
-        error: (...args: any[]) => console.error(getContext(), ...args),
+        trace: (...args: any[]) => logWithType(LogType.Trace, getContext(), ...args),
+        debug: (...args: any[]) => logWithType(LogType.Debug, getContext(), ...args),
+        info: (...args: any[]) => logWithType(LogType.Info, getContext(), ...args),
+        warn: (...args: any[]) => logWithType(LogType.Warn, getContext(), ...args),
+        error: (...args: any[]) => logWithType(LogType.Error, getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
         performance: (preText?: string) => logPerformance(`${getContext()} ${preText ?? ''}`.trim())
         // performance: (childContext?: string) =>

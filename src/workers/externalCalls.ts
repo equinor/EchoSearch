@@ -287,7 +287,7 @@ function externalToggleMockData(): void {
     mcPacksMock.toggle();
     punchesMock.toggle();
     tagsMock.toggle();
-    log.log('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
+    log.info('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
 }
 
 export const syncContract = {

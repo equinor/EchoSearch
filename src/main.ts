@@ -29,8 +29,8 @@ const log = logger('Main');
 
 async function runSyncClicked() {
     const result = await Syncer.runSyncAsync(OfflineSystem.Tags);
-    log.log(result);
-    log.log('with pretext', result);
+    log.info(result);
+    log.info('with pretext', result);
 }
 
 async function runSyncMcPacksClicked() {
@@ -38,8 +38,8 @@ async function runSyncMcPacksClicked() {
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
     const results = await Promise.all([mcPackSync, punchesSync]);
     for (const result of results) {
-        log.log('Sync result main:', result);
-        if (!result.isSuccess) log.log({ ...result.error });
+        log.info('Sync result main:', result);
+        if (!result.isSuccess) log.info({ ...result.error });
     }
 }
 
@@ -99,9 +99,9 @@ async function searchBtnClicked() {
 }
 
 async function expensiveBtnClicked() {
-    log.log('ExpensiveBtnClicked', count++);
+    log.info('ExpensiveBtnClicked', count++);
     const result = echoSearchWorker.runExpensive();
-    log.log(result);
+    log.info(result);
 }
 
 async function doStuffBtn2Clicked() {
@@ -115,7 +115,7 @@ async function toggleMockDataClicked() {
 
 async function testCommReturnTypesClicked(): Promise<void> {
     const result = (await echoSearchWorker.testCommReturnTypes()) as ErrorForTesting;
-    log.log('in main', result);
+    log.info('in main', result);
     console.log({ ...result });
 }
 
@@ -131,7 +131,7 @@ async function handleClick(): Promise<void> {
     //const result = authenticatorHelper.getToken();
     //console.log('echoClientId', echoClientId);
     //const token = '';
-    log.log('clicked - do nothing ' + token);
+    log.info('clicked - do nothing ' + token);
     // try {
     //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
     //     console.log(result2);
@@ -148,7 +148,7 @@ async function handleClick(): Promise<void> {
 }
 
 async function cancelBtnClicked() {
-    log.log('CancelBtnClicked', count++);
+    log.info('CancelBtnClicked', count++);
 
     echoSearchWorker.cancelSync(OfflineSystem.Tags);
     echoSearchWorker.cancelSync(OfflineSystem.McPack);
