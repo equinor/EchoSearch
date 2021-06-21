@@ -1,4 +1,4 @@
-import { logPerformance } from '../../logger';
+import { logger } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { verifyCount } from '../dataVerification';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
@@ -8,6 +8,7 @@ import { dateAsApiString } from '../Utils/stringUtils';
 import { urlOrFakeError } from '../Utils/urlOrFakeError';
 import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
 
+const log = logger('Punch.Api');
 const _mock = new ToggleState(true);
 export const punchesMock = _mock;
 
@@ -62,7 +63,7 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 }
 
 export async function apiAllPunches(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
-    const performanceLogger = logPerformance();
+    const performanceLogger = log.performance();
     const items: PunchDb[] = _mock.isEnabled
         ? JSON.parse(mockedOpenClosedRejectedPunches())
         : await getAllPunchesFromApi(instCode, abortSignal);

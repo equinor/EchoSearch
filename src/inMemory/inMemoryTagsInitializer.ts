@@ -1,14 +1,16 @@
-import { logPerformance } from '../logger';
+import { logger } from '../logger';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { clearAndInitInMemoryTags } from './inMemoryTags';
 import { clearLevTrie, populateLevTrieWithTags } from './inMemoryTagSearch';
 
+const log = logger('Init.Tags');
+
 export async function initInMemoryTagsFromIndexDb(): Promise<number> {
     if (!isFullSyncDone(OfflineSystem.Tags)) {
         return 0;
     }
-    const performanceLogger = logPerformance();
+    const performanceLogger = log.performance();
     const tags = await tagsRepository().slowlyGetAllData();
     performanceLogger.log(`Load all tags from indexDb (${tags.length})`);
 

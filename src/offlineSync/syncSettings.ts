@@ -1,6 +1,7 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
-import { logInfo, logVerbose } from '../logger';
+import { logger } from '../logger';
 
+const log = logger('SyncSettings');
 export const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net/';
 
 /**
@@ -49,8 +50,8 @@ function instance(): SettingsDexieDB {
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
     await instance().offlineStatus.put(offlineSettingItem);
 
-    logVerbose(
-        `[${offlineSettingItem.offlineSystemKey}] settings done saving. IsEnabled:`,
+    log.create(offlineSettingItem.offlineSystemKey).trace(
+        `settings done saving. IsEnabled:`,
         offlineSettingItem.isEnable,
         offlineSettingItem.lastSyncedAtDate?.toISOString(),
         offlineSettingItem.newestItemDate?.toISOString()
@@ -65,7 +66,7 @@ export async function loadOfflineSettings(): Promise<void> {
 
     const instCodeArg = await instance().settings.get('instCode');
     _instCode = instCodeArg ?? '';
-    logInfo('instCode loaded:', _instCode);
+    log.info('instCode loaded:', _instCode);
 
     AddMissingSettings();
 }

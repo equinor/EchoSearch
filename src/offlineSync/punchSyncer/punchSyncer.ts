@@ -1,11 +1,13 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
-import { logInfo, logPerformance } from '../../logger';
+import { logger } from '../../logger';
 import { Repository } from '../offlineDataDexieBase';
 import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllPunches, apiUpdatedPunches, PunchDb, verifyPunchCount } from './punchApi';
 import { punchesAdministrator, punchesRepository } from './punchRepository';
+
+const log = logger('Punch.Sync');
 
 export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
     setIsSyncEnabled(OfflineSystem.Punches, isEnabled);
@@ -17,7 +19,7 @@ export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
 }
 
 export async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance('[Punches]');
+    const performanceLogger = log.performance();
     const data = await apiAllPunches(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta(' Api');
 
@@ -43,9 +45,9 @@ export async function syncUpdatePunches(newestItemDate: Date, abortSignal: Abort
         return await syncFullPunches(abortSignal);
     }
 
-    const performanceLogger = logPerformance('[Punches]');
+    const performanceLogger = log.performance();
     const punches = await apiUpdatedPunches(getInstCode(), newestItemDate, abortSignal);
-    performanceLogger.forceLogDelta(' Api');
+    performanceLogger.forceLogDelta('Api');
     inMemoryPunchesInstance().updateItems(punches);
 
     const repository = punchesRepository();
@@ -64,7 +66,7 @@ async function deleteClosedPunches(punches: PunchDb[], repository: Repository<Pu
 
     const closedPunchesNos = punches.filter((punch) => punch.clearedAt || punch.rejectedAt).map((item) => item.id);
     if (closedPunchesNos.length > 0) {
-        logInfo('-- Delete closed punches', closedPunchesNos.length);
+        log.info('-- Delete closed punches', closedPunchesNos.length);
         await repository.bulkDeleteData(closedPunchesNos);
     }
 }

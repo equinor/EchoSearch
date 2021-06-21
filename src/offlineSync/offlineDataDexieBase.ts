@@ -1,9 +1,11 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { DbError, SyncCanceledError } from '../baseResult';
-import { logInfo, logPerformance, logVerbose, logWarn } from '../logger';
+import { logger, LoggerFunctions } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
+
+const logging = logger('Db');
 
 async function tryOrThrow<Tr>(runMainFunc: () => Promise<Tr>): Promise<Tr> {
     try {
@@ -16,8 +18,11 @@ async function tryOrThrow<Tr>(runMainFunc: () => Promise<Tr>): Promise<Tr> {
 export class OfflineDataDexieBase<T> extends Dexie {
     databaseName: string;
     tableName: string;
+    log: LoggerFunctions;
+
     constructor(databaseName: string, tableName: string) {
         super(databaseName);
+        this.log = logging.create(tableName);
         this.databaseName = databaseName;
         this.tableName = tableName;
     }
@@ -48,11 +53,11 @@ export class OfflineDataDexieBase<T> extends Dexie {
         let index = 0;
         for await (const chunk of chunks) {
             if (abortSignal.aborted) {
-                this.log('Sync canceled');
+                this.log.info('Sync canceled');
                 throw new SyncCanceledError('Sync was canceled');
             }
 
-            if (index % 10 === 0) this.log(`adding data.. ${chunks.length}`);
+            if (index % 10 === 0) this.log.info(`adding data.. ${chunks.length}`);
             index++;
 
             await database.bulkPut(chunk); //bulkAdd doesn't make any speed difference with 500k items with id as number.
@@ -61,7 +66,7 @@ export class OfflineDataDexieBase<T> extends Dexie {
             // if (currentIndex == 15) throw new Error('Testing failing dexie syncing');
         }
         if (abortSignal.aborted) {
-            this.log('Sync canceled');
+            this.log.info('Sync canceled');
             throw new SyncCanceledError('Sync was canceled');
         }
     }
@@ -77,10 +82,6 @@ export class OfflineDataDexieBase<T> extends Dexie {
      */
     async slowlyGetAllData(): Promise<T[]> {
         return await this.table(this.tableName).toArray();
-    }
-
-    private log(message: string) {
-        logInfo(`[DB ${this.tableName}]`, message);
     }
 }
 
@@ -121,12 +122,14 @@ export class Repository<T> {
 
 export class DatabaseAdministrator<T> {
     //repository: Repository<T>
+    log: LoggerFunctions;
     isInitDone: boolean;
     databaseNamePreFix: string;
 
     database: OfflineDataDexieBase<T> | null;
     databaseCreator: (version: number) => OfflineDataDexieBase<T>;
     constructor(databaseNamePreFix: string, databaseCreator: (version: number) => OfflineDataDexieBase<T>) {
+        this.log = logging.create('Admin.' + databaseNamePreFix);
         this.databaseNamePreFix = databaseNamePreFix;
         this.isInitDone = false;
         this.database = null;
@@ -134,7 +137,7 @@ export class DatabaseAdministrator<T> {
     }
     async init(): Promise<void> {
         if (this.isInitDone) {
-            logWarn(this.databaseNamePreFix + ' has already been initialized');
+            this.log.warn(this.databaseNamePreFix + ' has already been initialized');
             return;
         }
         const version = await getCurrentVersion(this.databaseNamePreFix);
@@ -155,7 +158,7 @@ export class DatabaseAdministrator<T> {
     }
 
     private openVersion(currentVersion: number) {
-        logVerbose('opening database v' + this.databaseNamePreFix + currentVersion);
+        this.log.trace('opening database v' + this.databaseNamePreFix + currentVersion);
         this.database = this.databaseCreator(currentVersion);
     }
 }
@@ -169,7 +172,7 @@ export async function getDatabaseNames(databaseNamePreFix: string): Promise<stri
     return (await Dexie.getDatabaseNames()).filter((item) => item.includes(databaseNamePreFix));
 }
 export async function deleteDataBaseAndReturnNewVersionNumber(databaseNamePreFix: string): Promise<number> {
-    const p = logPerformance();
+    const p = logging.performance();
     const newVersion = 1 + getMaxNumberInCollectionOrOne(await getDatabaseNames(databaseNamePreFix));
     await DeleteOlDatabaseVersions(databaseNamePreFix, newVersion);
     p.forceLog('Deleted  database ' + databaseNamePreFix);
@@ -182,7 +185,7 @@ async function DeleteOlDatabaseVersions(databaseNamePreFix: string, currentVersi
     );
 
     oldDatabaseNames.forEach((oldDatabaseName) => {
-        logVerbose('delete old database', oldDatabaseName);
+        logging.info('delete old database', oldDatabaseName);
         Dexie.delete(oldDatabaseName);
     });
 }

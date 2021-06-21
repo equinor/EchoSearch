@@ -1,5 +1,7 @@
-import { logWarn } from '../logger';
+import { logger } from '../logger';
 import { OfflineSystem } from './syncSettings';
+
+const log = logger('Verification');
 export async function verifyCount(
     actualCount: number,
     estimatedCount: () => Promise<number>,
@@ -9,6 +11,6 @@ export async function verifyCount(
     const estimated = await estimatedCount();
     const verified = estimated == 0 || (estimated > 0 && actualCount >= estimated * tolerance);
     if (!verified && offlineSystemKey)
-        logWarn(`Verify ${offlineSystemKey} failed - we only have ${actualCount} of estimated ${estimated}`);
+        log.create(offlineSystemKey).warn(`failed - we only have ${actualCount} of estimated ${estimated}`);
     return verified;
 }

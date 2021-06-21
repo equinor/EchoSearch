@@ -1,10 +1,11 @@
-import { logWarn } from '../logger';
+import { logger } from '../logger';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
+const log = logger('InMemory.McPacks');
 //McPacks init
 const inMemoryDbMcPacks: InMemoryData<McPackDb> = new InMemoryData<McPackDb>((item) => item.commPkgNo);
 
@@ -14,7 +15,7 @@ export function inMemoryMcPacksInstance(): InMemoryData<McPackDb> {
 
 export async function inMemoryMcPacksInit(): Promise<number> {
     if (!isFullSyncDone(OfflineSystem.McPack)) {
-        logWarn(`Full ${OfflineSystem.McPack} sync is not done, cannot init in memory`);
+        log.warn(`Full ${OfflineSystem.McPack} sync is not done, cannot init in memory`);
         return 0;
     }
 

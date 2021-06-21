@@ -1,6 +1,9 @@
 import { initializeError, NetworkError, NetworkErrorArgs } from '@equinor/echo-base';
-import { logInfo, logPerformance } from '../logger';
+import { logger } from '../logger';
 import { getToken } from '../tokenHelper';
+
+const log = logger('FETCH');
+const logColor = 'background: green; color: white; display: block;';
 
 type Body =
     | string
@@ -35,8 +38,8 @@ const workerFetch = async (
               ...headerOptions
           };
 
-    logFetchToConsole && logInfo('Fetch', endpoint);
-    const performanceLogger = logPerformance();
+    logFetchToConsole && log.info(endpoint);
+    const performanceLogger = log.performance();
     const response: Response = await fetch(endpoint, {
         method,
         headers: headers,
@@ -82,8 +85,8 @@ export async function apiFetch(url: string, abortSignal: AbortSignal): Promise<R
  * @returns An array of the specified return type
  */
 export async function apiFetchJsonToArray<T>(url: string, abortSignal: AbortSignal): Promise<T[]> {
-    logInfo('Fetch:', url);
-    const performanceLogger = logPerformance();
+    log.info(url);
+    const performanceLogger = log.performance();
     const response = await workerFetch(url, getToken(), abortSignal, false);
     if (response.status === 200) {
         const result = (await response.json()) as T[];
