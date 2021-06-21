@@ -1,5 +1,5 @@
 import { InternalSyncResult, result, Result } from '../baseResult';
-import { logPerformance, logWarn } from '../logger';
+import { logger } from '../logger';
 import { SearchSystem } from '../workers/searchSystem';
 import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
 import { getMaxDate, minusOneDay } from './Utils/dateUtils';
@@ -14,17 +14,19 @@ export function syncIsOutdated(date: Date): boolean {
     return timeDiff > tenMinutes;
 }
 
+const log = logger('SyncRunner');
+
 const currentlySyncing: OfflineSystem[] = [];
 export async function runSync<T>(searchSystem: SearchSystem<T>): Promise<Result> {
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
         const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
-        logWarn(message);
+        log.warn(message);
         return result.syncError(message);
     }
 
     if (isSyncing(searchSystem.offlineSystemKey)) {
         const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
-        logWarn(message);
+        log.warn(message);
         return result.syncError(message);
     }
 
@@ -42,7 +44,7 @@ function isSyncing(offlineSystemKey: OfflineSystem): boolean {
 }
 
 function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
-    console.log(`[${offlineSystemKey} isSyncing]`, syncEnabledState);
+    log.create(offlineSystemKey).info(`isSyncing`, syncEnabledState);
     if (syncEnabledState) {
         currentlySyncing.push(offlineSystemKey);
         return;
@@ -55,7 +57,7 @@ function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
 }
 
 async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<Result> {
-    const logPerformanceToConsole = logPerformance();
+    const performance = log.create(searchSystem.offlineSystemKey).performance();
 
     const syncTime = new Date();
     const settings = GetSetting(searchSystem.offlineSystemKey);
@@ -72,7 +74,7 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<Result
     }
 
     const tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
-    logPerformanceToConsole.forceLog(`[${searchSystem.offlineSystemKey}] Sync ${tagSyncStatus}`);
+    performance.forceLog(` Sync ${tagSyncStatus}`);
     return { ...result };
 }
 

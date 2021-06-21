@@ -14,7 +14,7 @@ import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
-import { createLogger } from '../logger';
+import { logger } from '../logger';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
@@ -30,11 +30,11 @@ import { syncFullTags, syncUpdateTags } from '../offlineSync/tagSyncer/tagSyncer
 import { setToken } from '../tokenHelper';
 import { SearchSystem } from './searchSystem';
 
-const logger = createLogger('externalCalls');
+const log = logger('externalCalls');
 
 let _counter = 0;
 function functionShouldOnlyBeCalledOnce(): void {
-    logger.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
+    log.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
 }
 
 functionShouldOnlyBeCalledOnce();
@@ -45,7 +45,7 @@ let tagSearchSystem: SearchSystem<TagSummaryDb>;
 let punchSearchSystem: SearchSystem<PunchDb>;
 
 export async function externalInitialize(): Promise<void> {
-    logger.info('-------------- externalInitialize ------------ ');
+    log.info('-------------- externalInitialize ------------ ');
     // const wait = (ms) => new Promise((res) => setTimeout(res, ms));
     // const p1 = new Promise((res) => setTimeout(() => res('p1'), 1000));
     // const p2 = new Promise((res) => setTimeout(() => res('p2'), 500));
@@ -55,21 +55,21 @@ export async function externalInitialize(): Promise<void> {
 }
 
 async function initMcPacks(): Promise<void> {
-    const performanceLogger = logger.performance('Init McPacks');
+    const performanceLogger = log.performance('Init McPacks');
     await mcPacksAdministrator().init();
     const mcPackCount = await inMemoryMcPacksInit();
     performanceLogger.forceLogDelta('done ' + mcPackCount);
 }
 
 async function initPunches(): Promise<void> {
-    const performanceLogger = logger.performance('Init Punches');
+    const performanceLogger = log.performance('Init Punches');
     await punchesAdministrator().init();
     const mcPackCount = await inMemoryPunchesInit();
     performanceLogger.forceLogDelta('done ' + mcPackCount);
 }
 
 async function initTags(): Promise<void> {
-    const performanceLogger = logger.performance('Init Tags');
+    const performanceLogger = log.performance('Init Tags');
     await tagsAdministrator().init();
     const tagCount = await initInMemoryTagsFromIndexDb();
 
@@ -80,15 +80,15 @@ async function initTags(): Promise<void> {
 }
 
 async function internalInitialize(): Promise<void> {
-    logger.create('child').info('-- this is from the new logger 222');
+    log.create('child').info('-- this is from the new logger 222');
 
     externalToggleMockData();
     if (initDone) {
-        logger.warn('internalInitialize already done, returning');
+        log.warn('internalInitialize already done, returning');
         return;
     }
 
-    const performanceLogger = logger.performance();
+    const performanceLogger = log.performance();
 
     await loadOfflineSettings();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
@@ -141,7 +141,7 @@ async function internalInitialize(): Promise<void> {
     // const tagsTask = initInMemoryTagsFromIndexDb();
     // const mcPacksTask = inMemoryMcPacksInit();
     // const result = await Promise.all([tagsTask, mcPacksTask]);
-    // console.log('done loading', result);
+    // logger.log('done loading', result);
 
     performanceLogger.forceLog('Search module initialize done');
     initDone = true;
@@ -259,7 +259,7 @@ function externalCancelSync(offlineSystemKey: OfflineSystem): void {
 }
 
 async function externalDeleteAllData(): Promise<void> {
-    const performanceLogger = logger.performance('..Delete All Data');
+    const performanceLogger = log.performance('..Delete All Data');
     performanceLogger.forceLog(' - Started');
     externalCancelSync(OfflineSystem.McPack);
     ClearSettings(OfflineSystem.Tags);
@@ -287,14 +287,7 @@ function externalToggleMockData(): void {
     mcPacksMock.toggle();
     punchesMock.toggle();
     tagsMock.toggle();
-    logger.log(
-        'use mock tags:',
-        tagsMock.isEnabled,
-        'mcPacks',
-        mcPacksMock.isEnabled,
-        'punches',
-        punchesMock.isEnabled
-    );
+    log.log('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
 }
 
 export const syncContract = {

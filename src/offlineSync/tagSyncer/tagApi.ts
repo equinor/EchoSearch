@@ -1,5 +1,5 @@
 import { JsonParseError } from '../../baseResult';
-import { logPerformance } from '../../logger';
+import { logger } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode } from '../syncSettings';
@@ -7,6 +7,8 @@ import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
+
+const log = logger('Tag.Api');
 
 const _mock = new ToggleState(true);
 export const tagsMock = _mock;
@@ -107,7 +109,7 @@ function getMockedTags(): TagsData {
 function getMockedUpdatedTags(): TagSummaryDb[] {
     const mockedTags = 100000;
     const tagString = getMockedTagsString(mockedTags);
-    const p = logPerformance();
+    const p = log.performance();
     const tags: TagSummaryDb[] = JSON.parse(tagString);
     p.forceLog('json parse ' + mockedTags);
     return tags;

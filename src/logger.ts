@@ -86,11 +86,11 @@ export function logPerformance(preText?: string): PerformanceFunctions {
 }
 
 export interface LoggerFunctions {
-    trace: (message: string) => void;
-    debug: (message: string) => void;
-    info: (message: string) => void;
+    trace: (...args: any[]) => void;
+    debug: (...args: any[]) => void;
+    info: (...args: any[]) => void;
     log: (...args: any[]) => void;
-    warn: (message: string) => void;
+    warn: (...args: any[]) => void;
     error: (...args: any[]) => void;
 
     create: (childContext: string) => LoggerFunctions;
@@ -137,22 +137,26 @@ export interface LoggerFunctions {
  * @returns Functions for logging or monitor performance.
  */
 export function createLogger(context: string): LoggerFunctions {
-    function format(message = ''): string {
-        return `[${context}] ${message}`.trim();
+    function getContext(): string {
+        return `[${context.trim()}]`;
     }
 
     return {
-        trace: (message: string) => console.log(format(message)),
-        debug: (message: string) => console.log(format(message)),
-        info: (message: string) => console.log(format(message)),
-        log: (...args: any[]) => console.log(format(''), ...args),
-        warn: (message: string) => console.warn(format(message)),
-        error: (...args: any[]) => console.error(format(), ...args),
+        trace: (...args: any[]) => console.log(getContext(), ...args),
+        debug: (...args: any[]) => console.log(getContext(), ...args),
+        info: (...args: any[]) => console.log(getContext(), ...args),
+        log: (...args: any[]) => console.log(getContext(), ...args),
+        warn: (...args: any[]) => console.warn(getContext(), ...args),
+        error: (...args: any[]) => console.error(getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
-        performance: (preText?: string) => logPerformance(format(preText))
+        performance: (preText?: string) => logPerformance(`${getContext()} ${preText ?? ''}`.trim())
         // performance: (childContext?: string) =>
         //     childContext
         //         ? createLogger(`${context}.${childContext}`).performance(format(''))
         //         : logPerformance(format(''))
     };
+}
+
+export function logger(context: string): LoggerFunctions {
+    return createLogger('Search.' + context);
 }

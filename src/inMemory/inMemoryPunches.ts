@@ -1,10 +1,11 @@
-import { logWarn } from '../logger';
+import { logger } from '../logger';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
+const log = logger('InMemory.Punch');
 const inMemoryDbPunches: InMemoryData<PunchDb> = new InMemoryData<PunchDb>((item) => item.commPkgNo);
 
 export function inMemoryPunchesInstance(): InMemoryData<PunchDb> {
@@ -13,7 +14,7 @@ export function inMemoryPunchesInstance(): InMemoryData<PunchDb> {
 
 export async function inMemoryPunchesInit(): Promise<number> {
     if (!isFullSyncDone(OfflineSystem.Punches)) {
-        logWarn(`Full ${OfflineSystem.Punches} sync is not done, cannot init in memory`);
+        log.warn(`Full sync is not done, cannot init in memory`);
         return 0;
     }
 

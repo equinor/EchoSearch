@@ -1,10 +1,12 @@
 import Dexie from 'dexie';
-import { logVerbose } from '../../logger';
+import { logger } from '../../logger';
 import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
 const databaseNamePreFix = 'tagsVer';
 //openCurrent();
+
+const log = logger('Tag.Repository');
 
 class TagsDatabase extends OfflineDataDexieBase<TagSummaryDb> {
     Tags: Dexie.Table<TagSummaryDb, string>;
@@ -35,7 +37,7 @@ export function tagsRepository(): Repository<TagSummaryDb> {
 }
 
 function dbIsReady(): void {
-    logVerbose('-- TagsDatabase is now ready --');
+    log.trace('-- TagsDatabase is now ready --');
 }
 
 // export async function getLocalTag(tagNo: string): Promise<TagSummaryDb | undefined> {

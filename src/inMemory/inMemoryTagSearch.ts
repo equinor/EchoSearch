@@ -1,4 +1,4 @@
-import { logError, logInfo, postNotificationPerformance } from '../logger';
+import { logger } from '../logger';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
@@ -10,6 +10,8 @@ import { LevTrie, TrieResult } from './trie/levTrie';
  *  Handling indexDB local plant data for offline search.
  */
 
+const log = logger('InMemory.Search.Tags');
+
 let levTrie: LevTrie = new LevTrie();
 let hasTagsInLevTrie = false;
 
@@ -19,7 +21,7 @@ export function clearLevTrie(): void {
 }
 
 export async function populateLevTrieWithTags(tagNos: string[]): Promise<void> {
-    const timeStart = performance.now();
+    const performance = log.performance('LevTrie');
     tagNos.forEach((tagNo) => {
         const cleanedTagNo = asAlphaNumeric(tagNo);
         if (cleanedTagNo.length > 3) {
@@ -28,7 +30,7 @@ export async function populateLevTrieWithTags(tagNos: string[]): Promise<void> {
     });
     hasTagsInLevTrie = hasTagsInLevTrie || tagNos.length > 0;
 
-    postNotificationPerformance('Camera tags ready: ' + tagNos.length + ' of ' + tagNos.length, timeStart, true);
+    performance.forceLog('Camera tags ready: ' + tagNos.length + ' of ' + tagNos.length);
 }
 
 export const isSearchForTagNoReady = (): boolean => hasTagsInLevTrie;
@@ -38,7 +40,7 @@ export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
     const maybeTagAlphaNumeric = levTrie.closest(tagNoCleaned, 6);
 
     if (maybeTagAlphaNumeric === undefined) {
-        logInfo('No match found for ', tagNo, 'has Tags in LevTrie:', hasTagsInLevTrie);
+        log.info('No match found for ', tagNo, 'has Tags in LevTrie:', hasTagsInLevTrie);
         return;
     }
 
@@ -46,14 +48,14 @@ export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
         (item) => item.tagNoAlphaNumericUpperCase === maybeTagAlphaNumeric.word
     );
     if (fullTagNo === undefined) {
-        logError(
+        log.error(
             "found match, but couldn't find fullTagNo (this should never happen, bug in code..): ",
             maybeTagAlphaNumeric
         );
         return;
     }
 
-    logInfo('Found', fullTagNo, maybeTagAlphaNumeric.cost);
+    log.info('Found', fullTagNo, maybeTagAlphaNumeric.cost);
     return { word: fullTagNo.tagNo, cost: maybeTagAlphaNumeric.cost } as TrieResult;
 }
 
@@ -63,9 +65,9 @@ export async function searchTags(searchText: string, maxHits: number): Promise<T
         return [] as TagSummaryDb[];
     }
 
-    const t0 = performance.now();
+    const performance = log.performance();
     const tags = await searchInMemoryTagNosIncludesAllInDescription(allSearchWords, maxHits);
-    postNotificationPerformance(`Full Tag Search (${searchText}) found(${tags.length})`, t0, true);
+    performance.forceLog(`Full Tag Search (${searchText}) found(${tags.length})`);
     return tags;
 }
 
@@ -73,7 +75,7 @@ async function searchInMemoryTagNosIncludesAllInDescription(
     allSearchWords: string[],
     maxHits: number
 ): Promise<TagSummaryDb[]> {
-    let startTime = performance.now();
+    const performance = log.performance();
     const allTags = getInMemoryTagsSorted();
 
     const perfectHits = [] as string[];
@@ -96,15 +98,10 @@ async function searchInMemoryTagNosIncludesAllInDescription(
     }
 
     const results = perfectHits.concat(goodHits, otherHits).slice(0, maxHits);
-    postNotificationPerformance(
-        `3.0 Tag Search in Memory with description (${allSearchWords}) found(${results.length})`,
-        startTime,
-        false
-    );
+    performance.logDelta(`3.0 Tag Search in Memory with description (${allSearchWords}) found(${results.length})`);
 
-    startTime = performance.now();
     const tagResults = await tagsRepository().bulkGet(results);
-    postNotificationPerformance(`3.1 Tag Search bulk get from indexDb (${results.length})`, startTime, false);
+    performance.log(`3.1 Tag Search bulk get from indexDb (${results.length})`);
 
     return tagResults;
 }

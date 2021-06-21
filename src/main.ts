@@ -1,6 +1,7 @@
 import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
+import { logger } from './logger';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { ErrorForTesting } from './workers/externalCalls';
 
@@ -24,9 +25,12 @@ document.getElementById('toggleUseMockDataBtn')?.addEventListener('click', toggl
 document.getElementById('testCommReturnTypes')?.addEventListener('click', testCommReturnTypesClicked);
 
 let count = 0;
+const log = logger('Main');
+
 async function runSyncClicked() {
     const result = await Syncer.runSyncAsync(OfflineSystem.Tags);
-    console.info(result);
+    log.log(result);
+    log.log('with pretext', result);
 }
 
 async function runSyncMcPacksClicked() {
@@ -34,8 +38,8 @@ async function runSyncMcPacksClicked() {
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
     const results = await Promise.all([mcPackSync, punchesSync]);
     for (const result of results) {
-        console.log('Sync result main:', result);
-        if (!result.isSuccess) console.log({ ...result.error });
+        log.log('Sync result main:', result);
+        if (!result.isSuccess) log.log({ ...result.error });
     }
 }
 
@@ -95,13 +99,13 @@ async function searchBtnClicked() {
 }
 
 async function expensiveBtnClicked() {
-    console.log('ExpensiveBtnClicked', count++);
+    log.log('ExpensiveBtnClicked', count++);
     const result = echoSearchWorker.runExpensive();
-    console.log(result);
+    log.log(result);
 }
 
 async function doStuffBtn2Clicked() {
-    console.log('doStuffBtn2Clicked', count++);
+    log.info('-- this is from the new logger, doStuffBtn2Clicked');
     await echoSearchWorker.doStuff2();
 }
 
@@ -111,7 +115,7 @@ async function toggleMockDataClicked() {
 
 async function testCommReturnTypesClicked(): Promise<void> {
     const result = (await echoSearchWorker.testCommReturnTypes()) as ErrorForTesting;
-    console.log('in main', result);
+    log.log('in main', result);
     console.log({ ...result });
 }
 
@@ -127,7 +131,7 @@ async function handleClick(): Promise<void> {
     //const result = authenticatorHelper.getToken();
     //console.log('echoClientId', echoClientId);
     //const token = '';
-    console.log('clicked - do nothing ' + token);
+    log.log('clicked - do nothing ' + token);
     // try {
     //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
     //     console.log(result2);
@@ -144,7 +148,7 @@ async function handleClick(): Promise<void> {
 }
 
 async function cancelBtnClicked() {
-    console.log('CancelBtnClicked', count++);
+    log.log('CancelBtnClicked', count++);
 
     echoSearchWorker.cancelSync(OfflineSystem.Tags);
     echoSearchWorker.cancelSync(OfflineSystem.McPack);

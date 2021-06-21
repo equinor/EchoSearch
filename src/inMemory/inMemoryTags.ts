@@ -1,9 +1,10 @@
-import { logPerformance } from '../logger';
+import { logger } from '../logger';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumericUpperCase } from '../offlineSync/Utils/util';
 
 let _sortedInMemoryTags: TagNoAlphaNumeric[] = [];
 let _isInMemoryTagsInitialized = false;
+const log = logger('InMemory.Tags');
 
 interface TagNoAlphaNumeric {
     tagNo: string;
@@ -18,7 +19,7 @@ export function isInMemoryTagsReady(): boolean {
 export function clearAndInitInMemoryTags(tags: TagSummaryDb[]): void {
     clearInMemoryTags();
     _isInMemoryTagsInitialized = false;
-    const performanceLogger = logPerformance();
+    const performanceLogger = log.performance();
 
     const tags2 = tags
         ? tags.map((item) => {
@@ -40,10 +41,10 @@ export function clearAndInitInMemoryTags(tags: TagSummaryDb[]): void {
 }
 
 export function updateInMemoryTags(updatedTags: TagSummaryDb[]): void {
-    const performanceLogger = logPerformance();
+    const performanceLogger = log.performance();
 
-    for (let index = 0; index < updatedTags.length; index++) {
-        const updatedTag = mapTo(updatedTags[index]);
+    for (const updatedTagItem of updatedTags) {
+        const updatedTag = mapTo(updatedTagItem);
         const indexFound = indexOfBinarySearch(updatedTag.tagNo);
         if (indexFound >= 0) {
             _sortedInMemoryTags[indexFound].descriptionAlphaNumericUpperCase =

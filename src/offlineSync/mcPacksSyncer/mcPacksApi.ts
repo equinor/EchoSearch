@@ -1,4 +1,4 @@
-import { logPerformance } from '../../logger';
+import { logger } from '../../logger';
 import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
@@ -18,6 +18,8 @@ export interface McPackDb {
     updatedAt: Date;
 }
 
+const log = logger('McPack.Api');
+
 function cleanupMcPack(mcPack: McPackDb): McPackDb {
     return {
         id: toNumber(mcPack.id),
@@ -30,7 +32,7 @@ function cleanupMcPack(mcPack: McPackDb): McPackDb {
 }
 
 export async function apiAllMcPacks(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
-    const performanceLogger = logPerformance();
+    const performanceLogger = log.performance();
     const items: McPackDb[] = _mock.isEnabled
         ? JSON.parse(getMockedMcPacksString(0))
         : await getAllMcPacksFromApi(instCode, abortSignal);

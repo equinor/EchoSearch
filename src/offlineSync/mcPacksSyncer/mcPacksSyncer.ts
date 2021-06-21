@@ -1,11 +1,12 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
-import { logPerformance } from '../../logger';
+import { logger } from '../../logger';
 import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
+const log = logger('McPack.Sync');
 export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
     setIsSyncEnabled(OfflineSystem.McPack, isEnabled);
 
@@ -16,7 +17,7 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
 }
 
 export async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance('[McPacks]');
+    const performanceLogger = log.performance();
     const data = await apiAllMcPacks(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta('Api');
 
@@ -33,7 +34,7 @@ export async function syncFullMcPacks(abortSignal: AbortSignal): Promise<Interna
 }
 
 export async function syncUpdateMcPacks(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
-    const performanceLogger = logPerformance('[McPacks]');
+    const performanceLogger = log.performance();
     const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate, abortSignal);
     performanceLogger.forceLogDelta('Api');
 

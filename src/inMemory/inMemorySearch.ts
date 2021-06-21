@@ -1,4 +1,4 @@
-import { logPerformance } from '../logger';
+import { logger } from '../logger';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
 
 /**
@@ -18,7 +18,7 @@ export function searchOrderedByBestMatch<T>(
     typeNameForLogging: string,
     alwaysPerformanceLogging = false
 ): T[] {
-    const performanceLogger = logPerformance();
+    const performanceLogger = logger(typeNameForLogging).performance();
     const results = searchOrderedByBestMatchLogic(collection, getSearchableFieldsPrioritizedFunc, searchText, maxHits);
     alwaysPerformanceLogging
         ? performanceLogger.forceLog(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`)
