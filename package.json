@@ -1,13 +1,13 @@
 {
   "name": "@equinor/echo-search",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Echo Search - search and offline for echo.",
-  "main": "lib/main.js",
+  "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
-  "source": "src/main.ts",
+  "source": "src/index.ts",
   "scripts": {
     "build": "rollup -c",
-    "start": "rollup -c -w ",
+    "start": "cross-env NODE_ENV=development rollup -c -w",
     "patch": "npm version patch",
     "major": "npm version major",
     "minor": "npm version minor",
@@ -16,7 +16,7 @@
     "echo-test": "jest ",
     "test-coverage": "jest --coverage --watchAll",
     "echo-publish": "npm publish --access public",
-    "echo-publish-beta": "npm publish --access public --tag beta"
+    "echo-publish-next": "npm publish --access public --tag next"
   },
   "author": "Echo Core",
   "license": "MIT",
@@ -41,6 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "babel": "^6.23.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.24.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.3.1",

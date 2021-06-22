@@ -14,15 +14,25 @@ import pkg from './package.json';
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
+const environment = process.env.NODE_ENV;
+const isDevelopment = environment === 'development';
+
+function print() {
+    console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+    console.log('isDevelopment', isDevelopment);
+}
+
+setTimeout(() => print(), 1000);
+
 /**
  * Rollup config configuration for Echo Projects
  * Compiling Typescript and support for Workers
  */
 const config = {
-    input: pkg.source,
+    input: isDevelopment ? 'src/main.ts' : pkg.source,
     output: [
         {
-            file: pkg.main,
+            file: isDevelopment ? 'lib/main.js' : pkg.main,
             format: 'cjs',
             exports: 'named',
             sourcemap: true
@@ -54,13 +64,14 @@ const config = {
         commonJs(),
 
         injectProcessEnv({
-            NODE_ENV: 'production',
+            NODE_ENV: environment,
             SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
             UNUSED: null
         }),
-        html2({
-            template: 'public/index.html'
-        })
+        isDevelopment &&
+            html2({
+                template: 'public/index.html'
+            })
     ]
 };
 
@@ -76,26 +87,28 @@ const types = {
             format: 'es'
         }
     ],
-    plugins: [
-        dt(),
-        copy({
-            targets: [
-                { src: 'public/ee.png', dest: 'lib' },
-                { src: 'public/style.css', dest: 'lib' }
-            ]
-        }),
+    plugins: isDevelopment
+        ? [
+              dt(),
+              copy({
+                  targets: [
+                      { src: 'public/ee.png', dest: 'lib' },
+                      { src: 'public/style.css', dest: 'lib' }
+                  ]
+              }),
 
-        /**https://www.npmjs.com/package/rollup-plugin-serve */
-        server({
-            contentBase: ['lib', 'public'],
-            port: 3000,
-            verbose: true,
-            open: true,
-            ssl: true,
-            host: 'localhost'
-        }),
-        livereload({ watch: 'lib' })
-    ]
+              /**https://www.npmjs.com/package/rollup-plugin-serve */
+              server({
+                  contentBase: ['lib', 'public'],
+                  port: 3000,
+                  verbose: true,
+                  open: true,
+                  ssl: true,
+                  host: 'localhost'
+              }),
+              livereload({ watch: 'lib' })
+          ]
+        : [dt()]
 };
 
 export default [config, types];
