@@ -7,7 +7,8 @@ export const Search = {
     closestTagSearchAsync: echoSearchWorker.searchForClosestTagNo,
     searchTagsAsync: echoSearchWorker.searchTags,
     searchMcPacksAsync: echoSearchWorker.searchMcPacks,
-    searchPunchesAsync: echoSearchWorker.searchPunches
+    searchPunchesAsync: echoSearchWorker.searchPunches,
+    OfflineSystem
 };
 
 export const Lookup = {
@@ -18,7 +19,8 @@ export const Lookup = {
     lookupPunchesAsync: echoSearchWorker.lookupPunchesAsync,
 
     lookupMcPackAsync: echoSearchWorker.lookupMcPackAsync,
-    lookupMcPacksAsync: echoSearchWorker.lookupMcPacksAsync
+    lookupMcPacksAsync: echoSearchWorker.lookupMcPacksAsync,
+    OfflineSystem
 };
 
 export const Syncer = {
@@ -27,5 +29,10 @@ export const Syncer = {
         return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     },
     setEnabledAsync: echoSearchWorker.setEnabled,
-    changePlantAsync: echoSearchWorker.changePlantAsync
+    changePlantAsync: echoSearchWorker.changePlantAsync,
+    OfflineSystem
 };
+
+export type { Result } from './baseResult';
+export type { SearchResult, SearchResults } from './inMemory/searchResult';
+export type { TagStatus, TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';

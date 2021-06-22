@@ -1,31 +1,45 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { NotImplementedError } from './baseResult';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 
-function logWithType(logType: LogType, ...args: any[]): void {
-    if (logType === LogType.Info) console.log(...args);
-    else if (logType === LogType.Warn) console.warn(...args);
-    else if (logType === LogType.Error) console.error(...args);
-    else if (logType === LogType.Trace) console.log(...args);
+export interface LogOptions {
+    minLevels: { [module: string]: string };
 }
 
-/*
-    private readonly levels: { [key: string]: number } = {
-        trace: 1,
-        debug: 2,
-        info: 3,
-        warn: 4,
-        error: 5
-    };
-    
-    private levelToInt(minLevel: string): number {
-        if (minLevel.toLowerCase() in this.levels) return this.levels[minLevel.toLowerCase()];
-        else return 99;
-    }    
-*/
+const options: LogOptions = {
+    minLevels: {
+        '[Search': 'info'
+    }
+};
+
+function isEnabled(context: string, logType: LogType): boolean {
+    let minLevel = 'none';
+    let match = '';
+
+    for (const key in options.minLevels) {
+        if (context.startsWith(key) && key.length >= match.length) {
+            minLevel = options.minLevels[key];
+            match = key;
+        }
+    }
+    console.log(context, match);
+    return match !== '';
+}
+
+function logWithType(logType: LogType, context: string, ...args: any[]): void {
+    //if (!isEnabled(context, logType)) return;
+
+    if (logType === LogType.Trace) console.log(context, ...args);
+    else if (logType === LogType.Debug) console.log(context, ...args);
+    else if (logType === LogType.Info) console.log(context, ...args);
+    else if (logType === LogType.Warn) console.warn(context, ...args);
+    else if (logType === LogType.Error) console.error(context, ...args);
+    else throw new NotImplementedError(`${logType} logging has not been implemented`);
+}
 
 enum LogType {
-    Trace,
+    Trace = 1,
     Debug,
     Info,
     Warn,
@@ -117,10 +131,6 @@ export function createLogger(context: string): LoggerFunctions {
         error: (...args: any[]) => logWithType(LogType.Error, getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
         performance: (preText?: string) => logPerformance(`${getContext()} ${preText ?? ''}`.trim())
-        // performance: (childContext?: string) =>
-        //     childContext
-        //         ? createLogger(`${context}.${childContext}`).performance(format(''))
-        //         : logPerformance(format(''))
     };
 }
 
