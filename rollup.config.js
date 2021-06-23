@@ -7,6 +7,7 @@ import dt from 'rollup-plugin-dts';
 import html2 from 'rollup-plugin-html2';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import livereload from 'rollup-plugin-livereload';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import server from 'rollup-plugin-server';
 import typescript from 'rollup-plugin-typescript2';
 import workerLoader from 'rollup-plugin-web-worker-loader';
@@ -46,6 +47,7 @@ const config = {
             inline: false
         }),
         typescript(),
+        peerDepsExternal(),
         babel({
             runtimeHelpers: true,
             babelrc: false,
