@@ -129,6 +129,35 @@ describe('searchLogic bestMatchSearch', () => {
         const actual = searchBestMatch(items, '08 L707 Boat');
         expect(actual).toEqual([items[1], items[0]]);
     });
+
+    it('should only return results where predicate is true', () => {
+        const searchText = '1234';
+        const items = [
+            create(searchText, '1', 'L.O265C.001'),
+            create(searchText, '2', 'L.O265C.002'),
+            create('56', searchText, 'L.O265C.002'),
+            create(searchText, '4, To Riser Hang Off Template G', 'L.O265C.001')
+        ];
+        const actual = searchBestMatch(
+            items,
+            searchText,
+            1000,
+            (item: Item): boolean => item.moreText === 'L.O265C.002'
+        );
+        expect(actual).toEqual([items[1], items[2]]);
+    });
+
+    it('should only return maximum number of hits', () => {
+        const searchText = '1234';
+        const items = [
+            create(searchText, '1', 'L.O265C.001'),
+            create(searchText, '2', 'L.O265C.002'),
+            create('56', searchText, 'L.O265C.002'),
+            create(searchText, '3', 'L.O265C.001')
+        ];
+        const actual = searchBestMatch(items, searchText, 2);
+        expect(actual).toEqual([items[0], items[1]]);
+    });
 });
 
 interface Item {
@@ -137,14 +166,19 @@ interface Item {
     moreText: string;
 }
 
-function searchBestMatch(collection: Item[], searchText: string, maxHits = 1000): Item[] {
-    const result = searchOrderedByBestMatchLogic(
+function searchBestMatch(
+    collection: Item[],
+    searchText: string,
+    maxHits = 1000,
+    predicate?: (arg: Item) => boolean
+): Item[] {
+    return searchOrderedByBestMatchLogic(
         collection,
         (arg) => [arg.id, arg.description, arg.moreText],
         searchText,
-        maxHits
+        maxHits,
+        predicate
     );
-    return result;
 }
 
 function create(id: string, description: string, moreText = ''): Item {

@@ -6,7 +6,11 @@ export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;
     private _initTask: Promise<void>;
     private _isOfflineSearchReady: () => boolean;
-    private _offlineSearch: (searchText: string, maxHits: number) => Promise<T[]>;
+    private _offlineSearch: (
+        searchText: string,
+        maxHits: number,
+        offlinePredicate?: (arg: T) => boolean
+    ) => Promise<T[]>;
     private _onlineSearch: (searchText: string, maxHits: number) => Promise<T[]>;
     private _fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>;
     private _updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>;
@@ -23,7 +27,7 @@ export class SearchSystem<T> {
         offlineSystemKey: OfflineSystem,
         initTaskFunc: Promise<void>,
         isOfflineSearchReady: () => boolean,
-        offlineSearch: (searchText: string, maxHits: number) => Promise<T[]>,
+        offlineSearch: (searchText: string, maxHits: number, offlinePredicate?: (arg: T) => boolean) => Promise<T[]>,
         onlineSearch: (searchText: string, maxHits: number) => Promise<T[]>,
         fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>,
         updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>
@@ -38,13 +42,17 @@ export class SearchSystem<T> {
         this._updateSync = updateSync;
     }
 
-    async search(searchText: string, maxHits: number): Promise<SearchResults<T>> {
+    async search(
+        searchText: string,
+        maxHits: number,
+        offlinePredicate?: (arg: T) => boolean
+    ): Promise<SearchResults<T>> {
         if (!isSyncEnabled(this._offlineSystemKey)) {
             return searchResults.syncNotEnabledError<T>(this._offlineSystemKey);
         }
         await this._initTask;
         const data = this._isOfflineSearchReady()
-            ? await this._offlineSearch(searchText, maxHits)
+            ? await this._offlineSearch(searchText, maxHits, offlinePredicate)
             : await this._onlineSearch(searchText, maxHits);
         return searchResults.successOrEmpty(data);
     }

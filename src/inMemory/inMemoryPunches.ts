@@ -23,7 +23,11 @@ export async function inMemoryPunchesInit(): Promise<number> {
     return data.length;
 }
 
-export function searchInMemoryPunchesWithText(searchText: string, maxHits: number): PunchDb[] {
+export function searchInMemoryPunchesWithText(
+    searchText: string,
+    maxHits: number,
+    predicate?: (punch: PunchDb) => boolean
+): PunchDb[] {
     return searchOrderedByBestMatch(
         inMemoryPunchesInstance().all(),
         (item) => [
@@ -38,6 +42,7 @@ export function searchInMemoryPunchesWithText(searchText: string, maxHits: numbe
         ],
         searchText,
         maxHits,
-        OfflineSystem.Punches
+        OfflineSystem.Punches,
+        predicate
     );
 }

@@ -16,10 +16,17 @@ export function searchOrderedByBestMatch<T>(
     searchText: string,
     maxHits: number,
     typeNameForLogging: string,
+    predicate?: (arg: T) => boolean,
     alwaysPerformanceLogging = false
 ): T[] {
     const performanceLogger = logger(typeNameForLogging).performance();
-    const results = searchOrderedByBestMatchLogic(collection, getSearchableFieldsPrioritizedFunc, searchText, maxHits);
+    const results = searchOrderedByBestMatchLogic(
+        collection,
+        getSearchableFieldsPrioritizedFunc,
+        searchText,
+        maxHits,
+        predicate
+    );
     alwaysPerformanceLogging
         ? performanceLogger.forceLog(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`)
         : performanceLogger.log(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`);
@@ -38,7 +45,8 @@ export function searchOrderedByBestMatchLogic<T>(
     collection: ReadonlyArray<T>,
     getSearchableFieldsPrioritizedFunc: (arg: T) => string[],
     searchText: string,
-    maxHits: number
+    maxHits: number,
+    predicate?: (arg: T) => boolean
 ): T[] {
     const searchTextWords = getAllWordsAsAlphaNumericUpperCase(searchText);
     if (searchTextWords.length === 0) {
@@ -51,6 +59,9 @@ export function searchOrderedByBestMatchLogic<T>(
     let perfectHits = 0;
     for (let index = 0; perfectHits < maxHits && index < collection.length; index++) {
         const item = collection[index];
+        if (predicate && !predicate(item)) {
+            continue;
+        }
         const score = searchMatchScore(getSearchableFieldsPrioritizedFunc(item), searchTextWords);
         if (score >= perfectHit) perfectHits++;
         if (score > 0) results.push({ score, item });

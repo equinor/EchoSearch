@@ -24,12 +24,17 @@ export async function inMemoryMcPacksInit(): Promise<number> {
     return data.length;
 }
 
-export function searchInMemoryMcPacksWithText(searchText: string, maxHits: number): McPackDb[] {
+export function searchInMemoryMcPacksWithText(
+    searchText: string,
+    maxHits: number,
+    predicate?: (mcPack: McPackDb) => boolean
+): McPackDb[] {
     return searchOrderedByBestMatch(
         inMemoryMcPacksInstance().all(),
         (item) => [item.mcPkgNo, item.commPkgNo, item.description, item.projectName],
         searchText,
         maxHits,
-        OfflineSystem.Punches
+        OfflineSystem.Punches,
+        predicate
     );
 }
