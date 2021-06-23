@@ -9,26 +9,33 @@ export interface LogOptions {
 
 const options: LogOptions = {
     minLevels: {
-        '[Search': 'info'
+        '': 'warn',
+        '[Search.EXternal': 'Trace'
     }
 };
 
-function isEnabled(context: string, logType: LogType): boolean {
-    let minLevel = 'none';
+function toEnumCase(enumValue: string): string {
+    return enumValue.charAt(0).toUpperCase() + enumValue.substr(1).toLowerCase();
+}
+
+function isLogEnabled(context: string, logType: LogType): boolean {
+    let minLevel = LogType.Disabled.toString();
     let match = '';
 
-    for (const key in options.minLevels) {
-        if (context.startsWith(key) && key.length >= match.length) {
-            minLevel = options.minLevels[key];
-            match = key;
+    for (const optionContext in options.minLevels) {
+        if (context.toLowerCase().startsWith(optionContext.toLowerCase()) && optionContext.length >= match.length) {
+            minLevel = options.minLevels[optionContext];
+            match = optionContext;
         }
     }
-    console.log(context, match);
-    return match !== '';
+
+    const logLevelFromConfig: LogType = LogType[toEnumCase(minLevel)];
+    //console.log('match', match, minLevel, logLevelFromConfig, logLevelFromConfig <= logType);
+    return logLevelFromConfig <= logType;
 }
 
 function logWithType(logType: LogType, context: string, ...args: any[]): void {
-    //if (!isEnabled(context, logType)) return;
+    if (!isLogEnabled(context, logType)) return;
 
     if (logType === LogType.Trace) console.log(context, ...args);
     else if (logType === LogType.Debug) console.log(context, ...args);
@@ -43,7 +50,8 @@ enum LogType {
     Debug,
     Info,
     Warn,
-    Error
+    Error,
+    Disabled
 }
 
 function logPerformanceToConsole(message: string, startTime: number, forcePrintToConsole = false): void {
