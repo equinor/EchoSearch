@@ -13,7 +13,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@equinor/echo-core": "^0.2.109",
+    "@equinor/echo-base": "^0.2.104",
+    "@equinor/echo-core": "file:../node_modules/@equinor/echo-core",
     "@equinor/echo-search": "file:..",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"

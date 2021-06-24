@@ -1,6 +1,6 @@
+import getBabelOutputPlugin from '@rollup/plugin-babel';
 import commonJs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
 import del from 'rollup-plugin-delete';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import typescript from 'rollup-plugin-typescript2';
@@ -18,21 +18,28 @@ const config = {
     output: [
         {
             file: pkg.main,
-            format: 'cjs',
+            format: 'esm',
             exports: 'named',
-            sourcemap: true
+            sourcemap: true,
+            globals: pkg.peerDependencies
         }
     ],
     plugins: [
         del({ targets: 'lib/*', runOnce: true }),
         nodeResolve({ extensions }),
-        workerLoader({ targetPlatform: 'browser', inline: false, preserveFileName: true}),
+        workerLoader({ targetPlatform: 'browser', external: ['@equinor/echo-base'] }),
         typescript(),
         peerDepsExternal(),
-        babel({
-            runtimeHelpers: true,
+        getBabelOutputPlugin({
+            /**
+             * 'runtime' - you should use this especially when building libraries with Rollup.
+             * It has to be used in combination with @babel/plugin-transform-runtime
+             * https://github.com/rollup/plugins/tree/master/packages/babel#babelhelpers
+             *
+             */
+            babelHelpers: 'runtime',
             babelrc: false,
-            presets: [['@babel/preset-env', { modules: false }], ['@babel/preset-react']],
+            presets: [['@babel/preset-env'], ['@babel/preset-react']],
             plugins: [
                 [
                     '@babel/plugin-transform-runtime',

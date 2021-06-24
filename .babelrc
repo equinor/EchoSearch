@@ -1,11 +1,21 @@
 {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react",
-    ],
-    "plugins": [
-      ["@babel/plugin-transform-runtime", {
-        "regenerator": true
-      }]
-    ]
+         /**
+             * 'runtime' - you should use this especially when building libraries with Rollup.
+             * It has to be used in combination with @babel/plugin-transform-runtime
+             * https://github.com/rollup/plugins/tree/master/packages/babel#babelhelpers
+             *
+             */
+             babelHelpers: 'runtime',
+             babelrc: false,
+             presets: [['@babel/preset-env'], ['@babel/preset-react']],
+             plugins: [
+                 [
+                     '@babel/plugin-transform-runtime',
+                     {
+                         regenerator: true
+                     }
+                 ]
+             ],
+             extensions,
+             exclude: 'node_modules/
   }

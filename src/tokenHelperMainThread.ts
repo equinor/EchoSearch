@@ -1,4 +1,6 @@
 import EchoCore from '@equinor/echo-core';
 export async function getApiTokenInMainThread(): Promise<string> {
-    return await EchoCore.EchoClient.getAccessToken();
+    const token = await EchoCore.EchoClient.getAccessToken();
+    console.log('Current Token', token);
+    return token;
 }

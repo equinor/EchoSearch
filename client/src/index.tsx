@@ -20,6 +20,14 @@ export interface ErrorForTesting {
     properties?: Record<string, unknown>;
 }
 
+async function newSearch(): Promise<void> {
+    await Syncer.changePlantAsync('JSV');
+
+    await Syncer.runSyncAsync(Syncer.OfflineSystem.Tags);
+    const result = await Search.searchTagsAsync('a-73ma001', 10);
+    console.log('------------------------------- tag search result', result);
+}
+
 const SearchEngineDemo: React.FC = (): JSX.Element => {
     const isAuthenticated = EchoCore.useEchoSetup({} as any);
 
@@ -116,25 +124,7 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
     }
 
     async function handleStart(): Promise<void> {
-        const token = await EchoCore.EchoClient.getAccessToken();
-        //const token = EchoCore.EchoClient.getAccessToken();
-        //const result = authenticatorHelper.getToken();
-        //console.log('echoClientId', echoClientId);
-        //const token = '';
-        log.info('clicked - do nothing ' + token);
-        // try {
-        //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
-        //     console.log(result2);
-        // } catch (ex) {
-        //     console.log('yes, we caught error from worker in main thread :D');
-        //     console.log('the error is:', ex);
-        // }
-        // console.log(
-        //     await worker2.howOld({
-        //         name: 'lots of work',
-        //         num: 10000000
-        //     })
-        // );
+        newSearch();
     }
 
     async function handleCancel() {
@@ -155,6 +145,7 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
                 {isAuthenticated ? (
                     <div>
                         <p>Please look at your developer console.</p>
+                        <button onClick={handleStart}>Start A test</button>
                         <button onClick={handlePlant}>Change Plant (delete)</button>
                         <button onClick={handleSearch}>Search</button>
                         <button onClick={handleCameraSearch}>Camera Search</button>
@@ -164,7 +155,6 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
                         <button onClick={() => handleSetMcPackEnabled(false)}>McPack Disable</button>
 
                         <button onClick={handleDoStuffBtn2}>doStuffBtn2</button>
-                        <button onClick={handleStart}>Start</button>
                         <button onClick={handleCancel}>Cancel</button>
                         <button onClick={handleExpensive}>Expensive</button>
 
