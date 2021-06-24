@@ -3,6 +3,18 @@ import { echoSearchWorker } from './echoWorkerInstance';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 
+export const sleep2 = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
+export async function SearchAsync(sleepCount: number): Promise<string> {
+    let value = 0;
+    for (let index = 0; index < sleepCount; index++) {
+        console.log('going to sleep', value);
+        await sleep2(1000);
+        value++;
+    }
+
+    return 'search async done' + value;
+}
+
 export const Search = {
     closestTagSearchAsync: echoSearchWorker.searchForClosestTagNo,
     searchTagsAsync: echoSearchWorker.searchTags,

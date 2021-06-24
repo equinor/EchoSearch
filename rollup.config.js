@@ -19,8 +19,7 @@ const environment = process.env.NODE_ENV;
 const isDevelopment = environment === 'development';
 
 function print() {
-    console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-    console.log('isDevelopment', isDevelopment);
+    console.log('isDevelopment', isDevelopment, 'process.env.NODE_ENV', process.env.NODE_ENV);
 }
 
 setTimeout(() => print(), 1000);
@@ -42,10 +41,7 @@ const config = {
     plugins: [
         del({ targets: 'lib/*', runOnce: true }),
         nodeResolve({ extensions }),
-        workerLoader({
-            preserveFileNames: true,
-            inline: false
-        }),
+        workerLoader({ preserveFileNames: false, inline: true, targetPlatform: 'browser' }),
         typescript(),
         peerDepsExternal(),
         babel({
