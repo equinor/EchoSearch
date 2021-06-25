@@ -1,6 +1,6 @@
 {
   "name": "@equinor/echo-search",
-  "version": "0.1.02",
+  "version": "0.1.11",
   "description": "Echo Search - search and offline for echo.",
   "main": "lib/index.js",
   "types": "lib/src/index.d.ts",
@@ -21,10 +21,10 @@
   "author": "Echo Core",
   "license": "MIT",
   "peerDependencies": {
-    "@equinor/echo-base": "^0.2.104",
     "@equinor/echo-core": "^0.2.110"
   },
   "dependencies": {
+    "@equinor/echo-base": "^0.2.104",
     "comlink": "^4.3.1",
     "dexie": "^3.0.3"
   },

@@ -26,7 +26,7 @@ export const Lookup = {
 export const Syncer = {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<Result> {
         const token = await getApiTokenInMainThread();
-        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
+        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token ?? '');
     },
     setEnabledAsync: echoSearchWorker.setEnabled,
     changePlantAsync: echoSearchWorker.changePlantAsync,

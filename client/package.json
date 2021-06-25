@@ -8,14 +8,15 @@
   },
   "scripts": {
     "start": "webpack serve --mode development --env development --open --hot ",
+    "dev": "npm-local-development ../",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@equinor/echo-base": "^0.2.104",
-    "@equinor/echo-core": "file:../node_modules/@equinor/echo-core",
-    "@equinor/echo-search": "file:..",
+    "@equinor/echo-core": "^0.2.110",
+    "@equinor/echo-search": "^0.1.11",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },

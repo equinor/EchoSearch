@@ -18,7 +18,7 @@ const config = {
     output: [
         {
             file: pkg.main,
-            format: 'esm',
+            format: 'cjs',
             exports: 'named',
             sourcemap: true,
             globals: pkg.peerDependencies
@@ -27,7 +27,7 @@ const config = {
     plugins: [
         del({ targets: 'lib/*', runOnce: true }),
         nodeResolve({ extensions }),
-        workerLoader({ targetPlatform: 'browser', external: ['@equinor/echo-base'] }),
+        workerLoader({ targetPlatform: 'browser' }),
         typescript(),
         peerDepsExternal(),
         getBabelOutputPlugin({

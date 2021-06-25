@@ -91,7 +91,7 @@ const webpackConfig = {
         splitChunks: {
             chunks: 'all'
         },
-        minimize: true
+        minimize: false
     }
 };
 

@@ -1,6 +1,6 @@
 import EchoCore from '@equinor/echo-core';
 import { echoSearchWorker, logger, OfflineSystem, Search, Syncer } from '@equinor/echo-search';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 let count = 0;
@@ -29,7 +29,12 @@ async function newSearch(): Promise<void> {
 }
 
 const SearchEngineDemo: React.FC = (): JSX.Element => {
-    const isAuthenticated = EchoCore.useEchoSetup({} as any);
+    const isAuthenticated = EchoCore.useAuthenticate(EchoCore.EchoAuthProvider);
+    useEffect(() => {
+        if (isAuthenticated) {
+            EchoCore.EchoClient.getAccessToken().then((token) => console.log(token));
+        }
+    }, [isAuthenticated]);
 
     async function handlePlant() {
         await Syncer.changePlantAsync('JSV');
@@ -162,7 +167,7 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
                         <button onClick={handleCommReturnTypes}>test Comm return types</button>
                     </div>
                 ) : (
-                    <p>Please Autenticate to use this module.</p>
+                    <p>Please Authenticate to use this module.</p>
                 )}
             </div>
         </div>
@@ -172,5 +177,3 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
 if (!(window !== window.parent && !window.opener)) {
     ReactDOM.render(<SearchEngineDemo />, document.getElementById('root'));
 }
-
-EchoCore.EchoAuthProvider.handleLogin();
