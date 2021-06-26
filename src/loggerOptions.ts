@@ -1,39 +1,75 @@
-export interface LogOptions {
-    minLevels: { [module: string]: string };
+export enum LogType {
+    Disabled = 0,
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error
 }
 
-const options: LogOptions = {
-    minLevels: {
-        '': 'warn',
-        '[Search.EXternal': 'Trace'
+const logOptions: LogOptions = { '': LogType.Error }; //Default
+
+function formatContext(context: string) {
+    const stripChars = '[]';
+    context = strip(context, stripChars).toLowerCase();
+    return context;
+}
+
+function setLogLevel(context: string, logTypeLevel: LogType): void {
+    logOptions[formatContext(context)] = logTypeLevel;
+}
+
+function getLogLevel(context: string): LogType {
+    return logOptions[formatContext(context)] ?? getDefaultLogLevel();
+}
+
+function setLogLevels(logLevels: LogOptions): void {
+    for (const logLevel of Object.keys(logLevels)) {
+        setLogLevel(logLevel, logLevels[logLevel]);
     }
+}
+
+function setDefaultLogLevel(defaultLogLevel: LogType): void {
+    setLogLevel('', defaultLogLevel);
+}
+
+function getDefaultLogLevel(): LogType {
+    return logOptions[''] ?? LogType.Disabled;
+}
+
+function strip(value: string, charsToStrip: string, replaceWithChar = ''): string {
+    for (const char of charsToStrip) {
+        value = value.replace(char, replaceWithChar);
+    }
+    return value;
+}
+
+export const logging = {
+    setLogLevel,
+    setLogLevels,
+    setDefaultLogLevel,
+    getDefaultLogLevel,
+    getLogLevel
 };
 
-function toEnumCase(enumValue: string): string {
-    return enumValue.charAt(0).toUpperCase() + enumValue.substr(1).toLowerCase();
+export interface LogOptions {
+    [context: string]: LogType;
 }
 
 export function isLogEnabled(context: string, logType: LogType): boolean {
-    let minLevel = LogType.Disabled.toString();
-    let match = '';
+    if (logType === LogType.Disabled) return false;
+    context = formatContext(context);
+    let minLevel = getDefaultLogLevel();
 
-    for (const optionContext in options.minLevels) {
-        if (context.toLowerCase().startsWith(optionContext.toLowerCase()) && optionContext.length >= match.length) {
-            minLevel = options.minLevels[optionContext];
+    let match = '';
+    for (const optionContext in logOptions) {
+        if (optionContext.length > 0 && optionContext.length >= match.length && context.startsWith(optionContext)) {
+            minLevel = logOptions[optionContext];
             match = optionContext;
         }
     }
 
-    const logLevelFromConfig: LogType = LogType[toEnumCase(minLevel)];
-    //console.log('match', match, minLevel, logLevelFromConfig, logLevelFromConfig <= logType);
-    return logLevelFromConfig <= logType;
-}
+    if (minLevel === LogType.Disabled) return false;
 
-export enum LogType {
-    Trace = 1,
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Disabled
+    return logType >= minLevel;
 }
