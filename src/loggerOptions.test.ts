@@ -54,7 +54,7 @@ describe('loggerOptions', () => {
         [nonExistingContext, LogType.Debug, false],
         [nonExistingContext, LogType.Trace, false],
         [nonExistingContext, LogType.Disabled, false]
-    ])('.nonExistingContext should be set to default warn: %s, %s expected %s', (a, b, expected) => {
+    ])('nonExistingContext should be set to default warn: %s, %s expected %s', (a, b, expected) => {
         expect(isLogEnabled(a, b)).toBe(expected);
     });
 

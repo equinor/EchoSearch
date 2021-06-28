@@ -47,28 +47,16 @@ let punchSearchSystem: SearchSystem<PunchDb>;
 
 export async function externalInitialize(): Promise<void> {
     const logOptions = {
-        '': LogType.Warn,
-        Search: LogType.Info,
-        'Search.External': LogType.Disabled
+        '': LogType.Trace
     };
 
     logging.setLogLevels(logOptions);
-
     log.info('-------------- externalInitialize ------------ ');
     log.trace('trace');
-    log.trace('trace 123');
     log.debug('debug');
     log.info('info');
     log.warn('warn');
     log.error('error');
-
-    const log2 = logger('Module2');
-    log2.trace('trace');
-    log2.trace('trace 123');
-    log2.debug('debug');
-    log2.info('info');
-    log2.warn('warn');
-    log2.error('error');
 
     // const wait = (ms) => new Promise((res) => setTimeout(res, ms));
     // const p1 = new Promise((res) => setTimeout(() => res('p1'), 1000));
