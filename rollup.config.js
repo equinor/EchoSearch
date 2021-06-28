@@ -1,14 +1,8 @@
+import getBabelOutputPlugin from '@rollup/plugin-babel';
 import commonJs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
-import copy from 'rollup-plugin-copy';
 import del from 'rollup-plugin-delete';
-import dt from 'rollup-plugin-dts';
-import html2 from 'rollup-plugin-html2';
-import injectProcessEnv from 'rollup-plugin-inject-process-env';
-import livereload from 'rollup-plugin-livereload';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import server from 'rollup-plugin-server';
 import typescript from 'rollup-plugin-typescript2';
 import workerLoader from 'rollup-plugin-web-worker-loader';
 import pkg from './package.json';
@@ -29,25 +23,32 @@ setTimeout(() => print(), 1000);
  * Compiling Typescript and support for Workers
  */
 const config = {
-    input: isDevelopment ? 'src/main.ts' : pkg.source,
+    input: pkg.source,
     output: [
         {
-            file: isDevelopment ? 'lib/main.js' : pkg.main,
+            file: pkg.main,
             format: 'cjs',
             exports: 'named',
-            sourcemap: true
+            sourcemap: true,
+            globals: pkg.peerDependencies
         }
     ],
     plugins: [
         del({ targets: 'lib/*', runOnce: true }),
         nodeResolve({ extensions }),
-        workerLoader({ preserveFileNames: false, inline: true, targetPlatform: 'browser' }),
+        workerLoader({ targetPlatform: 'browser' }),
         typescript(),
         peerDepsExternal(),
-        babel({
-            runtimeHelpers: true,
+        getBabelOutputPlugin({
+            /**
+             * 'runtime' - you should use this especially when building libraries with Rollup.
+             * It has to be used in combination with @babel/plugin-transform-runtime
+             * https://github.com/rollup/plugins/tree/master/packages/babel#babelhelpers
+             *
+             */
+            babelHelpers: 'runtime',
             babelrc: false,
-            presets: [['@babel/preset-env', { modules: false }], ['@babel/preset-react']],
+            presets: [['@babel/preset-env'], ['@babel/preset-react']],
             plugins: [
                 [
                     '@babel/plugin-transform-runtime',
@@ -59,54 +60,8 @@ const config = {
             extensions,
             exclude: 'node_modules/**'
         }),
-        commonJs(),
-
-        injectProcessEnv({
-            NODE_ENV: environment,
-            SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
-            UNUSED: null
-        }),
-        isDevelopment &&
-            html2({
-                template: 'public/index.html'
-            })
+        commonJs()
     ]
 };
 
-/**
- * Rollup types configuration for Echo Projects
- * Providing type decelerations.
- */
-const types = {
-    input: pkg.source,
-    output: [
-        {
-            file: pkg.types,
-            format: 'es'
-        }
-    ],
-    plugins: isDevelopment
-        ? [
-              dt(),
-              copy({
-                  targets: [
-                      { src: 'public/ee.png', dest: 'lib' },
-                      { src: 'public/style.css', dest: 'lib' }
-                  ]
-              }),
-
-              /**https://www.npmjs.com/package/rollup-plugin-serve */
-              server({
-                  contentBase: ['lib', 'public'],
-                  port: 3000,
-                  verbose: true,
-                  open: true,
-                  ssl: true,
-                  host: 'localhost'
-              }),
-              livereload({ watch: 'lib' })
-          ]
-        : [dt()]
-};
-
-export default [config, types];
+export default config;

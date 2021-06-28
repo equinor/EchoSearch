@@ -1,21 +1,33 @@
 {
     "compilerOptions": {
-        "target": "es2017",
+        // basic options
+        "target": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],
+        "module": "esnext",
+
         "allowJs": true,
-        "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "isolatedModules": false,
+        "declaration": true,
 
-        "noImplicitAny": false ,
+        // type checking
+        "strict": true,
+        "noImplicitAny": false,
+        "noUnusedParameters": false,
+        "strictNullChecks": true,
+        "alwaysStrict": false,
+
+        // must be set to true because we rely on babel to transpile.
         "noEmit": true,
-        "sourceMap": true
+        "sourceMap": true,
+
+        // others
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "allowUnusedLabels": true
     },
     "include": ["src", "public"]
 }

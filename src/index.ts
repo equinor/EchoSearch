@@ -38,7 +38,7 @@ export const Lookup = {
 export const Syncer = {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<Result> {
         const token = await getApiTokenInMainThread();
-        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
+        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token ?? '');
     },
     setEnabledAsync: echoSearchWorker.setEnabled,
     changePlantAsync: echoSearchWorker.changePlantAsync,
@@ -46,5 +46,8 @@ export const Syncer = {
 };
 
 export type { Result } from './baseResult';
+export { echoSearchWorker } from './echoWorkerInstance';
 export type { SearchResult, SearchResults } from './inMemory/searchResult';
+export { logger } from './logger';
+export { OfflineSystem } from './offlineSync/syncSettings';
 export type { TagStatus, TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';
