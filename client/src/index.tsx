@@ -32,7 +32,9 @@ const SearchEngineDemo: React.FC = (): JSX.Element => {
     const isAuthenticated = EchoCore.useAuthenticate(EchoCore.EchoAuthProvider);
     useEffect(() => {
         if (isAuthenticated) {
-            EchoCore.EchoClient.getAccessToken().then((token) => console.log(token));
+            EchoCore.EchoClient.getAccessToken().then((token) =>
+                token?.length > 0 ? console.log(':D TOKEN success :)') : console.log(':(( TOKEN failed :(')
+            );
         }
     }, [isAuthenticated]);
 
