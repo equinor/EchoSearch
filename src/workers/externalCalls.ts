@@ -15,6 +15,7 @@ import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inM
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
+import { logging, LogType } from '../loggerOptions';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
@@ -45,7 +46,18 @@ let tagSearchSystem: SearchSystem<TagSummaryDb>;
 let punchSearchSystem: SearchSystem<PunchDb>;
 
 export async function externalInitialize(): Promise<void> {
+    const logOptions = {
+        '': LogType.Trace
+    };
+
+    logging.setLogLevels(logOptions);
     log.info('-------------- externalInitialize ------------ ');
+    log.trace('trace');
+    log.debug('debug');
+    log.info('info');
+    log.warn('warn');
+    log.error('error');
+
     // const wait = (ms) => new Promise((res) => setTimeout(res, ms));
     // const p1 = new Promise((res) => setTimeout(() => res('p1'), 1000));
     // const p2 = new Promise((res) => setTimeout(() => res('p2'), 500));

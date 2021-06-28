@@ -1,34 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NotImplementedError } from './baseResult';
+import { isLogEnabled, LogType } from './loggerOptions';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 
-export interface LogOptions {
-    minLevels: { [module: string]: string };
-}
-
-const options: LogOptions = {
-    minLevels: {
-        '[Search': 'info'
-    }
-};
-
-function isEnabled(context: string, logType: LogType): boolean {
-    let minLevel = 'none';
-    let match = '';
-
-    for (const key in options.minLevels) {
-        if (context.startsWith(key) && key.length >= match.length) {
-            minLevel = options.minLevels[key];
-            match = key;
-        }
-    }
-    console.log(context, match);
-    return match !== '';
-}
-
 function logWithType(logType: LogType, context: string, ...args: any[]): void {
-    //if (!isEnabled(context, logType)) return;
+    if (!isLogEnabled(context, logType)) return;
 
     if (logType === LogType.Trace) console.log(context, ...args);
     else if (logType === LogType.Debug) console.log(context, ...args);
@@ -36,14 +13,6 @@ function logWithType(logType: LogType, context: string, ...args: any[]): void {
     else if (logType === LogType.Warn) console.warn(context, ...args);
     else if (logType === LogType.Error) console.error(context, ...args);
     else throw new NotImplementedError(`${logType} logging has not been implemented`);
-}
-
-enum LogType {
-    Trace = 1,
-    Debug,
-    Info,
-    Warn,
-    Error
 }
 
 function logPerformanceToConsole(message: string, startTime: number, forcePrintToConsole = false): void {

@@ -9,6 +9,15 @@ import pkg from './package.json';
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
+const environment = process.env.NODE_ENV;
+const isDevelopment = environment === 'development';
+
+function print() {
+    console.log('isDevelopment', isDevelopment, 'process.env.NODE_ENV', process.env.NODE_ENV);
+}
+
+setTimeout(() => print(), 1000);
+
 /**
  * Rollup config configuration for Echo Projects
  * Compiling Typescript and support for Workers

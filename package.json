@@ -26,7 +26,8 @@
   "dependencies": {
     "@equinor/echo-base": "^0.2.104",
     "comlink": "^4.3.1",
-    "dexie": "^3.0.3"
+    "dexie": "^3.0.3",
+    "worker-thread": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.13.15",
@@ -66,8 +67,7 @@
     "rollup-plugin-typescript2": "^0.30.0",
     "rollup-plugin-web-worker-loader": "^1.6.1",
     "tslib": "^2.2.0",
-    "typescript": "^4.2.4",
-    "worker-thread": "^1.1.0"
+    "typescript": "^4.2.4"
   },
   "files": [
     "lib/"
