@@ -7,7 +7,7 @@ export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setT
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
     let value = 0;
     for (let index = 0; index < sleepCount; index++) {
-        console.log('going to sleep 22', value);
+        console.log('going to sleep 77', value);
         await sleep(1000);
         value++;
     }

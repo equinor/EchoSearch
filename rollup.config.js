@@ -17,6 +17,7 @@ const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
 const environment = process.env.NODE_ENV;
 const isDevelopment = environment === 'development';
+const isProduction = !isDevelopment;
 
 function print() {
     console.log('isDevelopment', isDevelopment, 'process.env.NODE_ENV', process.env.NODE_ENV);
@@ -46,7 +47,7 @@ const config = {
         typescript(),
         // this will strip away libs in peerDeps in release, we should get the same instance as echopedia use instead.
         // note that peer dependencies doesn't work in worker/comlink
-        isDevelopment && peerDepsExternal(),
+        isProduction && peerDepsExternal(),
         babel({
             runtimeHelpers: true,
             babelrc: false,

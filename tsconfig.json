@@ -1,4 +1,5 @@
 {
+    //see https://www.typescriptlang.org/tsconfig
     "compilerOptions": {
         // basic options
         "target": "esnext",
@@ -15,10 +16,10 @@
 
         // type checking
         "strict": true,
-        "noImplicitAny": false,
-        "noUnusedParameters": false,
+        "noImplicitAny": true,
+        "noUnusedParameters": true,
         "strictNullChecks": true,
-        "alwaysStrict": false,
+        "alwaysStrict": true,
 
         // must be set to true because we rely on babel to transpile.
         "noEmit": true,
