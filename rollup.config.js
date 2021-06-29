@@ -35,7 +35,8 @@ const config = {
             file: isDevelopment ? 'lib/main.js' : pkg.main,
             format: 'cjs',
             exports: 'named',
-            sourcemap: true
+            sourcemap: true,
+            globals: pkg.peerDependencies
         }
     ],
     plugins: [
@@ -43,7 +44,9 @@ const config = {
         nodeResolve({ extensions }),
         workerLoader({ preserveFileNames: false, inline: true, targetPlatform: 'browser' }),
         typescript(),
-        peerDepsExternal(),
+        // this will strip away libs in peerDeps in release, we should get the same instance as echopedia use instead.
+        // note that peer dependencies doesn't work in worker/comlink
+        isDevelopment && peerDepsExternal(),
         babel({
             runtimeHelpers: true,
             babelrc: false,
