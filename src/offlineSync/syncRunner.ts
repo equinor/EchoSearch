@@ -43,7 +43,7 @@ function isSyncing(offlineSystemKey: OfflineSystem): boolean {
     return currentlySyncing.includes(offlineSystemKey);
 }
 
-function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState) {
+function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState: boolean) {
     log.create(offlineSystemKey).info(`isSyncing`, syncEnabledState);
     if (syncEnabledState) {
         currentlySyncing.push(offlineSystemKey);
