@@ -1,4 +1,5 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
+import { NotInitializedError } from '../baseResult';
 import { logger } from '../logger';
 
 const log = logger('SyncSettings');
@@ -28,12 +29,12 @@ let _instCode: string;
 
 export function getInstCode(): string {
     if (!_instCode) {
-        throw new Error('instCode is not defined');
+        throw new NotInitializedError('instCode is not defined');
     }
     return _instCode;
 }
 
-export async function saveInstCode(instCodeArg: string): Promise<void> {
+async function saveInstCode(instCodeArg: string): Promise<void> {
     await instance()?.settings.put(instCodeArg, 'instCode');
     _instCode = instCodeArg;
 }
@@ -58,7 +59,7 @@ async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise
     );
 }
 
-export async function loadOfflineSettings(): Promise<void> {
+async function loadOfflineSettings(): Promise<void> {
     const settings = await instance().offlineStatus.toArray();
     settings.forEach((setting) => {
         dictionary[setting.offlineSystemKey] = setting;
@@ -82,7 +83,7 @@ function AddMissingSettings() {
         const offlineSystemKey = item as OfflineSystem;
         const hasSetting = dictionary[offlineSystemKey];
         if (!hasSetting) {
-            dictionary[offlineSystemKey] = CreateDefaultSettings(offlineSystemKey);
+            dictionary[offlineSystemKey] = Settings.CreateDefaultSettings(offlineSystemKey);
         }
     }
 }
@@ -110,7 +111,7 @@ export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem 
     if (result) {
         return { ...result };
     }
-    throw new Error('settings not initialized - bug in code');
+    throw new NotInitializedError('settings not initialized - bug in code');
 }
 
 export function SaveSettings(settings: OfflineSettingItem): void {
@@ -122,15 +123,20 @@ function fireAndForget(asyncFunc: () => Promise<void>): void {
     asyncFunc();
 }
 
-export function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
-    const setting: OfflineSettingItem = {
+function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
+    return {
         offlineSystemKey: offlineSystemKey,
         isEnable: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
         newestItemDate: undefined,
         lastSyncedAtDate: undefined
     };
-    return setting;
 }
+
+export const Settings = {
+    CreateDefaultSettings,
+    loadOfflineSettings,
+    saveInstCode
+};
 
 export interface OfflineSettingItem {
     offlineSystemKey: OfflineSystem;

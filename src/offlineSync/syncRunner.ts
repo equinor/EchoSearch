@@ -64,6 +64,7 @@ async function runSyncInternal<T>(searchSystem: SearchSystem<T>): Promise<Result
 
     let result = {} as InternalSyncResult;
     const needFullSync = !settings.lastSyncedAtDate;
+    log.trace('Need full sync:', needFullSync);
 
     result = needFullSync
         ? await searchSystem.runFullSync()

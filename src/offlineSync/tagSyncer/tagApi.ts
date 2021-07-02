@@ -1,4 +1,4 @@
-import { JsonParseError } from '../../baseResult';
+import { JsonParseError, SyncError } from '../../baseResult';
 import { logger } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
@@ -37,6 +37,7 @@ function cleanupTags(tags: TagSummaryDb[]): TagSummaryDb[] {
 export async function apiAllTags(abortSignal: AbortSignal): Promise<TagsData> {
     const tagData = _mock.isEnabled ? getMockedTags() : await getAllTagsFromApi(getInstCode(), abortSignal);
     tagData.tags = cleanupTags(tagData.tags);
+    log.trace('All Tags:', tagData.tags.length, tagData.dataSyncedAt, _mock.isEnabled ? 'Using mock data' : '');
     return tagData;
 }
 
@@ -44,6 +45,7 @@ export async function apiUpdatedTags(fromDate: Date, abortSignal: AbortSignal): 
     const tags = _mock.isEnabled
         ? getMockedUpdatedTags()
         : await getUpdatedTagFromApi(getInstCode(), fromDate, abortSignal);
+    log.trace('Updated Tags:', tags.length, _mock.isEnabled ? 'Using mock data' : '');
     return { tags: cleanupTags(tags), dataSyncedAt: new Date() } as TagsData;
 }
 
@@ -71,7 +73,7 @@ function extractDateFromHeader(response: Response, headerName: string): Date {
         const dates = response.headers.get(headerName)?.match(regex) as string[];
         return new Date(dates[0]);
     }
-    throw new Error(`header (${headerName}) doesn't exist`);
+    throw new SyncError(`header (${headerName}) doesn't exist`); //Expected from api, something is wrong with api response
 }
 
 async function getAllTagsFromApi(instCode: string, abortSignal: AbortSignal): Promise<TagsData> {

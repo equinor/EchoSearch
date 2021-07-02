@@ -1,13 +1,14 @@
 import EchoCore from '@equinor/echo-core';
-export async function getApiTokenInMainThread(): Promise<string> {
-    console.log('trying to get token');
+import { logger } from './logger';
 
+const log = logger('Token');
+export async function getApiTokenInMainThread(): Promise<string> {
     try {
-        const result = await EchoCore.EchoClient.getAccessToken();
-        //console.log('token', result);
-        return result;
+        const token = await EchoCore.EchoClient.getAccessToken();
+        log.trace('Token SUCCESS:', token.length > 0);
+        return token;
     } catch (e) {
-        console.error('failed to get token-------------');
+        log.error('Token FAILED', e);
         throw e;
     }
 }

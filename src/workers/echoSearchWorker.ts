@@ -1,9 +1,10 @@
 import * as Comlink from 'comlink';
-import { Result } from '../baseResult';
-import { SearchResult, searchResults, SearchResults } from '../inMemory/searchResult';
+import { result, Result } from '../baseResult';
+import { SearchResult, SearchResults } from '../inMemory/searchResult';
+import { logger } from '../logger';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { OfflineSystem, saveInstCode } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import ctx from '../setup/setup';
@@ -36,11 +37,13 @@ function expensive(time: number): number {
     return count;
 }
 
+const log = logger('EchoSearchWorker');
+
 export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
 
 export interface EchoWorker {
-    initialize(): Promise<void>;
-    changePlantAsync(instCode: string): Promise<void>;
+    initialize(): Promise<Result>;
+    changePlantAsync(instCode: string): Promise<Result>;
 
     searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
@@ -57,7 +60,7 @@ export interface EchoWorker {
     searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
-    setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
+    setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
 
     cancelSync(offlineSystemKey: OfflineSystem): void;
     runExpensive: () => string;
@@ -67,43 +70,37 @@ export interface EchoWorker {
     testCommReturnTypes(): unknown;
 }
 
+async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promise<T> {
+    try {
+        const funcResult = await func();
+        if (!funcResult.isSuccess) log.debug('Error:', funcResult.error);
+        return funcResult;
+    } catch (error) {
+        log.debug(error);
+        return result.errorFromException(error) as T;
+    }
+}
+
 const echoWorker: EchoWorker = {
-    initialize: externalInitialize,
+    initialize: (...args) => tryCatchToResult(() => externalInitialize(...args)),
 
-    async searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
-        try {
-            return await externalTagSearch(searchText, maxHits);
-        } catch (e) {
-            console.log('caught in echoWorker', JSON.parse(JSON.stringify(e)));
-            return searchResults.error(e);
-            //throw e;
-        }
-    },
-    lookupTagAsync: externalLookupTag,
-    lookupTagsAsync: externalLookupTags,
+    searchTags: (...args) => tryCatchToResult(() => externalTagSearch(...args)),
+    searchForClosestTagNo: (...args) => tryCatchToResult(() => externalSearchForClosestTagNo(...args)),
+    lookupTagAsync: (...args) => tryCatchToResult(() => externalLookupTag(...args)),
+    lookupTagsAsync: (...args) => tryCatchToResult(() => externalLookupTags(...args)),
 
-    searchMcPacks: externalMcPackSearch,
-    lookupMcPackAsync: externalLookupMcPack,
-    lookupMcPacksAsync: externalLookupMcPacks,
+    searchMcPacks: (...args) => tryCatchToResult(() => externalMcPackSearch(...args)),
+    lookupMcPackAsync: (...args) => tryCatchToResult(() => externalLookupMcPack(...args)),
+    lookupMcPacksAsync: (...args) => tryCatchToResult(() => externalLookupMcPacks(...args)),
 
-    searchPunches: externalPunchesSearch,
-    lookupPunchAsync: externalLookupPunch,
-    lookupPunchesAsync: externalLookupPunches,
+    searchPunches: (...args) => tryCatchToResult(() => externalPunchesSearch(...args)),
+    lookupPunchAsync: (...args) => tryCatchToResult(() => externalLookupPunch(...args)),
+    lookupPunchesAsync: (...args) => tryCatchToResult(() => externalLookupPunches(...args)),
 
-    searchForClosestTagNo: externalSearchForClosestTagNo,
-
-    async changePlantAsync(instCode: string): Promise<void> {
-        await saveInstCode(instCode);
-        await syncContract.externalDeleteAllData();
-    },
-
-    runSyncWorkerAsync: syncContract.externalRunSync,
-
-    cancelSync(offlineSystemKey: OfflineSystem): void {
-        syncContract.externalCancelSync(offlineSystemKey);
-    },
-
-    setEnabled: syncContract.externalSetEnabled,
+    changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
+    runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),
+    cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
+    setEnabled: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
 
     runExpensive(): string {
         expensive(2000);

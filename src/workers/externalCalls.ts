@@ -23,7 +23,7 @@ import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
 import { runSync } from '../offlineSync/syncRunner';
-import { CreateDefaultSettings, loadOfflineSettings, OfflineSystem, SaveSettings } from '../offlineSync/syncSettings';
+import { OfflineSystem, SaveSettings, Settings } from '../offlineSync/syncSettings';
 import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
 import { tagsAdministrator, tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
@@ -45,7 +45,7 @@ let mcPacksSystem: SearchSystem<McPackDb>;
 let tagSearchSystem: SearchSystem<TagSummaryDb>;
 let punchSearchSystem: SearchSystem<PunchDb>;
 
-export async function externalInitialize(): Promise<void> {
+export async function externalInitialize(): Promise<Result> {
     const logOptions = {
         '': LogType.Trace
     };
@@ -64,6 +64,7 @@ export async function externalInitialize(): Promise<void> {
     // const result = await Promise.race([p1, p2]);
 
     await internalInitialize();
+    return result.success();
 }
 
 async function initMcPacks(): Promise<void> {
@@ -102,7 +103,7 @@ async function internalInitialize(): Promise<void> {
 
     const performanceLogger = log.performance();
 
-    await loadOfflineSettings();
+    await Settings.loadOfflineSettings();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
 
     const initMcTask = initMcPacks();
@@ -255,19 +256,25 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 //     throw new NotImplementedError('getSearchSystem has not been implemented for ', offlineSystemKey);
 // }
 
-async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.McPack) {
-        setMcPacksIsEnabled(isEnabled);
-    } else if (offlineSystemKey === OfflineSystem.Punches) {
-        setPunchesIsEnabled(isEnabled);
+async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result> {
+    switch (offlineSystemKey) {
+        case OfflineSystem.McPack:
+            setMcPacksIsEnabled(isEnabled);
+            return result.success();
+        case OfflineSystem.Punches:
+            setPunchesIsEnabled(isEnabled);
+            return result.success();
     }
+
+    return result.notImplementedError('SetEnabled not implemented for ' + offlineSystemKey);
 }
 
-function externalCancelSync(offlineSystemKey: OfflineSystem): void {
+async function externalCancelSync(offlineSystemKey: OfflineSystem): Promise<Result> {
     if (offlineSystemKey === OfflineSystem.McPack) mcPacksSystem.cancelSync();
     else if (offlineSystemKey === OfflineSystem.Tags) tagSearchSystem.cancelSync();
     else if (offlineSystemKey === OfflineSystem.Punches) punchSearchSystem.cancelSync();
     else throw new NotImplementedError('cancel not implemented for ' + offlineSystemKey);
+    return result.success();
 }
 
 async function externalDeleteAllData(): Promise<void> {
@@ -291,7 +298,7 @@ async function externalDeleteAllData(): Promise<void> {
 }
 
 function ClearSettings(offlineSystemKey: OfflineSystem): void {
-    const settings = CreateDefaultSettings(offlineSystemKey);
+    const settings = Settings.CreateDefaultSettings(offlineSystemKey);
     SaveSettings(settings);
 }
 
@@ -302,12 +309,19 @@ function externalToggleMockData(): void {
     log.info('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
 }
 
+async function externalChangePlant(instCode: string): Promise<Result> {
+    await Settings.saveInstCode(instCode);
+    await syncContract.externalDeleteAllData();
+    return result.success();
+}
+
 export const syncContract = {
     externalDeleteAllData,
     externalCancelSync,
     externalSetEnabled,
     externalRunSync,
-    externalToggleMockData
+    externalToggleMockData,
+    externalChangePlant
 };
 
 export function externalTestCommReturnTypes(): ErrorForTesting {

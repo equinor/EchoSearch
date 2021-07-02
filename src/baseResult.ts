@@ -1,4 +1,4 @@
-import { BaseError, BaseErrorArgs, NotFoundError } from '@equinor/echo-base';
+import { BaseError, BaseErrorArgs, ForbiddenError, NotFoundError, UnauthorizedError } from '@equinor/echo-base';
 
 export interface Result {
     readonly isSuccess: boolean;
@@ -21,9 +21,12 @@ export class DbError extends SyncError {}
 export class NotImplementedError extends SyncError {}
 export class JsonParseError extends SyncError {}
 
-export class ArgumentDateError extends SyncError {}
+export class ArgumentError extends SyncError {}
+export class ArgumentDateError extends ArgumentError {}
 
 export class SyncNotEnabledError extends SyncError {}
+
+export class NotInitializedError extends SyncError {}
 
 export class SyncCanceledError extends SyncError {
     constructor(message: string) {
@@ -40,11 +43,14 @@ const createError = (error: SearchModuleError): Result => {
     return { isSuccess: false, error };
 };
 
-function createResultErrorFromException(error: Error | BaseError): Result {
+function createResultErrorFromException<T extends Result>(error: Error | BaseError): T {
     let errorType = ErrorType.Unknown;
 
     if (error instanceof SyncCanceledError) errorType = ErrorType.SyncCanceled;
     else if (error instanceof NotFoundError) errorType = ErrorType.ApiNotFound;
+    else if (error instanceof ForbiddenError || error instanceof UnauthorizedError) errorType = ErrorType.ApiForbidden;
+    else if (error instanceof NotInitializedError) errorType = ErrorType.NotInitialized;
+    else if (error instanceof ArgumentError) errorType = ErrorType.BugInCode;
     else if (error instanceof Error && error.message.toLowerCase().includes('abort'))
         errorType = ErrorType.SyncCanceled; //fetch url call was aborted
 
@@ -63,7 +69,7 @@ function createResultErrorFromException(error: Error | BaseError): Result {
         properties: { ...allProperties }
     };
     //todo url and statusCode?
-    return createError(searchModuleError);
+    return createError(searchModuleError) as T;
 }
 
 export const result = {
@@ -73,13 +79,6 @@ export const result = {
     notImplementedError: (message: string): Result => createError({ type: ErrorType.NotImplemented, message: message })
 };
 
-// enum ErrorType {
-//     SyncIsNotEnabled,
-//     NetworkErrorForbidden,
-//     NetworkErrorInternalServerError,
-//     NetworkErrorBadRequest
-// }
-
 export enum ErrorType {
     Unknown = 'Unknown',
     ApiNotFound = 'ApiNotFound',
@@ -87,7 +86,9 @@ export enum ErrorType {
     NotImplemented = 'NotImplemented',
     SyncFailed = 'SyncFailed',
     SyncCanceled = 'SyncCanceled',
-    SyncIsNotEnabled = 'SyncIsNotEnabled'
+    SyncIsNotEnabled = 'SyncIsNotEnabled',
+    NotInitialized = 'NotInitialized',
+    BugInCode = 'BugInCode'
 }
 
 export interface SearchModuleError {

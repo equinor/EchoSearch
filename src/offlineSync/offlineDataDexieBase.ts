@@ -1,5 +1,5 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
-import { DbError, SyncCanceledError } from '../baseResult';
+import { DbError, NotInitializedError, SyncCanceledError } from '../baseResult';
 import { logger, LoggerFunctions } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
@@ -149,7 +149,7 @@ export class DatabaseAdministrator<T> {
         if (this.database !== undefined) {
             return new Repository(this.database as OfflineDataDexieBase<T>);
         }
-        throw new Error('not initialized ' + this.databaseNamePreFix);
+        throw new NotInitializedError('not initialized ' + this.databaseNamePreFix);
     }
 
     async deleteAndRecreate(): Promise<void> {

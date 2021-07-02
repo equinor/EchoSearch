@@ -7,8 +7,8 @@ import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 function logWithType(logType: LogType, context: string, ...args: any[]): void {
     if (!isLogEnabled(context, logType)) return;
 
-    if (logType === LogType.Trace) console.log(context, ...args);
-    else if (logType === LogType.Debug) console.log(context, ...args);
+    if (logType === LogType.Trace) console.log('TRACE', context, ...args);
+    else if (logType === LogType.Debug) console.log('DEBUG', context, ...args);
     else if (logType === LogType.Info) console.log(context, ...args);
     else if (logType === LogType.Warn) console.warn(context, ...args);
     else if (logType === LogType.Error) console.error(context, ...args);

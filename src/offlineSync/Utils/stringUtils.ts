@@ -1,3 +1,5 @@
+import { ArgumentDateError } from '../../baseResult';
+
 export function randomId(length: number): string {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -20,7 +22,7 @@ export function randomNumberId(length: number): number {
 
 export function dateAsApiString(date: Date | string): string {
     if (!date) {
-        throw new Error('Argument exception - date is undefined');
+        throw new ArgumentDateError('dateAsApiString - date is undefined');
     }
 
     return new Date(date).toISOString();
