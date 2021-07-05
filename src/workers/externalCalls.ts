@@ -5,12 +5,8 @@ import {
     inMemoryMcPacksInstance,
     searchInMemoryMcPacksWithText
 } from '../inMemory/inMemoryMcPacks';
-import { inMemoryNotificationsInit, searchInMemoryNotificationsWithText } from '../inMemory/inMemoryNotifications';
-import {
-    inMemoryPunchesInit,
-    inMemoryPunchesInstance,
-    searchInMemoryPunchesWithText
-} from '../inMemory/inMemoryPunches';
+import { searchInMemoryNotificationsWithText } from '../inMemory/inMemoryNotifications';
+import { inMemoryPunchesInit, searchInMemoryPunchesWithText } from '../inMemory/inMemoryPunches';
 import { clearInMemoryTags, isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { clearLevTrie, searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
 import { initInMemoryTagsFromIndexDb } from '../inMemory/inMemoryTagsInitializer';
@@ -21,11 +17,12 @@ import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
+import { notificationsRepository } from '../offlineSync/notificationSyncer/notificationRepository';
 import {
-    notificationsAdministrator,
-    notificationsRepository
-} from '../offlineSync/notificationSyncer/notificationRepository';
-import { syncFullNotifications, syncUpdateNotifications } from '../offlineSync/notificationSyncer/notificationSyncer';
+    notificationsSyncSystem,
+    syncFullNotifications,
+    syncUpdateNotifications
+} from '../offlineSync/notificationSyncer/notificationSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
@@ -100,13 +97,6 @@ async function initTags(): Promise<void> {
     performanceLogger.forceLogDelta('done ' + tagCount);
 }
 
-async function initNotifications(): Promise<void> {
-    const performanceLogger = log.performance('Init Notifications');
-    await notificationsAdministrator().init();
-    const count = await inMemoryNotificationsInit();
-    performanceLogger.forceLogDelta('done ' + count);
-}
-
 async function internalInitialize(): Promise<void> {
     log.create('child').info('-- this is from the new logger 222');
 
@@ -124,7 +114,7 @@ async function internalInitialize(): Promise<void> {
     const initMcTask = initMcPacks();
     const initTagsTask = initTags();
     const initPunchesTask = initPunches();
-    const initNotificationTask = initNotifications();
+    const initNotificationTask = notificationsSyncSystem.initTask();
 
     performanceLogger.forceLog('SearchSystems starting');
 
@@ -269,6 +259,8 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
             return await runSync(tagSearchSystem);
         } else if (offlineSystemKey === OfflineSystem.Punches) {
             return await runSync(punchSearchSystem);
+        } else if (offlineSystemKey === OfflineSystem.Notifications) {
+            return await runSync(notificationsSyncSystem);
         }
 
         return result.notImplementedError('sync has not been implemented for ' + offlineSystemKey);
@@ -293,10 +285,13 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 async function externalSetEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result> {
     switch (offlineSystemKey) {
         case OfflineSystem.McPack:
-            setMcPacksIsEnabled(isEnabled);
+            await setMcPacksIsEnabled(isEnabled);
             return result.success();
         case OfflineSystem.Punches:
-            setPunchesIsEnabled(isEnabled);
+            await setPunchesIsEnabled(isEnabled);
+            return result.success();
+        case OfflineSystem.Notifications:
+            await notificationsSyncSystem.setIsEnabled(isEnabled);
             return result.success();
     }
 
@@ -325,9 +320,7 @@ async function externalDeleteAllData(): Promise<void> {
     await mcPacksAdministrator().deleteAndRecreate();
     inMemoryMcPacksInstance().clearData();
 
-    ClearSettings(OfflineSystem.Punches);
-    await punchesAdministrator().deleteAndRecreate();
-    inMemoryPunchesInstance().clearData();
+    await notificationsSyncSystem.clearAllData();
     performanceLogger.forceLog(' - Done');
 }
 

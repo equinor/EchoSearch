@@ -2,6 +2,7 @@ import EchoCore from '@equinor/echo-core';
 import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { logger } from './logger';
+import { logging, LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { ErrorForTesting } from './workers/externalCalls';
 
@@ -25,6 +26,11 @@ document.getElementById('toggleUseMockDataBtn')?.addEventListener('click', toggl
 document.getElementById('testCommReturnTypes')?.addEventListener('click', testCommReturnTypesClicked);
 
 let count = 0;
+
+const logOptions = {
+    '': LogType.Trace
+};
+logging.setLogLevels(logOptions);
 const log = logger('Main');
 
 async function runSyncClicked() {
@@ -36,10 +42,11 @@ async function runSyncClicked() {
 async function runSyncMcPacksClicked() {
     const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
-    const results = await Promise.all([mcPackSync, punchesSync]);
+    const notificationsSync = Syncer.runSyncAsync(OfflineSystem.Notifications);
+    const results = await Promise.all([mcPackSync, punchesSync, notificationsSync]);
     for (const result of results) {
         log.info('Sync result main:', result);
-        if (!result.isSuccess) log.info({ ...result.error });
+        if (!result.isSuccess) log.warn({ ...result.error });
     }
 }
 

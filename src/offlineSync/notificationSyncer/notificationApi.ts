@@ -6,7 +6,7 @@ import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedNotificationsString } from './notificationMocked';
 
-const _mock = new ToggleState(true);
+const _mock = new ToggleState(false);
 export const notificationsMock = _mock;
 
 // maintenance record properties
@@ -42,6 +42,7 @@ export interface NotificationDb {
 const log = logger('Notification.Api');
 
 function cleanupNotification(notification: NotificationDb): NotificationDb {
+    if (!notification.createdDateTime) log.warn('Undefined date', notification);
     return {
         maintenanceRecordId: toNumber(notification.maintenanceRecordId),
         recordTypeId: orEmpty(notification.recordTypeId),
