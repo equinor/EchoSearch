@@ -5,6 +5,7 @@ import {
     inMemoryMcPacksInstance,
     searchInMemoryMcPacksWithText
 } from '../inMemory/inMemoryMcPacks';
+import { inMemoryNotificationsInit, searchInMemoryNotificationsWithText } from '../inMemory/inMemoryNotifications';
 import {
     inMemoryPunchesInit,
     inMemoryPunchesInstance,
@@ -19,6 +20,12 @@ import { logging, LogType } from '../loggerOptions';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { setMcPacksIsEnabled, syncFullMcPacks, syncUpdateMcPacks } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
+import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
+import {
+    notificationsAdministrator,
+    notificationsRepository
+} from '../offlineSync/notificationSyncer/notificationRepository';
+import { syncFullNotifications, syncUpdateNotifications } from '../offlineSync/notificationSyncer/notificationSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesAdministrator, punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { setPunchesIsEnabled, syncFullPunches, syncUpdatePunches } from '../offlineSync/punchSyncer/punchSyncer';
@@ -44,6 +51,7 @@ let initDone = false;
 let mcPacksSystem: SearchSystem<McPackDb>;
 let tagSearchSystem: SearchSystem<TagSummaryDb>;
 let punchSearchSystem: SearchSystem<PunchDb>;
+let notificationsSystem: SearchSystem<NotificationDb>;
 
 export async function externalInitialize(): Promise<Result> {
     const logOptions = {
@@ -92,6 +100,13 @@ async function initTags(): Promise<void> {
     performanceLogger.forceLogDelta('done ' + tagCount);
 }
 
+async function initNotifications(): Promise<void> {
+    const performanceLogger = log.performance('Init Notifications');
+    await notificationsAdministrator().init();
+    const count = await inMemoryNotificationsInit();
+    performanceLogger.forceLogDelta('done ' + count);
+}
+
 async function internalInitialize(): Promise<void> {
     log.create('child').info('-- this is from the new logger 222');
 
@@ -109,6 +124,7 @@ async function internalInitialize(): Promise<void> {
     const initMcTask = initMcPacks();
     const initTagsTask = initTags();
     const initPunchesTask = initPunches();
+    const initNotificationTask = initNotifications();
 
     performanceLogger.forceLog('SearchSystems starting');
 
@@ -143,11 +159,21 @@ async function internalInitialize(): Promise<void> {
         async (lastChangedDate, abortSignal) => syncUpdatePunches(lastChangedDate, abortSignal)
     );
 
+    notificationsSystem = new SearchSystem<NotificationDb>(
+        OfflineSystem.Notifications,
+        initNotificationTask,
+        () => inMemoryMcPacksInstance().isReady(),
+        async (searchText, maxHits) => searchInMemoryNotificationsWithText(searchText, maxHits),
+        async () => [],
+        async (abortSignal) => syncFullNotifications(abortSignal),
+        async (lastChangedDate, abortSignal) => syncUpdateNotifications(lastChangedDate, abortSignal)
+    );
+
     performanceLogger.forceLog('SearchSystems instantiated');
 
     // await initMcTask;
     // await initTagsTask;
-    await Promise.all([initMcTask, initPunchesTask, initTagsTask]);
+    await Promise.all([initMcTask, initPunchesTask, initTagsTask, initNotificationTask]);
     performanceLogger.log('DONE');
 
     //Keep for performance testing when we have more items to sync.
@@ -158,6 +184,14 @@ async function internalInitialize(): Promise<void> {
 
     performanceLogger.forceLog('Search module initialize done');
     initDone = true;
+}
+
+export function externalNotifications() {
+    return {
+        search: (searchText: string, maxHits: number) => notificationsSystem.search(searchText, maxHits),
+        lookup: notificationsRepository().get,
+        lookups: notificationsRepository().bulkGet
+    };
 }
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
