@@ -158,7 +158,7 @@ export class DatabaseAdministrator<T> {
     }
 
     private openVersion(currentVersion: number) {
-        this.log.trace('opening database v' + this.databaseNamePreFix + currentVersion);
+        this.log.trace('opening database ' + this.databaseNamePreFix + currentVersion);
         this.database = this.databaseCreator(currentVersion);
     }
 }
@@ -175,7 +175,7 @@ export async function deleteDataBaseAndReturnNewVersionNumber(databaseNamePreFix
     const p = logging.performance();
     const newVersion = 1 + getMaxNumberInCollectionOrOne(await getDatabaseNames(databaseNamePreFix));
     await DeleteOlDatabaseVersions(databaseNamePreFix, newVersion);
-    p.forceLog('Deleted  database ' + databaseNamePreFix);
+    p.forceLog('Deleted database ' + databaseNamePreFix);
     return newVersion;
 }
 

@@ -1,5 +1,5 @@
 import { ArgumentDateError, InternalSyncResult } from '../baseResult';
-import { InMemoryData } from '../inMemory/inMemoryData';
+import { InMemoryInterface } from '../inMemory/inMemoryData';
 import { logger, LoggerFunctions } from '../logger';
 import { DatabaseAdministrator } from '../offlineSync/offlineDataDexieBase';
 import { isFullSyncDone, OfflineSystem, SaveSettings, setIsSyncEnabled, Settings } from '../offlineSync/syncSettings';
@@ -9,14 +9,14 @@ export class SyncSystem<T> {
 
     private _initTask: Promise<void> | undefined;
     private _abortController: AbortController;
-    private _inMemoryData: InMemoryData<T>;
+    private _inMemoryData: InMemoryInterface<T>;
     private _databaseAdministrator: DatabaseAdministrator<T>;
     private _offlineSystemKey: OfflineSystem;
     private _fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>;
     private _updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>;
     constructor(
         _offlineSystemKey: OfflineSystem,
-        inMemoryData: InMemoryData<T>,
+        inMemoryData: InMemoryInterface<T>,
         databaseAdministrator: DatabaseAdministrator<T>,
         fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>,
         updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>
@@ -82,13 +82,19 @@ export class SyncSystem<T> {
     }
 
     async clearAllData(): Promise<void> {
-        this.ClearSettings(this._offlineSystemKey);
+        this.cancelSync();
         await this._databaseAdministrator.deleteAndRecreate();
+        this.ClearSettings(this._offlineSystemKey);
         this._inMemoryData.clearData();
+        this.log.trace('Finished clearing data');
     }
 
     private ClearSettings(offlineSystemKey: OfflineSystem): void {
         const settings = Settings.CreateDefaultSettings(offlineSystemKey);
         SaveSettings(settings);
+    }
+
+    cancelSync(): void {
+        this._abortController.abort();
     }
 }

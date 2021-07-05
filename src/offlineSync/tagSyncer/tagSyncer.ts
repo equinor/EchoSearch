@@ -2,16 +2,27 @@ import { InternalSyncResult, result } from '../../baseResult';
 import {
     clearAndInitInMemoryTags,
     inMemoryTagsCount as inMemoryTagCount,
+    InMemoryTagsInstance,
     updateInMemoryTags
 } from '../../inMemory/inMemoryTags';
 import { populateLevTrieWithTags } from '../../inMemory/inMemoryTagSearch';
 import { logger } from '../../logger';
+import { SyncSystem } from '../../workers/syncSystem';
+import { OfflineSystem } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllTags, apiUpdatedTags } from './tagApi';
 import { tagsAdministrator, tagsRepository } from './tagRepository';
 import { TagSummaryDb } from './tagSummaryDb';
 
 const log = logger('TagSyncer');
+
+export const tagsSyncSystem = new SyncSystem(
+    OfflineSystem.Tags,
+    InMemoryTagsInstance,
+    tagsAdministrator(),
+    async (abortSignal) => syncFullTags(abortSignal),
+    async (lastChangedDate, abortSignal) => syncUpdateTags(lastChangedDate, abortSignal)
+);
 
 export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     log.trace('Full Sync Started');

@@ -91,7 +91,6 @@ function AddMissingSettings() {
 
 export function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
     const settings = GetSetting(offlineSystemKey);
-    log.info('IsSyncEnabled', offlineSystemKey, settings);
     return settings.isEnable;
 }
 

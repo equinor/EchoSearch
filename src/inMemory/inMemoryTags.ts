@@ -1,6 +1,8 @@
 import { logger } from '../logger';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumericUpperCase } from '../offlineSync/Utils/util';
+import { InMemoryInterface } from './inMemoryData';
+import { clearLevTrie } from './inMemoryTagSearch';
 
 let _sortedInMemoryTags: TagNoAlphaNumeric[] = [];
 let _isInMemoryTagsInitialized = false;
@@ -15,6 +17,11 @@ interface TagNoAlphaNumeric {
 export function isInMemoryTagsReady(): boolean {
     return _isInMemoryTagsInitialized;
 }
+
+export const InMemoryTagsInstance: InMemoryInterface<TagSummaryDb> = {
+    clearAndInit: clearAndInitInMemoryTags,
+    clearData: clearInMemoryTags
+};
 
 export function clearAndInitInMemoryTags(tags: TagSummaryDb[]): void {
     clearInMemoryTags();
@@ -99,4 +106,5 @@ export function inMemoryTagsCount(): number {
 export function clearInMemoryTags(): void {
     _sortedInMemoryTags = [];
     _isInMemoryTagsInitialized = false;
+    clearLevTrie();
 }

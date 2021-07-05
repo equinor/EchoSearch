@@ -1,6 +1,5 @@
-import { InternalSyncResult, result, Result } from '../baseResult';
+import { result, Result } from '../baseResult';
 import { logger } from '../logger';
-import { SearchSystem } from '../workers/searchSystem';
 import { SyncSystem } from '../workers/syncSystem';
 import { GetSetting, isSyncEnabled, OfflineSystem, SaveSettings } from './syncSettings';
 import { getMaxDate, minusOneDay } from './Utils/dateUtils';
@@ -16,10 +15,9 @@ export function syncIsOutdated(date: Date): boolean {
 }
 
 const log = logger('SyncRunner');
-
 const currentlySyncing: OfflineSystem[] = [];
-//TODO remove searchSystem
-export async function runSync<T>(searchSystem: SearchSystem<T> | SyncSystem<T>): Promise<Result> {
+
+export async function runSync<T>(searchSystem: SyncSystem<T>): Promise<Result> {
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
         const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
         log.warn(message);
@@ -58,18 +56,16 @@ function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState: boolean
     }
 }
 
-//TODO remove searchSystem
-async function runSyncInternal<T>(searchSystem: SearchSystem<T> | SyncSystem<T>): Promise<Result> {
+async function runSyncInternal<T>(searchSystem: SyncSystem<T>): Promise<Result> {
     const performance = log.create(searchSystem.offlineSystemKey).performance();
 
     const syncTime = new Date();
     const settings = GetSetting(searchSystem.offlineSystemKey);
 
-    let result = {} as InternalSyncResult;
     const needFullSync = !settings.lastSyncedAtDate;
     log.trace('Need full sync:', needFullSync);
 
-    result = needFullSync
+    const result = needFullSync
         ? await searchSystem.runFullSync()
         : await searchSystem.runUpdateSync(settings.newestItemDate!);
 

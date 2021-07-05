@@ -1,18 +1,9 @@
-//import handleErrors from '../../utils/handleErrors';
-
-//import { offlineDb } from './dexieDB';
-
-export function clearAllInMemoryKeys(): void {
-    // clearInMemoryTags();
-    // clearInMemoryDocuments();
-    // clearInMemoryTotalEntries();
-    // clearInMemoryCommPacks();
-    // clearInMemoryMcPacks();
-    // clearInMemoryPunches();
-    // clearInMemoryNotifications();
+export interface InMemoryInterface<T> {
+    clearData(): void;
+    clearAndInit(data: T[]): void;
 }
 
-export class InMemoryData<T> {
+export class InMemoryData<T> implements InMemoryInterface<T> {
     inMemoryData: T[];
     getKeyValue: (arg: T) => string | number;
     isReadyFlag: boolean;

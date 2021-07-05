@@ -1,12 +1,21 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
 import { logger } from '../../logger';
+import { SyncSystem } from '../../workers/syncSystem';
 import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
 const log = logger('McPack.Sync');
+
+export const mcPacksSyncSystem = new SyncSystem(
+    OfflineSystem.McPack,
+    inMemoryMcPacksInstance(),
+    mcPacksAdministrator(),
+    async (abortSignal) => syncFullMcPacks(abortSignal),
+    async (lastChangedDate, abortSignal) => syncUpdateMcPacks(lastChangedDate, abortSignal)
+);
 export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
     setIsSyncEnabled(OfflineSystem.McPack, isEnabled);
 
@@ -16,7 +25,7 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
     }
 }
 
-export async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllMcPacks(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta('Api');
@@ -33,7 +42,7 @@ export async function syncFullMcPacks(abortSignal: AbortSignal): Promise<Interna
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdateMcPacks(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncUpdateMcPacks(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate, abortSignal);
     performanceLogger.forceLogDelta('Api');

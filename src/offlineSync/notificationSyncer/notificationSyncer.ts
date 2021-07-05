@@ -18,7 +18,7 @@ export const notificationsSyncSystem = new SyncSystem(
     async (lastChangedDate, abortSignal) => syncUpdateNotifications(lastChangedDate, abortSignal)
 );
 
-export async function syncFullNotifications(abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncFullNotifications(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllNotifications(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta('Api');
@@ -35,10 +35,7 @@ export async function syncFullNotifications(abortSignal: AbortSignal): Promise<I
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdateNotifications(
-    lastChangedDate: Date,
-    abortSignal: AbortSignal
-): Promise<InternalSyncResult> {
+async function syncUpdateNotifications(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiUpdatedNotifications(getInstCode(), lastChangedDate, abortSignal);
     performanceLogger.forceLogDelta('Api');

@@ -1,6 +1,7 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
 import { logger } from '../../logger';
+import { SyncSystem } from '../../workers/syncSystem';
 import { Repository } from '../offlineDataDexieBase';
 import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
@@ -8,6 +9,14 @@ import { apiAllPunches, apiUpdatedPunches, PunchDb, verifyPunchCount } from './p
 import { punchesAdministrator, punchesRepository } from './punchRepository';
 
 const log = logger('Punch.Sync');
+
+export const punchesSyncSystem = new SyncSystem(
+    OfflineSystem.Punches,
+    inMemoryPunchesInstance(),
+    punchesAdministrator(),
+    async (abortSignal) => syncFullPunches(abortSignal),
+    async (lastChangedDate, abortSignal) => syncUpdatePunches(lastChangedDate, abortSignal)
+);
 
 export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
     setIsSyncEnabled(OfflineSystem.Punches, isEnabled);
@@ -18,7 +27,7 @@ export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
     }
 }
 
-export async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllPunches(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta(' Api');
@@ -36,7 +45,7 @@ export async function syncFullPunches(abortSignal: AbortSignal): Promise<Interna
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-export async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const lastSyncedAtDate = GetSetting(OfflineSystem.Punches).lastSyncedAtDate;
     const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
     const daysBackInTime = 2;
