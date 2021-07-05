@@ -4,11 +4,33 @@ describe('inMemoryData', () => {
     it('should INIT and SORT initial data', () => {
         const db = createDb();
 
-        const input = [create('2'), create('1'), create('3')];
+        const input = [
+            create('2'),
+            create('1'),
+            create('3'),
+            create('8'),
+            create('7'),
+            create('0'),
+            create('9'),
+            create('5'),
+            create('4'),
+            create('6')
+        ];
         db.clearAndInit(input);
         const actual = db.all();
 
-        const expected = [create('1'), create('2'), create('3')];
+        const expected = [
+            create('0'),
+            create('1'),
+            create('2'),
+            create('3'),
+            create('4'),
+            create('5'),
+            create('6'),
+            create('7'),
+            create('8'),
+            create('9')
+        ];
         expect(actual).toEqual(expected);
     });
 

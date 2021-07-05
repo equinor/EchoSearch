@@ -79,17 +79,21 @@ async function loadOfflineSettings(): Promise<void> {
 const dictionary: Record<string, OfflineSettingItem> = {};
 
 function AddMissingSettings() {
+    log.info('AddMissingSettings');
     for (const item in OfflineSystem) {
-        const offlineSystemKey = item as OfflineSystem;
-        const hasSetting = dictionary[offlineSystemKey];
+        const hasSetting = dictionary[item];
+        log.info(item, hasSetting);
+
         if (!hasSetting) {
-            dictionary[offlineSystemKey] = Settings.CreateDefaultSettings(offlineSystemKey);
+            dictionary[item] = Settings.CreateDefaultSettings(item as OfflineSystem);
         }
     }
+    console.log('all settings now: ', dictionary);
 }
 
 export function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
     const settings = GetSetting(offlineSystemKey);
+    log.info('IsSyncEnabled', offlineSystemKey, settings);
     return settings.isEnable;
 }
 
@@ -108,9 +112,11 @@ export function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
 
 export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     const result = dictionary[offlineSystemKey];
+    log.info('GetSettings', offlineSystemKey, result);
     if (result) {
         return { ...result };
     }
+    log.info('dictionary now', dictionary);
     throw new NotInitializedError('settings not initialized - bug in code');
 }
 

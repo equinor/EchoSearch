@@ -15,23 +15,36 @@ export async function SearchDummyTest(sleepCount: number): Promise<string> {
     return 'search dummy test done' + value;
 }
 
-export const Search = {
-    closestTagSearchAsync: echoSearchWorker.searchForClosestTagNo,
-    searchTagsAsync: echoSearchWorker.searchTags,
-    searchMcPacksAsync: echoSearchWorker.searchMcPacks,
-    searchPunchesAsync: echoSearchWorker.searchPunches,
-    OfflineSystem
+const SearchTags = {
+    searchAsync: echoSearchWorker.searchTags,
+    closestTagAsync: echoSearchWorker.searchForClosestTagNo,
+    getAsync: echoSearchWorker.lookupTagAsync,
+    bulkGetAsync: echoSearchWorker.lookupTagsAsync
 };
 
-export const Lookup = {
-    lookupTagAsync: echoSearchWorker.lookupTagAsync,
-    lookupTagsAsync: echoSearchWorker.lookupTagsAsync,
+const SearchPunches = {
+    searchAsync: echoSearchWorker.searchPunches,
+    getAsync: echoSearchWorker.lookupPunchAsync,
+    bulkGetAsync: echoSearchWorker.lookupPunchesAsync
+};
 
-    lookupPunchAsync: echoSearchWorker.lookupPunchAsync,
-    lookupPunchesAsync: echoSearchWorker.lookupPunchesAsync,
+const SearchMcPacks = {
+    searchAsync: echoSearchWorker.searchMcPacks,
+    getAsync: echoSearchWorker.lookupPunchAsync,
+    bulkGetAsync: echoSearchWorker.lookupPunchesAsync
+};
 
-    lookupMcPackAsync: echoSearchWorker.lookupMcPackAsync,
-    lookupMcPacksAsync: echoSearchWorker.lookupMcPacksAsync,
+const searchNotifications = {
+    searchAsync: echoSearchWorker.searchNotifications,
+    getAsync: {},
+    bulkGetAsync: {}
+};
+
+export const Search = {
+    Tags: SearchTags,
+    Punch: SearchPunches,
+    McPacks: SearchMcPacks,
+    Notifications: searchNotifications,
     OfflineSystem
 };
 

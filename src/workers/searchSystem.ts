@@ -47,6 +47,7 @@ export class SearchSystem<T> {
         maxHits: number,
         offlinePredicate?: (arg: T) => boolean
     ): Promise<SearchResults<T>> {
+        console.log('--search,', this._offlineSystemKey);
         if (!isSyncEnabled(this._offlineSystemKey)) {
             return searchResults.syncNotEnabledError<T>(this._offlineSystemKey);
         }

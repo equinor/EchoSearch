@@ -14,10 +14,10 @@ export function clearAllInMemoryKeys(): void {
 
 export class InMemoryData<T> {
     inMemoryData: T[];
-    getKeyValue: (arg: T) => string;
+    getKeyValue: (arg: T) => string | number;
     isReadyFlag: boolean;
     alphabeticSort: (a: T, b: T) => number;
-    constructor(getKeyValue: (arg: T) => string) {
+    constructor(getKeyValue: (arg: T) => string | number) {
         this.isReadyFlag = false;
         this.inMemoryData = [] as T[];
         this.getKeyValue = getKeyValue;
@@ -81,7 +81,7 @@ export class InMemoryData<T> {
         });
     }
 
-    indexOfBinarySearch(key: string): number {
+    indexOfBinarySearch(key: string | number): number {
         let minNum = 0;
         let maxNum = this.inMemoryData.length - 1;
 
@@ -89,7 +89,7 @@ export class InMemoryData<T> {
             const mid = Math.floor((minNum + maxNum) / 2);
             if (key === this.getKeyValue(this.inMemoryData[mid])) {
                 return mid;
-            } else if (key.localeCompare(this.getKeyValue(this.inMemoryData[mid])) < 0) {
+            } else if (key < this.getKeyValue(this.inMemoryData[mid])) {
                 maxNum = mid - 1;
             } else {
                 minNum = mid + 1;

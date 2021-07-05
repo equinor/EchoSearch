@@ -46,6 +46,7 @@ async function runSyncMcPacksClicked() {
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
     await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
+    await Syncer.setEnabledAsync(OfflineSystem.Notifications, isEnabled);
 }
 
 async function changePlantBtnClicked() {
@@ -54,13 +55,13 @@ async function changePlantBtnClicked() {
 
 async function cameraSearchClicked() {
     const similarTag = 'A73MAO0l';
-    const tag = await Search.closestTagSearchAsync(similarTag);
+    const tag = await Search.Tags.closestTagAsync(similarTag);
     console.log(similarTag, 'camera search: found tag', tag);
 }
 
 async function searchBtnClicked() {
     try {
-        const tags = await Search.searchTagsAsync('a73 pedes cran', 5);
+        const tags = await Search.Tags.searchAsync('a73 pedes cran', 5);
         if (tags.isSuccess) {
             console.log(
                 'found tags:',
@@ -73,7 +74,7 @@ async function searchBtnClicked() {
         console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
-    const mcPacks = await Search.searchMcPacksAsync('0001-A01', 2);
+    const mcPacks = await Search.McPacks.searchAsync('0001-A01', 2);
     if (mcPacks.isSuccess) {
         console.log(
             'mc packs search',
@@ -85,7 +86,7 @@ async function searchBtnClicked() {
         console.log('mc packs search ', mcPacks.error?.message?.toString());
     }
 
-    const punches = await Search.searchPunchesAsync('A-73MA001', 2);
+    const punches = await Search.Punch.searchAsync('A-73MA001', 2);
     if (punches.isSuccess) {
         console.log(
             'punches search',
@@ -95,6 +96,18 @@ async function searchBtnClicked() {
         );
     } else {
         console.log('punches search ', punches.error?.message?.toString());
+    }
+
+    const notifications = await Search.Notifications.searchAsync('A-73MA001', 2);
+    if (notifications.isSuccess) {
+        console.log(
+            'notifications search',
+            notifications.data.map((item) =>
+                [item.maintenanceRecordId, item.title, item.tagId, item.wbsId, item.wbs, item.changedDateTime].join(' ')
+            )
+        );
+    } else {
+        console.log('notifications search ', notifications.error?.message?.toString());
     }
 }
 
