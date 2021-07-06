@@ -1,12 +1,12 @@
 import Dexie from 'dexie';
-import { logger } from '../../logger';
+import { loggerTags } from '../../logger';
 import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
 const databaseNamePreFix = 'tagsVer';
 //openCurrent();
 
-const log = logger('Tag.Repository');
+const log = loggerTags('Repository');
 
 class TagsDatabase extends OfflineDataDexieBase<TagSummaryDb> {
     Tags: Dexie.Table<TagSummaryDb, string>;

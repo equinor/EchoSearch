@@ -106,3 +106,7 @@ export function createLogger(context: string): LoggerFunctions {
 export function logger(context: string): LoggerFunctions {
     return createLogger('Search.' + context);
 }
+
+export function loggerTags(context: string): LoggerFunctions {
+    return logger('Tags').create(context);
+}

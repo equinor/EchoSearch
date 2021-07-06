@@ -5,6 +5,7 @@ import { searchInMemoryNotificationsWithText } from '../inMemory/inMemoryNotific
 import { searchInMemoryPunchesWithText } from '../inMemory/inMemoryPunches';
 import { isInMemoryTagsReady } from '../inMemory/inMemoryTags';
 import { searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
+import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogType } from '../loggerOptions';
@@ -66,6 +67,7 @@ export async function externalInitialize(): Promise<Result> {
 async function initTags(): Promise<void> {
     const performanceLogger = log.performance('Init Tags');
     await tagsSyncSystem.initTask();
+    await initLevTrieFromInMemoryTags();
 
     const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
     await wait(5000);

@@ -50,13 +50,13 @@ async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal)
     const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
     const daysBackInTime = 2;
     if (daysSinceLastUpdate >= daysBackInTime) {
-        console.log('------ running full punch sync');
+        log.info('Running full punch sync, daysSinceLastUpdate', daysSinceLastUpdate);
         return await syncFullPunches(abortSignal);
     }
 
     const performanceLogger = log.performance();
     const punches = await apiUpdatedPunches(getInstCode(), newestItemDate, abortSignal);
-    performanceLogger.forceLogDelta('Api');
+    performanceLogger.forceLogDelta('Api, daysSinceLastUpdate: ' + daysSinceLastUpdate);
     inMemoryPunchesInstance().updateItems(punches);
 
     const repository = punchesRepository();
@@ -75,7 +75,7 @@ async function deleteClosedPunches(punches: PunchDb[], repository: Repository<Pu
 
     const closedPunchesNos = punches.filter((punch) => punch.clearedAt || punch.rejectedAt).map((item) => item.id);
     if (closedPunchesNos.length > 0) {
-        log.info('-- Delete closed punches', closedPunchesNos.length);
+        log.info('Delete closed punches', closedPunchesNos.length);
         await repository.bulkDeleteData(closedPunchesNos);
     }
 }
