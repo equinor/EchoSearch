@@ -1,5 +1,6 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { DbError, NotInitializedError, SyncCanceledError } from '../baseResult';
+import { SearchResult, searchResult, SearchResults, searchResults } from '../inMemory/searchResult';
 import { logger, LoggerFunctions } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { isNullOrEmpty } from './Utils/stringExtensions';
@@ -102,12 +103,14 @@ export class Repository<T> {
         await this.database.bulkDeleteData(keys);
     }
 
-    async bulkGet(keys: string[]): Promise<T[]> {
-        return await this.database.bulkGet(keys);
+    async bulkGet(keys: string[]): Promise<SearchResults<T>> {
+        const results = await this.database.bulkGet(keys);
+        return searchResults.successOrEmpty(results);
     }
 
-    async get(key: string): Promise<T | undefined> {
-        return await this.database.get(key);
+    async get(key: string): Promise<SearchResult<T>> {
+        const result = await this.database.get(key);
+        return searchResult.successOrNotFound(result);
     }
 
     /**
@@ -158,7 +161,7 @@ export class DatabaseAdministrator<T> {
     }
 
     private openVersion(currentVersion: number) {
-        this.log.trace('opening database v' + this.databaseNamePreFix + currentVersion);
+        this.log.trace('opening database ' + this.databaseNamePreFix + currentVersion);
         this.database = this.databaseCreator(currentVersion);
     }
 }
@@ -175,7 +178,7 @@ export async function deleteDataBaseAndReturnNewVersionNumber(databaseNamePreFix
     const p = logging.performance();
     const newVersion = 1 + getMaxNumberInCollectionOrOne(await getDatabaseNames(databaseNamePreFix));
     await DeleteOlDatabaseVersions(databaseNamePreFix, newVersion);
-    p.forceLog('Deleted  database ' + databaseNamePreFix);
+    p.forceLog('Deleted database ' + databaseNamePreFix);
     return newVersion;
 }
 

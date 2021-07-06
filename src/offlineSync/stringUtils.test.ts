@@ -1,5 +1,5 @@
+import { ArgumentDateError } from '../baseResult';
 import {
-    ArgumentDateError,
     extractPositiveFirstNumbers,
     getMaxNumberInCollectionOrOne,
     orEmpty,

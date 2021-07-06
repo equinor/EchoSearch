@@ -80,10 +80,11 @@ const dictionary: Record<string, OfflineSettingItem> = {};
 
 function AddMissingSettings() {
     for (const item in OfflineSystem) {
-        const offlineSystemKey = item as OfflineSystem;
-        const hasSetting = dictionary[offlineSystemKey];
+        const hasSetting = dictionary[item];
+        log.info(item, hasSetting);
+
         if (!hasSetting) {
-            dictionary[offlineSystemKey] = Settings.CreateDefaultSettings(offlineSystemKey);
+            dictionary[item] = Settings.CreateDefaultSettings(item as OfflineSystem);
         }
     }
 }
@@ -153,5 +154,5 @@ export enum OfflineSystem {
     CommPack = 'CommPack',
     McPack = 'McPack',
     Notifications = 'Notifications',
-    WorkOrders = 'WorkOrders' //missing in SystemKey
+    WorkOrders = 'WorkOrders'
 }

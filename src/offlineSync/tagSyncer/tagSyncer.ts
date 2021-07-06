@@ -2,16 +2,27 @@ import { InternalSyncResult, result } from '../../baseResult';
 import {
     clearAndInitInMemoryTags,
     inMemoryTagsCount as inMemoryTagCount,
+    InMemoryTagsInstance,
     updateInMemoryTags
 } from '../../inMemory/inMemoryTags';
-import { populateLevTrieWithTags } from '../../inMemory/inMemoryTagSearch';
-import { logger } from '../../logger';
+import { tagsLevTrie } from '../../inMemory/inMemoryTagsLevTrie';
+import { loggerTags } from '../../logger';
+import { SyncSystem } from '../../workers/syncSystem';
+import { OfflineSystem } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllTags, apiUpdatedTags } from './tagApi';
 import { tagsAdministrator, tagsRepository } from './tagRepository';
 import { TagSummaryDb } from './tagSummaryDb';
 
-const log = logger('TagSyncer');
+const log = loggerTags('Syncer');
+
+export const tagsSyncSystem = new SyncSystem(
+    OfflineSystem.Tags,
+    InMemoryTagsInstance,
+    tagsAdministrator(),
+    async (abortSignal) => syncFullTags(abortSignal),
+    async (lastChangedDate, abortSignal) => syncUpdateTags(lastChangedDate, abortSignal)
+);
 
 export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     log.trace('Full Sync Started');
@@ -21,7 +32,7 @@ export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSy
         await tagsAdministrator().deleteAndRecreate();
         await tagsRepository().addDataBulks(data.tags, abortSignal); //TODO test exception and error handling inside addDataBulks
         clearAndInitInMemoryTags(data.tags); //we are dependent on summary from indexDb, so have to sync in memory after indexDb is done :(
-        populateLevTrieWithTags(data.tags.map((item) => item.tagNo));
+        tagsLevTrie.populateWithTags(data.tags.map((item) => item.tagNo));
 
         const updateSyncResult = await syncUpdateTags(data.dataSyncedAt, abortSignal);
         if (updateSyncResult.isSuccess) {
@@ -39,7 +50,7 @@ export async function syncUpdateTags(lastChangedDate: Date, abortSignal: AbortSi
     const data = await apiUpdatedTags(lastChangedDate, abortSignal);
     await tagsRepository().addDataBulks(data.tags, abortSignal);
     updateInMemoryTags(data.tags);
-    populateLevTrieWithTags(data.tags.map((item) => item.tagNo));
+    tagsLevTrie.populateWithTags(data.tags.map((item) => item.tagNo));
     const newestItemDate = getNewestItemDate(data.tags);
     return { isSuccess: true, newestItemDate, itemsSyncedCount: data.tags.length }; //TODO Ove remove result, throw exception?
 }

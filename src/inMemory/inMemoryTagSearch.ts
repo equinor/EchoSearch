@@ -1,46 +1,19 @@
-import { logger } from '../logger';
+import { loggerTags } from '../logger';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
 import { getInMemoryTagsSorted } from './inMemoryTags';
-import { LevTrie, TrieResult } from './trie/levTrie';
+import { tagsLevTrie } from './inMemoryTagsLevTrie';
+import { TrieResult } from './trie/levTrie';
 
-/*
- *  @GET | POST | CLEAR
- *  Handling indexDB local plant data for offline search.
- */
-
-const log = logger('InMemory.Search.Tags');
-
-let levTrie: LevTrie = new LevTrie();
-let hasTagsInLevTrie = false;
-
-export function clearLevTrie(): void {
-    levTrie = new LevTrie();
-    hasTagsInLevTrie = false;
-}
-
-export async function populateLevTrieWithTags(tagNos: string[]): Promise<void> {
-    const performance = log.performance('LevTrie');
-    tagNos.forEach((tagNo) => {
-        const cleanedTagNo = asAlphaNumeric(tagNo);
-        if (cleanedTagNo.length > 3) {
-            levTrie.addWord(cleanedTagNo);
-        }
-    });
-    hasTagsInLevTrie = hasTagsInLevTrie || tagNos.length > 0;
-
-    performance.forceLog('Camera tags ready: ' + tagNos.length + ' of ' + tagNos.length);
-}
-
-export const isSearchForTagNoReady = (): boolean => hasTagsInLevTrie;
+const log = loggerTags('InMemory.Search');
 
 export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
     const tagNoCleaned = asAlphaNumeric(tagNo);
-    const maybeTagAlphaNumeric = levTrie.closest(tagNoCleaned, 6);
+    const maybeTagAlphaNumeric = tagsLevTrie.instance().closest(tagNoCleaned, 6);
 
     if (maybeTagAlphaNumeric === undefined) {
-        log.info('No match found for ', tagNo, 'has Tags in LevTrie:', hasTagsInLevTrie);
+        log.info('No match found for ', tagNo, 'has Tags in LevTrie:', tagsLevTrie.isReady());
         return;
     }
 
@@ -103,5 +76,7 @@ async function searchInMemoryTagNosIncludesAllInDescription(
     const tagResults = await tagsRepository().bulkGet(results);
     performance.log(`3.1 Tag Search bulk get from indexDb (${results.length})`);
 
-    return tagResults;
+    if (tagResults.error) log.error(tagResults.error);
+
+    return tagResults.data;
 }

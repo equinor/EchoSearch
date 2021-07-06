@@ -3,6 +3,7 @@ import { result, Result } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
@@ -17,6 +18,7 @@ import {
     externalLookupTag,
     externalLookupTags,
     externalMcPackSearch,
+    externalNotifications,
     externalPunchesSearch,
     externalSearchForClosestTagNo,
     externalTagSearch,
@@ -56,8 +58,10 @@ export interface EchoWorker {
     searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
-
     searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
+
+    searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDb>>;
+
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
     setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
@@ -76,7 +80,7 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
         if (!funcResult.isSuccess) log.debug('Error:', funcResult.error);
         return funcResult;
     } catch (error) {
-        log.debug(error);
+        log.warn(error);
         return result.errorFromException(error) as T;
     }
 }
@@ -96,6 +100,8 @@ const echoWorker: EchoWorker = {
     searchPunches: (...args) => tryCatchToResult(() => externalPunchesSearch(...args)),
     lookupPunchAsync: (...args) => tryCatchToResult(() => externalLookupPunch(...args)),
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalLookupPunches(...args)),
+
+    searchNotifications: (...args) => tryCatchToResult(() => externalNotifications().search(...args)),
 
     changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
     runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),
