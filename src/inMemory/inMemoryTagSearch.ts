@@ -103,5 +103,7 @@ async function searchInMemoryTagNosIncludesAllInDescription(
     const tagResults = await tagsRepository().bulkGet(results);
     performance.log(`3.1 Tag Search bulk get from indexDb (${results.length})`);
 
-    return tagResults;
+    if (tagResults.error) log.error(tagResults.error);
+
+    return tagResults.data;
 }
