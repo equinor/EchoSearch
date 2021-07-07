@@ -1,14 +1,14 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotifications';
 //import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotifications';
-import { logger } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { getInstCode, OfflineSystem } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllNotifications, apiUpdatedNotifications, NotificationDb } from './notificationApi';
 import { notificationsAdministrator, notificationsRepository } from './notificationRepository';
 
-const log = logger('Notification.Sync');
+const log = loggerFactory.notifications('Syncer');
 
 export const notificationsSyncSystem = new SyncSystem(
     OfflineSystem.Notifications,

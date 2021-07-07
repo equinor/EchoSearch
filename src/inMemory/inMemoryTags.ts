@@ -1,4 +1,4 @@
-import { loggerTags } from '../logger';
+import { loggerFactory } from '../logger';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumericUpperCase } from '../offlineSync/Utils/util';
 import { InMemoryInterface } from './inMemoryData';
@@ -6,7 +6,7 @@ import { tagsLevTrie } from './inMemoryTagsLevTrie';
 
 let _sortedInMemoryTags: TagNoAlphaNumeric[] = [];
 let _isInMemoryTagsInitialized = false;
-const log = loggerTags('InMemory');
+const log = loggerFactory.tags('InMemory');
 
 interface TagNoAlphaNumeric {
     tagNo: string;

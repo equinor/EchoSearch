@@ -6,7 +6,7 @@ import {
     updateInMemoryTags
 } from '../../inMemory/inMemoryTags';
 import { tagsLevTrie } from '../../inMemory/inMemoryTagsLevTrie';
-import { loggerTags } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { OfflineSystem } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
@@ -14,7 +14,7 @@ import { apiAllTags, apiUpdatedTags } from './tagApi';
 import { tagsAdministrator, tagsRepository } from './tagRepository';
 import { TagSummaryDb } from './tagSummaryDb';
 
-const log = loggerTags('Syncer');
+const log = loggerFactory.tags('Syncer');
 
 export const tagsSyncSystem = new SyncSystem(
     OfflineSystem.Tags,

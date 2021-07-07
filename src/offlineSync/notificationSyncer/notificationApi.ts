@@ -1,4 +1,4 @@
-import { logger } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
@@ -39,7 +39,7 @@ export interface NotificationDb {
     wbs: string;
 }
 
-const log = logger('Notification.Api');
+const log = loggerFactory.notifications('Api');
 
 function cleanupNotification(notification: NotificationDb): NotificationDb {
     if (!notification.createdDateTime) log.warn('Undefined date', notification);

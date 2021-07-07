@@ -1,11 +1,11 @@
-import { logger } from '../logger';
+import { loggerFactory } from '../logger';
 import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
 import { notificationsRepository } from '../offlineSync/notificationSyncer/notificationRepository';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
-const log = logger('InMemory.Notifications');
+const log = loggerFactory.notifications('InMemory');
 //Notifications init
 const inMemoryDbNotifications: InMemoryData<NotificationDb> = new InMemoryData<NotificationDb>(
     (item) => item.maintenanceRecordId

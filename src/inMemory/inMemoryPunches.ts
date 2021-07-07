@@ -1,11 +1,11 @@
-import { logger } from '../logger';
+import { loggerFactory } from '../logger';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
-const log = logger('InMemory.Punch');
+const log = loggerFactory.punches('InMemory');
 const inMemoryDbPunches: InMemoryData<PunchDb> = new InMemoryData<PunchDb>((item) => item.commPkgNo);
 
 export function inMemoryPunchesInstance(): InMemoryData<PunchDb> {

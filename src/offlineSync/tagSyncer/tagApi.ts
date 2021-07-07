@@ -1,5 +1,5 @@
 import { JsonParseError, SyncError } from '../../baseResult';
-import { loggerTags } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode } from '../syncSettings';
@@ -8,7 +8,7 @@ import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
-const log = loggerTags('Api');
+const log = loggerFactory.tags('Api');
 
 const _mock = new ToggleState(true);
 export const tagsMock = _mock;

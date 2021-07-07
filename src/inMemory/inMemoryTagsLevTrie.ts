@@ -1,8 +1,8 @@
-import { loggerTags } from '../logger';
+import { loggerFactory } from '../logger';
 import { asAlphaNumeric } from '../offlineSync/Utils/util';
 import { LevTrie } from './trie/levTrie';
 
-const log = loggerTags('InMemory.LevTrie');
+const log = loggerFactory.tags('InMemory.LevTrie');
 
 let _levTrie: LevTrie = new LevTrie();
 let _hasTagsInLevTrie = false;

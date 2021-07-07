@@ -1,4 +1,4 @@
-import { loggerTags } from '../logger';
+import { loggerFactory } from '../logger';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
@@ -6,7 +6,7 @@ import { getInMemoryTagsSorted } from './inMemoryTags';
 import { tagsLevTrie } from './inMemoryTagsLevTrie';
 import { TrieResult } from './trie/levTrie';
 
-const log = loggerTags('InMemory.Search');
+const log = loggerFactory.tags('InMemory.Search');
 
 export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
     const tagNoCleaned = asAlphaNumeric(tagNo);

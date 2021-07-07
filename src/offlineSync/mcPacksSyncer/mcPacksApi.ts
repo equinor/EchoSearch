@@ -1,4 +1,4 @@
-import { logger } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
@@ -18,7 +18,7 @@ export interface McPackDb {
     updatedAt: Date;
 }
 
-const log = logger('McPack.Api');
+const log = loggerFactory.mcPacks('Api');
 
 function cleanupMcPack(mcPack: McPackDb): McPackDb {
     return {

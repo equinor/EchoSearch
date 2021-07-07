@@ -1,9 +1,9 @@
-import { loggerTags } from '../logger';
+import { loggerFactory } from '../logger';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { getInMemoryTagsSorted } from './inMemoryTags';
 import { tagsLevTrie } from './inMemoryTagsLevTrie';
 
-const log = loggerTags('LevTrie.Init');
+const log = loggerFactory.tags('InMemory.LevTrie');
 
 export async function initLevTrieFromInMemoryTags(): Promise<number> {
     if (!isFullSyncDone(OfflineSystem.Tags)) {

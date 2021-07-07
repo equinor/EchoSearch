@@ -19,7 +19,7 @@ export function searchOrderedByBestMatch<T>(
     predicate?: (arg: T) => boolean,
     alwaysPerformanceLogging = false
 ): T[] {
-    const performanceLogger = logger(typeNameForLogging).performance();
+    const performanceLogger = logger(typeNameForLogging).create('Search').performance();
     const results = searchOrderedByBestMatchLogic(
         collection,
         getSearchableFieldsPrioritizedFunc,

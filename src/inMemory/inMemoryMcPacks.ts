@@ -1,11 +1,11 @@
-import { logger } from '../logger';
+import { loggerFactory } from '../logger';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { isFullSyncDone, OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
-const log = logger('InMemory.McPacks');
+const log = loggerFactory.mcPacks('InMemory');
 //McPacks init
 const inMemoryDbMcPacks: InMemoryData<McPackDb> = new InMemoryData<McPackDb>((item) => item.commPkgNo);
 

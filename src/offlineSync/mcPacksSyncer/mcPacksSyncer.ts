@@ -1,13 +1,13 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
-import { logger } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
 
-const log = logger('McPack.Sync');
+const log = loggerFactory.mcPacks('Syncer');
 
 export const mcPacksSyncSystem = new SyncSystem(
     OfflineSystem.McPack,

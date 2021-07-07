@@ -1,6 +1,6 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
-import { logger } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { Repository } from '../offlineDataDexieBase';
 import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
@@ -8,7 +8,7 @@ import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllPunches, apiUpdatedPunches, PunchDb, verifyPunchCount } from './punchApi';
 import { punchesAdministrator, punchesRepository } from './punchRepository';
 
-const log = logger('Punch.Sync');
+const log = loggerFactory.punches('Syncer');
 
 export const punchesSyncSystem = new SyncSystem(
     OfflineSystem.Punches,
