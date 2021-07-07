@@ -10,7 +10,7 @@ import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import ctx from '../setup/setup';
 import {
-    externalInitialize,
+    externalInitializeTask,
     externalLookupMcPack,
     externalLookupMcPacks,
     externalLookupPunch,
@@ -45,7 +45,7 @@ export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setT
 
 export interface EchoWorker {
     initialize(): Promise<Result>;
-    changePlantAsync(instCode: string): Promise<Result>;
+    changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
     searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
@@ -86,7 +86,7 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
 }
 
 const echoWorker: EchoWorker = {
-    initialize: (...args) => tryCatchToResult(() => externalInitialize(...args)),
+    initialize: (...args) => tryCatchToResult(() => externalInitializeTask(...args)),
 
     searchTags: (...args) => tryCatchToResult(() => externalTagSearch(...args)),
     searchForClosestTagNo: (...args) => tryCatchToResult(() => externalSearchForClosestTagNo(...args)),

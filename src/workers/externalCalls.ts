@@ -36,32 +36,22 @@ function functionShouldOnlyBeCalledOnce(): void {
 
 functionShouldOnlyBeCalledOnce();
 
-let initDone = false;
-let mcPacksSearchSystem: SearchSystem<McPackDb>;
-let tagSearchSystem: SearchSystem<TagSummaryDb>;
-let punchSearchSystem: SearchSystem<PunchDb>;
-let notificationsSearchSystem: SearchSystem<NotificationDb>;
+let _initDone = false;
+let _mcPacksSearchSystem: SearchSystem<McPackDb>;
+let _tagSearchSystem: SearchSystem<TagSummaryDb>;
+let _punchSearchSystem: SearchSystem<PunchDb>;
+let _notificationsSearchSystem: SearchSystem<NotificationDb>;
 
-export async function externalInitialize(): Promise<Result> {
-    const logOptions = {
-        '': LogType.Trace
-    };
+let _initTaskInstance: Promise<Result> | undefined = undefined;
 
-    logging.setLogLevels(logOptions);
-    log.info('-------------- externalInitialize ------------ ');
-    log.trace('trace');
-    log.debug('debug');
-    log.info('info');
-    log.warn('warn');
-    log.error('error');
-
+export async function externalInitializeTask(): Promise<Result> {
     // const wait = (ms) => new Promise((res) => setTimeout(res, ms));
     // const p1 = new Promise((res) => setTimeout(() => res('p1'), 1000));
     // const p2 = new Promise((res) => setTimeout(() => res('p2'), 500));
     // const result = await Promise.race([p1, p2]);
 
-    await internalInitialize();
-    return result.success();
+    if (!_initTaskInstance) _initTaskInstance = internalInitialize();
+    return _initTaskInstance;
 }
 
 async function initTags(): Promise<void> {
@@ -75,19 +65,30 @@ async function initTags(): Promise<void> {
     performanceLogger.forceLogDelta('done');
 }
 
-async function internalInitialize(): Promise<void> {
+async function internalInitialize(): Promise<Result> {
+    const logOptions = {
+        '': LogType.Trace
+    };
+
+    logging.setLogLevels(logOptions);
+    log.info('-------------- externalInitialize ------------ ');
+    log.trace('trace');
+    log.debug('debug');
+    log.info('info');
+    log.warn('warn');
+    log.error('error');
     log.create('child').info('-- this is from the new logger 222');
 
-    externalToggleMockData();
-    if (initDone) {
+    if (_initDone) {
         log.warn('internalInitialize already done, returning');
-        return;
+        return result.success();
     }
 
     const performanceLogger = log.performance();
-
     await Settings.loadOfflineSettings();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
+
+    externalToggleMockData();
 
     const initMcTask = mcPacksSyncSystem.initTask();
     const initTagsTask = initTags();
@@ -96,7 +97,7 @@ async function internalInitialize(): Promise<void> {
 
     performanceLogger.forceLog('SearchSystems starting');
 
-    mcPacksSearchSystem = new SearchSystem<McPackDb>(
+    _mcPacksSearchSystem = new SearchSystem<McPackDb>(
         OfflineSystem.McPack,
         initMcTask,
         () => inMemoryMcPacksInstance().isReady(),
@@ -104,7 +105,7 @@ async function internalInitialize(): Promise<void> {
         async (searchText, maxHits) => searchMcPacksOnline(searchText, maxHits)
     );
 
-    tagSearchSystem = new SearchSystem<TagSummaryDb>(
+    _tagSearchSystem = new SearchSystem<TagSummaryDb>(
         OfflineSystem.Tags,
         initTagsTask,
         () => isInMemoryTagsReady(),
@@ -112,7 +113,7 @@ async function internalInitialize(): Promise<void> {
         async (searchText, maxHits) => searchTagsOnline(searchText, maxHits)
     );
 
-    punchSearchSystem = new SearchSystem<PunchDb>(
+    _punchSearchSystem = new SearchSystem<PunchDb>(
         OfflineSystem.Punches,
         initPunchesTask,
         () => isInMemoryTagsReady(),
@@ -121,7 +122,7 @@ async function internalInitialize(): Promise<void> {
         //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
     );
 
-    notificationsSearchSystem = new SearchSystem<NotificationDb>(
+    _notificationsSearchSystem = new SearchSystem<NotificationDb>(
         OfflineSystem.Notifications,
         initNotificationTask,
         () => inMemoryMcPacksInstance().isReady(),
@@ -132,13 +133,14 @@ async function internalInitialize(): Promise<void> {
     performanceLogger.forceLog('SearchSystems instantiated');
 
     await Promise.all([initMcTask, initPunchesTask, initTagsTask, initNotificationTask]);
-    performanceLogger.forceLog('Search module initialize done');
-    initDone = true;
+    performanceLogger.forceLog('----------- Search module initialize done -----------');
+    _initDone = true;
+    return result.success();
 }
 
 export function externalNotifications() {
     return {
-        search: (searchText: string, maxHits: number) => notificationsSearchSystem.search(searchText, maxHits),
+        search: (searchText: string, maxHits: number) => _notificationsSearchSystem.search(searchText, maxHits),
         lookup: notificationsRepository().get,
         lookups: notificationsRepository().bulkGet
     };
@@ -146,7 +148,7 @@ export function externalNotifications() {
 
 export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
-    return await tagSearchSystem.search(searchText, maxHits);
+    return await _tagSearchSystem.search(searchText, maxHits);
 }
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
@@ -161,7 +163,7 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
     // if (mcPacksSearcher === undefined) {
     //     return [];
     // }
-    return await mcPacksSearchSystem.search(searchText, maxHits);
+    return await _mcPacksSearchSystem.search(searchText, maxHits);
 }
 export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
     return await mcPacksRepository().get(id);
@@ -172,7 +174,7 @@ export async function externalLookupMcPacks(ids: string[]): Promise<SearchResult
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
-    return await punchSearchSystem.search(searchText, maxHits);
+    return await _punchSearchSystem.search(searchText, maxHits);
 }
 
 export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
@@ -258,12 +260,8 @@ async function externalDeleteAllData(): Promise<void> {
     externalCancelSync(OfflineSystem.McPack);
 
     const all = allSyncSystems();
-    for (const syncSystem of all) {
-        console.log('Sync System delete all:', syncSystem.offlineSystemKey);
-    }
     await Promise.all(all.map(async (item) => await item.clearAllData()));
 
-    //await notificationsSyncSystem.clearAllData();
     performanceLogger.forceLog(' - Done');
 }
 
@@ -274,7 +272,9 @@ function externalToggleMockData(): void {
     log.info('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
 }
 
-async function externalChangePlant(instCode: string): Promise<Result> {
+async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> {
+    await externalInitializeTask(); //in case init is not done yet
+    if (Settings.getInstCode() === instCode && !forceDeleteIfSameAlreadySelected) return result.success();
     await Settings.saveInstCode(instCode);
     await syncContract.externalDeleteAllData();
     return result.success();

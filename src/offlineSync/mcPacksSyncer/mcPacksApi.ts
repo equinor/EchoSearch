@@ -10,12 +10,12 @@ const _mock = new ToggleState(true);
 export const mcPacksMock = _mock;
 
 export interface McPackDb {
-    id: number;
-    commPkgNo: string;
-    description: string;
-    mcPkgNo: string;
-    projectName: string;
-    updatedAt: Date;
+    readonly id: number;
+    readonly commPkgNo: string;
+    readonly description: string;
+    readonly mcPkgNo: string;
+    readonly projectName: string;
+    readonly updatedAt: Date;
 }
 
 const log = loggerFactory.mcPacks('Api');

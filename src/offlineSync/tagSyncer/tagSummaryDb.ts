@@ -1,11 +1,11 @@
 export interface TagSummaryDb {
-    description: string;
-    tagCategoryDescription: string;
-    tagNo: string;
-    tagStatus: TagStatus;
-    tagType: string;
-    updatedDate: Date;
-    locationCode: string;
+    readonly tagNo: string;
+    readonly description: string;
+    readonly tagCategoryDescription: string;
+    readonly tagStatus: TagStatus;
+    readonly tagType: string;
+    readonly updatedDate: Date;
+    readonly locationCode: string;
 }
 
 export enum TagStatus {

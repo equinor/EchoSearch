@@ -14,6 +14,7 @@ function instance(): LevTrie {
 const isReady = (): boolean => _hasTagsInLevTrie;
 
 function clearAll(): void {
+    log.info('Clear all Data');
     _levTrie = new LevTrie();
     _hasTagsInLevTrie = false;
 }

@@ -28,7 +28,6 @@ export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSy
     log.trace('Full Sync Started');
     try {
         const data = await apiAllTags(abortSignal);
-        log.trace('Api done', data.tags.length);
         await tagsAdministrator().deleteAndRecreate();
         await tagsRepository().addDataBulks(data.tags, abortSignal); //TODO test exception and error handling inside addDataBulks
         clearAndInitInMemoryTags(data.tags); //we are dependent on summary from indexDb, so have to sync in memory after indexDb is done :(
@@ -52,7 +51,7 @@ export async function syncUpdateTags(lastChangedDate: Date, abortSignal: AbortSi
     updateInMemoryTags(data.tags);
     tagsLevTrie.populateWithTags(data.tags.map((item) => item.tagNo));
     const newestItemDate = getNewestItemDate(data.tags);
-    return { isSuccess: true, newestItemDate, itemsSyncedCount: data.tags.length }; //TODO Ove remove result, throw exception?
+    return { isSuccess: true, newestItemDate, itemsSyncedCount: data.tags.length };
 }
 
 function getNewestItemDate(data: TagSummaryDb[]): Date | undefined {

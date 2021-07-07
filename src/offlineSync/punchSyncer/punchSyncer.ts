@@ -30,7 +30,7 @@ export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
 async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllPunches(getInstCode(), abortSignal);
-    performanceLogger.forceLogDelta(' Api');
+    performanceLogger.forceLogDelta(' Api ' + data.length);
 
     inMemoryPunchesInstance().clearAndInit(data);
     performanceLogger.forceLogDelta(' clear and init inMemoryData');
