@@ -57,7 +57,7 @@ async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
 }
 
 async function changePlantBtnClicked() {
-    await Syncer.changePlantAsync('JSV');
+    await Syncer.changePlantAsync('JSV', true);
 }
 
 async function cameraSearchClicked() {

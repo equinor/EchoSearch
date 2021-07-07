@@ -67,7 +67,7 @@ async function loadOfflineSettings(): Promise<void> {
 
     const instCodeArg = await instance().settings.get('instCode');
     _instCode = instCodeArg ?? '';
-    log.info('instCode loaded:', _instCode);
+    log.trace('instCode loaded:', _instCode);
 
     AddMissingSettings();
 }
@@ -136,7 +136,8 @@ function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingI
 export const Settings = {
     CreateDefaultSettings,
     loadOfflineSettings,
-    saveInstCode
+    saveInstCode,
+    getInstCode
 };
 
 export interface OfflineSettingItem {

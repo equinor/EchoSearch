@@ -109,9 +109,9 @@ export function logger(context: string): LoggerFunctions {
 
 export const loggerFactory = {
     default: logger,
-    tags: (context: string) => createLogger('Tags').create(context),
-    punches: (context: string) => createLogger('Punch').create(context),
-    mcPacks: (context: string) => createLogger('McPacks').create(context),
-    notifications: (context: string) => createLogger('Notifications').create(context),
-    documents: (context: string) => createLogger('Documents').create(context)
+    tags: (context: string) => logger('Tags').create(context),
+    punches: (context: string) => logger('Punch').create(context),
+    mcPacks: (context: string) => logger('McPacks').create(context),
+    notifications: (context: string) => logger('Notifications').create(context),
+    documents: (context: string) => logger('Documents').create(context)
 };

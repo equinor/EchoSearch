@@ -21,7 +21,7 @@ export const notificationsSyncSystem = new SyncSystem(
 async function syncFullNotifications(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllNotifications(getInstCode(), abortSignal);
-    performanceLogger.forceLogDelta('Api');
+    performanceLogger.forceLogDelta(' Api ' + data.length);
 
     inMemoryNotificationsInstance().clearAndInit(data);
     performanceLogger.forceLogDelta('clear and init inMemoryData');

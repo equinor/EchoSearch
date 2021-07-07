@@ -1,11 +1,21 @@
 import { Result } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
+import { SearchResult, SearchResults } from './inMemory/searchResult';
+import { McPackDb } from './offlineSync/mcPacksSyncer/mcPacksApi';
+import { NotificationDb } from './offlineSync/notificationSyncer/notificationApi';
+import { PunchDb } from './offlineSync/punchSyncer/punchApi';
 import { OfflineSystem } from './offlineSync/syncSettings';
+import { TagStatus, TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 
-export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
+export type { Result };
+export type { SearchResult, SearchResults };
+export type { TagStatus, TagSummaryDb };
+export type { McPackDb, NotificationDb, PunchDb };
+
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
     let value = 0;
+    const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
     for (let index = 0; index < sleepCount; index++) {
         console.log('going to sleep 77', value);
         await sleep(1000);
@@ -15,20 +25,20 @@ export async function SearchDummyTest(sleepCount: number): Promise<string> {
     return 'search dummy test done' + value;
 }
 
-const SearchTags = {
+const searchTags = {
     searchAsync: echoSearchWorker.searchTags,
     closestTagAsync: echoSearchWorker.searchForClosestTagNo,
     getAsync: echoSearchWorker.lookupTagAsync,
     bulkGetAsync: echoSearchWorker.lookupTagsAsync
 };
 
-const SearchPunches = {
+const searchPunches = {
     searchAsync: echoSearchWorker.searchPunches,
     getAsync: echoSearchWorker.lookupPunchAsync,
     bulkGetAsync: echoSearchWorker.lookupPunchesAsync
 };
 
-const SearchMcPacks = {
+const searchMcPacks = {
     searchAsync: echoSearchWorker.searchMcPacks,
     getAsync: echoSearchWorker.lookupPunchAsync,
     bulkGetAsync: echoSearchWorker.lookupPunchesAsync
@@ -41,9 +51,9 @@ const searchNotifications = {
 };
 
 export const Search = {
-    Tags: SearchTags,
-    Punch: SearchPunches,
-    McPacks: SearchMcPacks,
+    Tags: searchTags,
+    Punch: searchPunches,
+    McPacks: searchMcPacks,
     Notifications: searchNotifications,
     OfflineSystem
 };
@@ -54,10 +64,7 @@ export const Syncer = {
         return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     },
     setEnabledAsync: echoSearchWorker.setEnabled,
-    changePlantAsync: echoSearchWorker.changePlantAsync,
+    changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
+        await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
     OfflineSystem
 };
-
-export type { Result } from './baseResult';
-export type { SearchResult, SearchResults } from './inMemory/searchResult';
-export type { TagStatus, TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';

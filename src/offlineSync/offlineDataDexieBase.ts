@@ -188,7 +188,7 @@ async function DeleteOlDatabaseVersions(databaseNamePreFix: string, currentVersi
     );
 
     oldDatabaseNames.forEach((oldDatabaseName) => {
-        logging.info('delete old database', oldDatabaseName);
+        logging.trace('delete old database', oldDatabaseName);
         Dexie.delete(oldDatabaseName);
     });
 }
