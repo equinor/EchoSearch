@@ -1,10 +1,7 @@
 import { NotFoundError } from '@equinor/echo-base';
 import { NotImplementedError, result, Result } from '../baseResult';
-import { inMemoryMcPacksInstance, searchInMemoryMcPacksWithText } from '../inMemory/inMemoryMcPacks';
-import { searchInMemoryNotificationsWithText } from '../inMemory/inMemoryNotifications';
-import { searchInMemoryPunchesWithText } from '../inMemory/inMemoryPunches';
-import { isInMemoryTagsReady } from '../inMemory/inMemoryTags';
-import { searchForClosestTagNo, searchTags } from '../inMemory/inMemoryTagSearch';
+import { inMemory } from '../inMemory/inMemoryExports';
+import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
@@ -20,7 +17,7 @@ import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
 import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
-import { searchTagsOnline, tagsMock } from '../offlineSync/tagSyncer/tagApi';
+import { tagsMock } from '../offlineSync/tagSyncer/tagApi';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
@@ -100,24 +97,24 @@ async function internalInitialize(): Promise<Result> {
     _mcPacksSearchSystem = new SearchSystem<McPackDb>(
         OfflineSystem.McPack,
         initMcTask,
-        () => inMemoryMcPacksInstance().isReady(),
-        async (searchText, maxHits) => searchInMemoryMcPacksWithText(searchText, maxHits),
-        async (searchText, maxHits) => searchMcPacksOnline(searchText, maxHits)
+        () => inMemory.McPacks.isReady(),
+        async (searchText, maxHits) => inMemory.McPacks.search(searchText, maxHits),
+        async (searchText, maxHits) => inMemory.McPacks.searchOnline(searchText, maxHits)
     );
 
     _tagSearchSystem = new SearchSystem<TagSummaryDb>(
         OfflineSystem.Tags,
         initTagsTask,
-        () => isInMemoryTagsReady(),
-        async (searchText, maxHits) => searchTags(searchText, maxHits),
-        async (searchText, maxHits) => searchTagsOnline(searchText, maxHits)
+        () => inMemory.Tags.isReady(),
+        async (searchText, maxHits) => inMemory.Tags.search(searchText, maxHits),
+        async (searchText, maxHits) => inMemory.Tags.searchOnline(searchText, maxHits)
     );
 
     _punchSearchSystem = new SearchSystem<PunchDb>(
         OfflineSystem.Punches,
         initPunchesTask,
-        () => isInMemoryTagsReady(),
-        async (searchText, maxHits) => searchInMemoryPunchesWithText(searchText, maxHits),
+        () => inMemory.Punches.isReady(),
+        async (searchText, maxHits) => inMemory.Punches.search(searchText, maxHits),
         async () => []
         //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
     );
@@ -125,8 +122,8 @@ async function internalInitialize(): Promise<Result> {
     _notificationsSearchSystem = new SearchSystem<NotificationDb>(
         OfflineSystem.Notifications,
         initNotificationTask,
-        () => inMemoryMcPacksInstance().isReady(),
-        async (searchText, maxHits) => searchInMemoryNotificationsWithText(searchText, maxHits),
+        () => inMemory.Notifications.isReady(),
+        async (searchText, maxHits) => inMemory.Notifications.search(searchText, maxHits),
         async () => []
     );
 
@@ -183,20 +180,6 @@ export async function externalLookupPunch(id: string): Promise<SearchResult<Punc
 
 export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
     return await punchesRepository().bulkGet(ids);
-}
-
-async function searchMcPacksOnline(searchText: string, maxHits: number): Promise<McPackDb[]> {
-    //TODO
-    return [
-        {
-            commPkgNo: '1',
-            description: 'McPacks online Search',
-            mcPkgNo: searchText,
-            projectName: maxHits.toString(),
-            id: 5,
-            updatedAt: new Date()
-        } as McPackDb
-    ];
 }
 
 export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {

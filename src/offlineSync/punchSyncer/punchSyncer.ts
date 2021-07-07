@@ -33,7 +33,7 @@ async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncRe
     performanceLogger.forceLogDelta(' Api ' + data.length);
 
     inMemoryPunchesInstance().clearAndInit(data);
-    performanceLogger.forceLogDelta(' clear and init inMemoryData');
+    performanceLogger.forceLogDelta('------ clear and init inMemoryData ' + inMemoryPunchesInstance().isReady());
 
     await punchesAdministrator().deleteAndRecreate();
     performanceLogger.forceLogDelta(' deleteAndRecreate');
