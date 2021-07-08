@@ -1,17 +1,15 @@
 import { Result } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { SearchResult, SearchResults } from './inMemory/searchResult';
-import { McPackDb } from './offlineSync/mcPacksSyncer/mcPacksApi';
-import { NotificationDb } from './offlineSync/notificationSyncer/notificationApi';
-import { PunchDb } from './offlineSync/punchSyncer/punchApi';
 import { OfflineSystem } from './offlineSync/syncSettings';
-import { TagStatus, TagSummaryDb } from './offlineSync/tagSyncer/tagSummaryDb';
+import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
+import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
 export type { Result };
 export type { SearchResult, SearchResults };
-export type { TagStatus, TagSummaryDb };
-export type { McPackDb, NotificationDb, PunchDb };
+export type { TagStatus, TagSummaryDto };
+export type { McPackDto, NotificationDto, PunchDto };
 
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
     let value = 0;

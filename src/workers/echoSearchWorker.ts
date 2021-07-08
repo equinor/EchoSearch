@@ -1,13 +1,10 @@
 import * as Comlink from 'comlink';
+import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
 import { result, Result } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
-import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
-import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
-import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
-import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import ctx from '../setup/setup';
 import {
     externalInitializeTask,
@@ -47,20 +44,20 @@ export interface EchoWorker {
     initialize(): Promise<Result>;
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
-    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
+    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>>;
     searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
-    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
-    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDb>>;
+    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
+    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
 
-    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>>;
-    lookupMcPackAsync(tagNo: string): Promise<SearchResult<McPackDb>>;
-    lookupMcPacksAsync(tagNos: string[]): Promise<SearchResults<McPackDb>>;
+    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>>;
+    lookupMcPackAsync(tagNo: string): Promise<SearchResult<McPackDto>>;
+    lookupMcPacksAsync(tagNos: string[]): Promise<SearchResults<McPackDto>>;
 
-    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
-    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
-    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
+    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>>;
+    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
 
-    searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDb>>;
+    searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 

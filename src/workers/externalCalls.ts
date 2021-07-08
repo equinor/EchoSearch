@@ -1,4 +1,5 @@
 import { NotFoundError } from '@equinor/echo-base';
+import { McPackDto, PunchDto, TagSummaryDto } from '..';
 import { NotImplementedError, result, Result } from '../baseResult';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
@@ -143,7 +144,7 @@ export function externalNotifications() {
     };
 }
 
-export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>> {
+export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     return await _tagSearchSystem.search(searchText, maxHits);
 }
@@ -152,37 +153,37 @@ export async function externalSearchForClosestTagNo(tagNo: string): Promise<Sear
     return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
-export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
+export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDto>> {
     return await tagsRepository().get(tagNo);
 }
 
-export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDb>> {
+export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDto>> {
     return await tagsRepository().bulkGet(tagNos);
 }
 
-export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDb>> {
+export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>> {
     // if (mcPacksSearcher === undefined) {
     //     return [];
     // }
     return await _mcPacksSearchSystem.search(searchText, maxHits);
 }
-export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDb>> {
+export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDto>> {
     return await mcPacksRepository().get(id);
 }
 
-export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDb>> {
+export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDto>> {
     return await mcPacksRepository().bulkGet(ids);
 }
 
-export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>> {
+export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>> {
     return await _punchSearchSystem.search(searchText, maxHits);
 }
 
-export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDb>> {
+export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDto>> {
     return await punchesRepository().get(id);
 }
 
-export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDb>> {
+export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDto>> {
     return await punchesRepository().bulkGet(ids);
 }
 

@@ -107,6 +107,7 @@ export function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
 
 export function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
     const settings = GetSetting(offlineSystemKey);
+    if (isEnabled && settings.isEnable === isEnabled) return;
     settings.isEnable = isEnabled;
     settings.lastSyncedAtDate = undefined;
     settings.newestItemDate = undefined;
