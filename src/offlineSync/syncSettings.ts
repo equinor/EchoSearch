@@ -13,7 +13,7 @@ class SettingsDexieDB extends Dexie {
     offlineStatus: Dexie.Table<OfflineSettingItem, OfflineSystem>;
     settings: Dexie.Table<string, string>;
     constructor() {
-        super('offlineSettingsEchoDb');
+        super('echoSearchSettings');
         this.version(0.3).stores({
             offlineStatus: 'offlineSystemKey',
             settings: ''
@@ -25,13 +25,24 @@ class SettingsDexieDB extends Dexie {
 }
 
 let _settingsDexieDb: SettingsDexieDB | undefined = undefined;
-let _instCode: string;
+let _instCode: string | undefined;
 
+/**
+ * Returns the selected instCode, or throws exception NotInitializedError
+ * @returns Returns the selected instCode, or throws exception NotInitializedError
+ */
 export function getInstCode(): string {
     if (!_instCode) {
         throw new NotInitializedError('instCode is not defined');
     }
     return _instCode;
+}
+
+async function getInstCodeOrUndefinedAsync(): Promise<string | undefined> {
+    if (_instCode) {
+        return _instCode;
+    }
+    return await instance().settings.get('instCode');
 }
 
 async function saveInstCode(instCodeArg: string): Promise<void> {
@@ -65,7 +76,7 @@ async function loadOfflineSettings(): Promise<void> {
         dictionary[setting.offlineSystemKey] = setting;
     });
 
-    const instCodeArg = await instance().settings.get('instCode');
+    const instCodeArg = await getInstCodeOrUndefinedAsync();
     _instCode = instCodeArg ?? '';
     log.trace('instCode loaded:', _instCode);
 
@@ -137,7 +148,8 @@ export const Settings = {
     CreateDefaultSettings,
     loadOfflineSettings,
     saveInstCode,
-    getInstCode
+    getInstCode,
+    getInstCodeOrUndefinedAsync
 };
 
 export interface OfflineSettingItem {

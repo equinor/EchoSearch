@@ -3,8 +3,13 @@ import { DbError, NotInitializedError, SyncCanceledError } from '../baseResult';
 import { SearchResult, searchResult, SearchResults, searchResults } from '../inMemory/searchResult';
 import { logger, LoggerFunctions } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
+import { OfflineSystem } from './syncSettings';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
+
+export function getDatabaseName(offlineSystemKey: OfflineSystem): string {
+    return `echoSearch${offlineSystemKey}Ver`;
+}
 
 const logging = logger('Db');
 

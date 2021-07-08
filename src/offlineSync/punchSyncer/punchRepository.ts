@@ -1,8 +1,9 @@
 import Dexie from 'dexie';
-import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { OfflineSystem } from '../syncSettings';
 import { PunchDb } from './punchApi';
 
-const databaseNamePreFix = 'punchesVer';
+const databaseNamePreFix = getDatabaseName(OfflineSystem.Punches);
 
 class PunchesDatabase extends OfflineDataDexieBase<PunchDb> {
     PunchesTable: Dexie.Table<PunchDb, string>;

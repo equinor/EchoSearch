@@ -1,8 +1,9 @@
 import Dexie from 'dexie';
-import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { OfflineSystem } from '../syncSettings';
 import { NotificationDb } from './notificationApi';
 
-const databaseNamePreFix = 'notificationsVer';
+const databaseNamePreFix = getDatabaseName(OfflineSystem.Notifications);
 
 class NotificationsDatabase extends OfflineDataDexieBase<NotificationDb> {
     NotificationsTable: Dexie.Table<NotificationDb, string>;

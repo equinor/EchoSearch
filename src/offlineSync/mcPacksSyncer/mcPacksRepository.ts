@@ -1,8 +1,9 @@
 import Dexie from 'dexie';
-import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { OfflineSystem } from '../syncSettings';
 import { McPackDb } from './mcPacksApi';
 
-const databaseNamePreFix = 'mcPacksVer';
+const databaseNamePreFix = getDatabaseName(OfflineSystem.McPack);
 
 class McPacksDatabase extends OfflineDataDexieBase<McPackDb> {
     McPacksTable: Dexie.Table<McPackDb, string>;

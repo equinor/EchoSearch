@@ -1,10 +1,10 @@
 import Dexie from 'dexie';
 import { loggerFactory } from '../../logger';
-import { DatabaseAdministrator, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
+import { OfflineSystem } from '../syncSettings';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
-const databaseNamePreFix = 'tagsVer';
-//openCurrent();
+const databaseNamePreFix = getDatabaseName(OfflineSystem.Tags);
 
 const log = loggerFactory.tags('Repository');
 

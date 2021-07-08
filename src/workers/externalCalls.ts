@@ -147,6 +147,10 @@ export async function externalTagSearch(searchText: string, maxHits: number): Pr
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     return await _tagSearchSystem.search(searchText, maxHits);
 }
+export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
+    const possibleTag = searchForClosestTagNo(tagNo);
+    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
+}
 
 export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDb>> {
     return await tagsRepository().get(tagNo);
@@ -182,11 +186,6 @@ export async function externalLookupPunches(ids: string[]): Promise<SearchResult
     return await punchesRepository().bulkGet(ids);
 }
 
-export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
-    const possibleTag = searchForClosestTagNo(tagNo);
-    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
-}
-
 async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
     setToken(apiAccessToken);
 
@@ -218,6 +217,8 @@ async function externalCancelSync(offlineSystemKey: OfflineSystem): Promise<Resu
     log.create(offlineSystemKey).trace('Sync canceled done');
     return result.success();
 }
+
+const cancelSyncAll = () => allSyncSystems().forEach((item) => item.cancelSync());
 
 function getSyncSystem(offlineSystemKey: OfflineSystem) {
     switch (offlineSystemKey) {
@@ -256,8 +257,10 @@ function externalToggleMockData(): void {
 }
 
 async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> {
-    await externalInitializeTask(); //in case init is not done yet
-    if (Settings.getInstCode() === instCode && !forceDeleteIfSameAlreadySelected) return result.success();
+    if (!forceDeleteIfSameAlreadySelected && (await Settings.getInstCodeOrUndefinedAsync()) === instCode)
+        return result.success();
+
+    cancelSyncAll();
     await Settings.saveInstCode(instCode);
     await syncContract.externalDeleteAllData();
     return result.success();

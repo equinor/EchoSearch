@@ -48,6 +48,7 @@ export interface EchoWorker {
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
     searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDb>>;
+    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDb>>;
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDb>>;
 
@@ -58,7 +59,6 @@ export interface EchoWorker {
     searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDb>>;
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDb>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDb>>;
-    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
 
     searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDb>>;
 
