@@ -1,6 +1,7 @@
-import { logPerformance } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { randomId } from '../Utils/stringUtils';
 
+const log = loggerFactory.tags('Mock');
 export function randomMockedTagsString(count: number): string {
     if (count === 0) return '';
     const items = range(count);
@@ -27,7 +28,7 @@ function range(size: number, startAt = 0) {
 }
 
 export function getMockedTagsString(randomTagsCount: number): string {
-    const performanceLog = logPerformance();
+    const performanceLog = log.performance();
     const result = getMockedTagsStringInternal(randomTagsCount);
     performanceLog.forceLog('Got random tags ' + randomTagsCount);
     return result;

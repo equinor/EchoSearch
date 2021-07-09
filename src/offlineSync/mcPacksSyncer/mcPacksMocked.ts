@@ -1,5 +1,7 @@
-import { logPerformance } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { randomId, randomNumberId } from '../Utils/stringUtils';
+
+const log = loggerFactory.mcPacks('Mock');
 
 function randomMockedMcPacksString(count: number) {
     if (count === 0) return '';
@@ -27,7 +29,7 @@ function range(size: number, startAt = 0) {
 }
 
 export function getMockedMcPacksString(randomItemsToCreateCount: number): string {
-    const performanceLog = logPerformance();
+    const performanceLog = log.performance();
     const result = getMockedStringInternal(randomItemsToCreateCount);
     performanceLog.forceLog('Got random McPacks ' + randomItemsToCreateCount);
     return result;

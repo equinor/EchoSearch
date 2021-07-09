@@ -4,18 +4,45 @@ import { NotImplementedError } from './baseResult';
 import { isLogEnabled, LogType } from './loggerOptions';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 
+const _green = '#008000';
+const _cyan = '#008080';
+const _gray = '#808080';
+
 function logWithType(logType: LogType, context: string, ...args: any[]): void {
     if (!isLogEnabled(context, logType)) return;
 
-    if (logType === LogType.Trace) console.log('TRACE', context, ...args);
-    else if (logType === LogType.Debug) console.log('DEBUG', context, ...args);
-    else if (logType === LogType.Info) console.log(context, ...args);
+    if (logType === LogType.Trace) logWithColor(_gray, '[Trace]', context, ...args);
+    else if (logType === LogType.Debug) logWithColor(_cyan, '[Debug]', context, ...args);
+    else if (logType === LogType.Info) logWithColor(_green, '[Info]', context, ...args);
     else if (logType === LogType.Warn) console.warn(context, ...args);
     else if (logType === LogType.Error) console.error(context, ...args);
     else throw new NotImplementedError(`${logType} logging has not been implemented`);
 }
 
-function logPerformanceToConsole(message: string, startTime: number, forcePrintToConsole = false): void {
+function logWithColor(color: string, ...args: any[]) {
+    let firstNoneStringIndex = 0;
+    for (const arg of args) {
+        if (typeof arg === 'string') firstNoneStringIndex++;
+        else break;
+    }
+
+    const startingStringArgs = args.slice(0, firstNoneStringIndex);
+    const rest = args.slice(firstNoneStringIndex, args.length);
+
+    logWitPartialColor(color, startingStringArgs.join(' '), ...rest);
+}
+
+function logWitPartialColor(color: string, textToApplyColorTo: string, ...args: any[]) {
+    console.log('%c%s', `color: ${color};`, `${textToApplyColorTo}`, ...args);
+}
+
+function logPerformanceToConsole(
+    context: string,
+    message: string,
+    startTime: number,
+    forcePrintToConsole = false
+): void {
+    if (!isLogEnabled(context, LogType.Performance)) return;
     const timeInSeconds = ElapsedTimeInSeconds(startTime);
     if (!forcePrintToConsole && timeInSeconds < 0.8) return;
 
@@ -23,13 +50,13 @@ function logPerformanceToConsole(message: string, startTime: number, forcePrintT
     if (timeInSeconds > 0.3) color = 'orange';
     if (timeInSeconds > 1) color = 'red';
 
-    console.log('%c%s %c%s', `color: black;`, message, `color: ${color};`, timeInSeconds.toFixed(3) + ' sec(s)');
-}
-
-export function logPerformanceFunc(message: string, func: () => void): void {
-    const tStart = performance.now();
-    func();
-    logPerformanceToConsole(message, tStart);
+    console.log(
+        '%c%s %c%s',
+        `color: black;`,
+        `${context} ${message}`,
+        `color: ${color};`,
+        timeInSeconds.toFixed(3) + ' sec(s)'
+    );
 }
 
 export interface PerformanceFunctions {
@@ -39,14 +66,14 @@ export interface PerformanceFunctions {
     forceLogDelta: (message: string) => void;
 }
 
-export function logPerformance(preText?: string): PerformanceFunctions {
+function logPerformance(context: string, preText?: string): PerformanceFunctions {
     const tStart = performance.now();
     let tDelta = tStart;
     const preTextMessage = preText ? preText : '';
 
     function internalLogPerformanceToConsole(message: string, startTime: number, forceLog: boolean): void {
         const text = preTextMessage.trim() + ' ' + message;
-        logPerformanceToConsole(text.trim(), startTime, forceLog);
+        logPerformanceToConsole(context, text.trim(), startTime, forceLog);
         tDelta = performance.now();
     }
 
@@ -99,7 +126,7 @@ export function createLogger(context: string): LoggerFunctions {
         warn: (...args: any[]) => logWithType(LogType.Warn, getContext(), ...args),
         error: (...args: any[]) => logWithType(LogType.Error, getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
-        performance: (preText?: string) => logPerformance(`${getContext()} ${preText ?? ''}`.trim())
+        performance: (preText?: string) => logPerformance(getContext(), `${preText ?? ''}`.trim())
     };
 }
 

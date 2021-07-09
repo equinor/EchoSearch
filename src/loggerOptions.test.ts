@@ -50,6 +50,7 @@ describe('loggerOptions', () => {
     test.each([
         [nonExistingContext, LogType.Error, true],
         [nonExistingContext, LogType.Warn, true],
+        [nonExistingContext, LogType.Performance, false],
         [nonExistingContext, LogType.Info, false],
         [nonExistingContext, LogType.Debug, false],
         [nonExistingContext, LogType.Trace, false],
@@ -62,6 +63,7 @@ describe('loggerOptions', () => {
     test.each([
         [searchContext, LogType.Error, true],
         [searchContext, LogType.Warn, true],
+        [searchContext, LogType.Performance, true],
         [searchContext, LogType.Info, true],
         [searchContext, LogType.Debug, false],
         [searchContext, LogType.Trace, false],
@@ -74,6 +76,7 @@ describe('loggerOptions', () => {
     test.each([
         [searchContextExternal, LogType.Error, false],
         [searchContextExternal, LogType.Warn, false],
+        [searchContextExternal, LogType.Performance, false],
         [searchContextExternal, LogType.Info, false],
         [searchContextExternal, LogType.Debug, false],
         [searchContextExternal, LogType.Trace, false],
@@ -86,6 +89,7 @@ describe('loggerOptions', () => {
     test.each([
         [searchContextExternalModule2, LogType.Error, true],
         [searchContextExternalModule2, LogType.Warn, false],
+        [searchContextExternalModule2, LogType.Performance, false],
         [searchContextExternalModule2, LogType.Info, false],
         [searchContextExternalModule2, LogType.Debug, false],
         [searchContextExternalModule2, LogType.Trace, false],

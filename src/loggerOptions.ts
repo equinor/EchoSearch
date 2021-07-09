@@ -3,6 +3,7 @@ export enum LogType {
     Trace,
     Debug,
     Info,
+    Performance,
     Warn,
     Error
 }

@@ -20,13 +20,13 @@ const currentlySyncing: OfflineSystem[] = [];
 export async function runSync<T>(searchSystem: SyncSystem<T>): Promise<Result> {
     if (!isSyncEnabled(searchSystem.offlineSystemKey)) {
         const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
-        log.warn(message);
+        log.create(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }
 
     if (isSyncing(searchSystem.offlineSystemKey)) {
         const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
-        log.warn(message);
+        log.create(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }
 
@@ -63,7 +63,7 @@ async function runSyncInternal<T>(searchSystem: SyncSystem<T>): Promise<Result> 
     const settings = GetSetting(searchSystem.offlineSystemKey);
 
     const needFullSync = !settings.lastSyncedAtDate;
-    log.trace('Need full sync:', needFullSync);
+    log.create(searchSystem.offlineSystemKey).trace('Need full sync:', needFullSync);
 
     const result = needFullSync
         ? await searchSystem.runFullSync()

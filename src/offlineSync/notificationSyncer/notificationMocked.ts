@@ -1,5 +1,7 @@
-import { logPerformance } from '../../logger';
+import { loggerFactory } from '../../logger';
 import { randomNumberId } from '../Utils/stringUtils';
+
+const log = loggerFactory.notifications('Mock');
 
 function randomMockedNotificationsString(count: number) {
     if (count === 0) return '';
@@ -63,7 +65,7 @@ function range(size: number, startAt = 0) {
 }
 
 export function getMockedNotificationsString(randomItemsToCreateCount: number): string {
-    const performanceLog = logPerformance();
+    const performanceLog = log.performance();
     const result = getMockedStringInternal(randomItemsToCreateCount);
     performanceLog.forceLog('Got random Notifications ' + randomItemsToCreateCount);
     return result;
