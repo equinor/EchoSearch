@@ -3,6 +3,7 @@ import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
 import { result, Result } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
+import { logging, LogOptions, LogType } from '../loggerOptions';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
@@ -69,6 +70,12 @@ export interface EchoWorker {
     doStuff2(): Promise<void>;
     toggleMockDataClicked(): void;
     testCommReturnTypes(): unknown;
+
+    setLogLevel: (context: string, logTypeLevel: LogType) => void;
+    setLogLevels: (logLevels: LogOptions) => void;
+    setDefaultLogLevel: (defaultLogLevel: LogType) => void;
+    getDefaultLogLevel: () => LogType;
+    getLogLevel: (context: string) => LogType;
 }
 
 async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promise<T> {
@@ -123,7 +130,13 @@ const echoWorker: EchoWorker = {
         console.log('EchoWorker', result);
         console.log('EchoWorker props', { ...result });
         return result;
-    }
+    },
+
+    setLogLevel: logging.setLogLevel,
+    setLogLevels: logging.setLogLevels,
+    setDefaultLogLevel: logging.setDefaultLogLevel,
+    getDefaultLogLevel: logging.getDefaultLogLevel,
+    getLogLevel: logging.getLogLevel
 };
 
 //used for debugging in vsCode locally

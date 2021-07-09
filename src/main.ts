@@ -30,6 +30,7 @@ let count = 0;
 const logOptions = {
     '': LogType.Trace
 };
+Syncer.logConfiguration.setLevels(logOptions);
 logging.setLogLevels(logOptions);
 const log = logger('Main');
 

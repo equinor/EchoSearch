@@ -67,8 +67,8 @@ async function internalInitialize(): Promise<Result> {
     const logOptions = {
         '': LogType.Trace
     };
+    logging.setLogLevels(logOptions); //will be overwritten by external setLogOptions
 
-    logging.setLogLevels(logOptions);
     log.info('-------------- externalInitialize ------------ ');
     log.trace('trace');
     log.debug('debug');

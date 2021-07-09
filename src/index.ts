@@ -48,6 +48,14 @@ const searchNotifications = {
     bulkGetAsync: {}
 };
 
+const logConfiguration = {
+    setLevel: echoSearchWorker.setLogLevel,
+    setLevels: echoSearchWorker.setLogLevels,
+    setDefaultLevel: echoSearchWorker.setDefaultLogLevel,
+    getDefaultLevel: echoSearchWorker.getDefaultLogLevel,
+    getLevel: echoSearchWorker.getLogLevel
+};
+
 export const Search = {
     Tags: searchTags,
     Punch: searchPunches,
@@ -64,5 +72,6 @@ export const Syncer = {
     setEnabledAsync: echoSearchWorker.setEnabled,
     changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
         await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
-    OfflineSystem
+    OfflineSystem,
+    logConfiguration: logConfiguration
 };
