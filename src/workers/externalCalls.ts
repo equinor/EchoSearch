@@ -75,6 +75,7 @@ async function internalInitialize(): Promise<Result> {
     log.info('info');
     log.warn('warn');
     log.error('error');
+    log.critical('critical');
     log.create('child').info('-- this is from the new logger 222');
 
     if (_initDone) {

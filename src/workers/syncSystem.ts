@@ -2,7 +2,7 @@ import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { InMemoryInterface } from '../inMemory/inMemoryData';
 import { logger, LoggerFunctions } from '../logger';
 import { DatabaseAdministrator } from '../offlineSync/offlineDataDexieBase';
-import { isFullSyncDone, OfflineSystem, SaveSettings, setIsSyncEnabled, Settings } from '../offlineSync/syncSettings';
+import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 
 export class SyncSystem<T> {
     private log: LoggerFunctions;
@@ -35,7 +35,7 @@ export class SyncSystem<T> {
     }
 
     async setIsEnabled(isEnabled: boolean): Promise<void> {
-        setIsSyncEnabled(this._offlineSystemKey, isEnabled);
+        Settings.setIsSyncEnabled(this._offlineSystemKey, isEnabled);
         if (!isEnabled) {
             await this._databaseAdministrator.deleteAndRecreate();
             this._inMemoryData.clearData();
@@ -61,8 +61,8 @@ export class SyncSystem<T> {
         const performanceLogger = this.log.performance('Init');
         await this._databaseAdministrator.init();
 
-        if (!isFullSyncDone(this._offlineSystemKey)) {
-            this.log.warn(`Full ${this._offlineSystemKey} sync is not done, cannot init in memory`);
+        if (Settings.isSyncEnabled(this._offlineSystemKey) && !Settings.isFullSyncDone(this._offlineSystemKey)) {
+            this.log.debug(`Full ${this._offlineSystemKey} sync is not done, cannot init in memory`);
         }
 
         const repository = this._databaseAdministrator.repository();
@@ -90,8 +90,8 @@ export class SyncSystem<T> {
     }
 
     private ClearSettings(offlineSystemKey: OfflineSystem): void {
-        const settings = Settings.CreateDefaultSettings(offlineSystemKey);
-        SaveSettings(settings);
+        const settings = Settings.createDefaultSettings(offlineSystemKey);
+        Settings.save(settings);
     }
 
     cancelSync(): void {

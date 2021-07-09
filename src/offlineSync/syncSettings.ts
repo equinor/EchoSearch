@@ -62,7 +62,7 @@ function instance(): SettingsDexieDB {
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
     await instance().offlineStatus.put(offlineSettingItem);
 
-    log.create(offlineSettingItem.offlineSystemKey).trace(
+    log.create(offlineSettingItem.offlineSystemKey).debug(
         `settings done saving. IsEnabled:`,
         offlineSettingItem.isEnable,
         offlineSettingItem.lastSyncedAtDate?.toISOString(),
@@ -78,7 +78,7 @@ async function loadOfflineSettings(): Promise<void> {
 
     const instCodeArg = await getInstCodeOrUndefinedAsync();
     _instCode = instCodeArg ?? '';
-    log.trace('instCode loaded:', _instCode);
+    log.debug('instCode loaded:', _instCode);
 
     AddMissingSettings();
 }
@@ -92,34 +92,32 @@ const dictionary: Record<string, OfflineSettingItem> = {};
 function AddMissingSettings() {
     for (const item in OfflineSystem) {
         const hasSetting = dictionary[item];
-        log.info(item, hasSetting);
-
         if (!hasSetting) {
-            dictionary[item] = Settings.CreateDefaultSettings(item as OfflineSystem);
+            dictionary[item] = Settings.createDefaultSettings(item as OfflineSystem);
         }
     }
 }
 
-export function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
-    const settings = GetSetting(offlineSystemKey);
+function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
+    const settings = getSettings(offlineSystemKey);
     return settings.isEnable;
 }
 
-export function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
-    const settings = GetSetting(offlineSystemKey);
+function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
+    const settings = getSettings(offlineSystemKey);
     if (isEnabled && settings.isEnable === isEnabled) return;
     settings.isEnable = isEnabled;
     settings.lastSyncedAtDate = undefined;
     settings.newestItemDate = undefined;
-    SaveSettings(settings);
+    saveSettings(settings);
 }
 
-export function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
-    const settings = GetSetting(offlineSystemKey);
+function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
+    const settings = getSettings(offlineSystemKey);
     return settings.lastSyncedAtDate !== undefined;
 }
 
-export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem {
+function getSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     const result = dictionary[offlineSystemKey];
     if (result) {
         return { ...result };
@@ -127,7 +125,7 @@ export function GetSetting(offlineSystemKey: OfflineSystem): OfflineSettingItem 
     throw new NotInitializedError('settings not initialized - bug in code');
 }
 
-export function SaveSettings(settings: OfflineSettingItem): void {
+function saveSettings(settings: OfflineSettingItem): void {
     dictionary[settings.offlineSystemKey] = settings;
     fireAndForget(() => saveToRepository(settings));
 }
@@ -136,7 +134,7 @@ function fireAndForget(asyncFunc: () => Promise<void>): void {
     asyncFunc();
 }
 
-function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
+function createDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     return {
         offlineSystemKey: offlineSystemKey,
         isEnable: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
@@ -146,11 +144,21 @@ function CreateDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingI
 }
 
 export const Settings = {
-    CreateDefaultSettings,
+    createDefaultSettings,
     loadOfflineSettings,
+
+    save: saveSettings,
+    get: getSettings,
+
     saveInstCode,
     getInstCode,
-    getInstCodeOrUndefinedAsync
+
+    getInstCodeOrUndefinedAsync,
+
+    isSyncEnabled,
+    setIsSyncEnabled,
+
+    isFullSyncDone
 };
 
 export interface OfflineSettingItem {

@@ -16,6 +16,7 @@ function logWithType(logType: LogType, context: string, ...args: any[]): void {
     else if (logType === LogType.Info) logWithColor(_green, '[Info]', context, ...args);
     else if (logType === LogType.Warn) console.warn(context, ...args);
     else if (logType === LogType.Error) console.error(context, ...args);
+    else if (logType === LogType.Critical) console.error(context, ...args);
     else throw new NotImplementedError(`${logType} logging has not been implemented`);
 }
 
@@ -91,6 +92,7 @@ export interface LoggerFunctions {
     info: (...args: any[]) => void;
     warn: (...args: any[]) => void;
     error: (...args: any[]) => void;
+    critical: (...args: any[]) => void;
 
     create: (childContext: string) => LoggerFunctions;
     performance: (preText?: string) => PerformanceFunctions;
@@ -125,6 +127,7 @@ export function createLogger(context: string): LoggerFunctions {
         info: (...args: any[]) => logWithType(LogType.Info, getContext(), ...args),
         warn: (...args: any[]) => logWithType(LogType.Warn, getContext(), ...args),
         error: (...args: any[]) => logWithType(LogType.Error, getContext(), ...args),
+        critical: (...args: any[]) => logWithType(LogType.Critical, getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
         performance: (preText?: string) => logPerformance(getContext(), `${preText ?? ''}`.trim())
     };

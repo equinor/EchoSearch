@@ -2,7 +2,7 @@ import { InternalSyncResult } from '../../baseResult';
 import { inMemoryMcPacksInstance } from '../../inMemory/inMemoryMcPacks';
 import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
-import { getInstCode, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
+import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllMcPacks, apiUpdatedMcPacks, McPackDb } from './mcPacksApi';
 import { mcPacksAdministrator, mcPacksRepository } from './mcPacksRepository';
@@ -17,7 +17,7 @@ export const mcPacksSyncSystem = new SyncSystem(
     async (lastChangedDate, abortSignal) => syncUpdateMcPacks(lastChangedDate, abortSignal)
 );
 export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
-    setIsSyncEnabled(OfflineSystem.McPack, isEnabled);
+    Settings.setIsSyncEnabled(OfflineSystem.McPack, isEnabled);
 
     if (!isEnabled) {
         mcPacksAdministrator().deleteAndRecreate(); //TODO part of searchSystem?

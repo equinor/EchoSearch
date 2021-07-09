@@ -3,7 +3,7 @@ import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
 import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { Repository } from '../offlineDataDexieBase';
-import { getInstCode, GetSetting, OfflineSystem, setIsSyncEnabled } from '../syncSettings';
+import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllPunches, apiUpdatedPunches, PunchDb, verifyPunchCount } from './punchApi';
 import { punchesAdministrator, punchesRepository } from './punchRepository';
@@ -19,7 +19,7 @@ export const punchesSyncSystem = new SyncSystem(
 );
 
 export async function setPunchesIsEnabled(isEnabled: boolean): Promise<void> {
-    setIsSyncEnabled(OfflineSystem.Punches, isEnabled);
+    Settings.setIsSyncEnabled(OfflineSystem.Punches, isEnabled);
 
     if (!isEnabled) {
         punchesAdministrator().deleteAndRecreate(); //TODO part of searchSystem?
@@ -46,7 +46,7 @@ async function syncFullPunches(abortSignal: AbortSignal): Promise<InternalSyncRe
 }
 
 async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
-    const lastSyncedAtDate = GetSetting(OfflineSystem.Punches).lastSyncedAtDate;
+    const lastSyncedAtDate = Settings.get(OfflineSystem.Punches).lastSyncedAtDate;
     const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
     const daysBackInTime = 2;
     if (daysSinceLastUpdate >= daysBackInTime) {

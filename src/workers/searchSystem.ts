@@ -1,6 +1,6 @@
 //import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { searchResults, SearchResults } from '../inMemory/searchResult';
-import { isSyncEnabled, OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 
 export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;
@@ -40,7 +40,7 @@ export class SearchSystem<T> {
         maxHits: number,
         offlinePredicate?: (arg: T) => boolean
     ): Promise<SearchResults<T>> {
-        if (!isSyncEnabled(this._offlineSystemKey)) {
+        if (!Settings.isSyncEnabled(this._offlineSystemKey)) {
             return searchResults.syncNotEnabledError<T>(this._offlineSystemKey);
         }
         await this._initTask;
