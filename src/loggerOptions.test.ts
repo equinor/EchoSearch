@@ -12,7 +12,7 @@ describe('loggerOptions', () => {
             Search: LogType.Info,
             '': LogType.Warn,
             'Search.External': LogType.Disabled,
-            'Search.External.Module2': LogType.Error
+            'Search.External.Module2': LogType.Critical
         };
         logging.setLogLevels(logOptions);
     });
@@ -48,6 +48,7 @@ describe('loggerOptions', () => {
 
     const nonExistingContext = 'nonExistingContext';
     test.each([
+        [nonExistingContext, LogType.Critical, true],
         [nonExistingContext, LogType.Error, true],
         [nonExistingContext, LogType.Warn, true],
         [nonExistingContext, LogType.Performance, false],
@@ -61,6 +62,7 @@ describe('loggerOptions', () => {
 
     const searchContext = '[Search]';
     test.each([
+        [searchContext, LogType.Critical, true],
         [searchContext, LogType.Error, true],
         [searchContext, LogType.Warn, true],
         [searchContext, LogType.Performance, true],
@@ -74,6 +76,7 @@ describe('loggerOptions', () => {
 
     const searchContextExternal = '[Search.External]';
     test.each([
+        [searchContextExternal, LogType.Critical, false],
         [searchContextExternal, LogType.Error, false],
         [searchContextExternal, LogType.Warn, false],
         [searchContextExternal, LogType.Performance, false],
@@ -87,14 +90,15 @@ describe('loggerOptions', () => {
 
     const searchContextExternalModule2 = '[Search.External.Module2]';
     test.each([
-        [searchContextExternalModule2, LogType.Error, true],
+        [searchContextExternalModule2, LogType.Critical, true],
+        [searchContextExternalModule2, LogType.Error, false],
         [searchContextExternalModule2, LogType.Warn, false],
         [searchContextExternalModule2, LogType.Performance, false],
         [searchContextExternalModule2, LogType.Info, false],
         [searchContextExternalModule2, LogType.Debug, false],
         [searchContextExternalModule2, LogType.Trace, false],
         [searchContextExternalModule2, LogType.Disabled, false]
-    ])('isLogEnabled: [Search.External.Module2] should be set to Error: (%s, %s) expected %s', (a, b, expected) => {
+    ])('isLogEnabled: [Search.External.Module2] should be set to Critical: (%s, %s) expected %s', (a, b, expected) => {
         expect(isLogEnabled(a, b)).toBe(expected);
     });
 });
