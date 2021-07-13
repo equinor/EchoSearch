@@ -5,31 +5,31 @@ import { ErrorType, result, Result } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
 export interface SearchResults<T> extends Result {
-    data: T[];
+    values: T[];
 }
 
 export interface SearchResult<T> extends Result {
-    data?: T;
+    value?: T;
     isNotFound: boolean;
 }
 
 function createFromError<T>(exception: Error | BaseError): SearchResults<T> {
     const errorResult = result.errorFromException(exception);
-    return { isSuccess: false, data: [], error: errorResult.error };
+    return { isSuccess: false, values: [], error: errorResult.error };
 }
 
-function createSearchArraySuccessOrEmpty<T>(data: T[]): SearchResults<T> {
-    return { isSuccess: true, data };
+function createSearchArraySuccessOrEmpty<T>(values: T[]): SearchResults<T> {
+    return { isSuccess: true, values };
 }
 
-function createSearchSuccessOrNotFound<T>(data: T | undefined): SearchResult<T> {
-    return { isSuccess: true, data: data, isNotFound: data === undefined };
+function createSearchSuccessOrNotFound<T>(value: T | undefined): SearchResult<T> {
+    return { isSuccess: true, value, isNotFound: value === undefined };
 }
 
 function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
     return {
         isSuccess: false,
-        data: [],
+        values: [],
         error: {
             type: ErrorType.SyncIsNotEnabled,
             message: `To search you first have to enable sync for ${offlineSystem}`

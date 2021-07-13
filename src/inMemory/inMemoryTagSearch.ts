@@ -79,5 +79,5 @@ async function searchInMemoryTagNosIncludesAllInDescription(
 
     if (tagResults.error) log.error(tagResults.error);
 
-    return tagResults.data;
+    return tagResults.values;
 }

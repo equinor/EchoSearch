@@ -73,7 +73,7 @@ async function searchBtnClicked() {
         if (tags.isSuccess) {
             console.log(
                 'found tags:',
-                tags.data.map((i) => i.tagNo)
+                tags.values.map((i) => i.tagNo)
             );
         } else {
             console.log('tags search error', tags.error);
@@ -86,7 +86,7 @@ async function searchBtnClicked() {
     if (mcPacks.isSuccess) {
         console.log(
             'mc packs search',
-            mcPacks.data.map((item) =>
+            mcPacks.values.map((item) =>
                 [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
             )
         );
@@ -98,7 +98,7 @@ async function searchBtnClicked() {
     if (punches.isSuccess) {
         console.log(
             'punches search',
-            punches.data.map((item) =>
+            punches.values.map((item) =>
                 [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
             )
         );
@@ -110,7 +110,7 @@ async function searchBtnClicked() {
     if (notifications.isSuccess) {
         console.log(
             'notifications search',
-            notifications.data.map((item) =>
+            notifications.values.map((item) =>
                 [item.maintenanceRecordId, item.title, item.tagId, item.wbsId, item.wbs, item.changedDateTime].join(' ')
             )
         );
@@ -118,7 +118,7 @@ async function searchBtnClicked() {
         console.log('notifications search ', notifications.error?.message?.toString());
     }
 
-    const recordLookup = await Search.Notifications.getAsync(notifications.data[0].maintenanceRecordId ?? '123');
+    const recordLookup = await Search.Notifications.getAsync(notifications.values[0].maintenanceRecordId ?? '123');
     console.log('Record lookup', recordLookup);
 }
 
