@@ -2,16 +2,15 @@ import { NotFoundError } from '@equinor/echo-base';
 import { McPackDto, PunchDto, TagSummaryDto } from '..';
 import { NotImplementedError, result, Result } from '../baseResult';
 import { inMemory } from '../inMemory/inMemoryExports';
+import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
+import { inMemoryNotificationsInstance, searchInMemoryNotificationsByTagNos } from '../inMemory/inMemoryNotifications';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogType } from '../loggerOptions';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
-import { mcPacksRepository } from '../offlineSync/mcPacksSyncer/mcPacksRepository';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
-import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
-import { notificationsRepository } from '../offlineSync/notificationSyncer/notificationRepository';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
@@ -23,6 +22,7 @@ import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
+import { NotificationDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 
 const log = logger('externalCalls');
@@ -38,7 +38,7 @@ let _initDone = false;
 let _mcPacksSearchSystem: SearchSystem<McPackDb>;
 let _tagSearchSystem: SearchSystem<TagSummaryDb>;
 let _punchSearchSystem: SearchSystem<PunchDb>;
-let _notificationsSearchSystem: SearchSystem<NotificationDb>;
+let _notificationsSearchSystem: SearchSystem<NotificationDto>;
 
 let _initTaskInstance: Promise<Result> | undefined = undefined;
 
@@ -121,7 +121,7 @@ async function internalInitialize(): Promise<Result> {
         //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
     );
 
-    _notificationsSearchSystem = new SearchSystem<NotificationDb>(
+    _notificationsSearchSystem = new SearchSystem<NotificationDto>(
         OfflineSystem.Notifications,
         initNotificationTask,
         () => inMemory.Notifications.isReady(),
@@ -140,8 +140,9 @@ async function internalInitialize(): Promise<Result> {
 export function externalNotifications() {
     return {
         search: (searchText: string, maxHits: number) => _notificationsSearchSystem.search(searchText, maxHits),
-        lookup: notificationsRepository().get,
-        lookups: notificationsRepository().bulkGet
+        searchByTagNos: async (tagNos: string[]) => searchInMemoryNotificationsByTagNos(tagNos),
+        lookup: async (key: string) => inMemoryNotificationsInstance().get(key),
+        lookups: async (keys: string[]) => inMemoryNotificationsInstance().getAll(keys)
     };
 }
 
@@ -168,12 +169,12 @@ export async function externalMcPackSearch(searchText: string, maxHits: number):
     // }
     return await _mcPacksSearchSystem.search(searchText, maxHits);
 }
-export async function externalLookupMcPack(id: string): Promise<SearchResult<McPackDto>> {
-    return await mcPacksRepository().get(id);
+export async function externalLookupMcPack(id: number): Promise<SearchResult<McPackDto>> {
+    return inMemoryMcPacksInstance().get(id);
 }
 
-export async function externalLookupMcPacks(ids: string[]): Promise<SearchResults<McPackDto>> {
-    return await mcPacksRepository().bulkGet(ids);
+export async function externalLookupMcPacks(ids: number[]): Promise<SearchResults<McPackDto>> {
+    return inMemoryMcPacksInstance().getAll(ids);
 }
 
 export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>> {
@@ -262,15 +263,18 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
     if (!forceDeleteIfSameAlreadySelected && (await Settings.getInstCodeOrUndefinedAsync()) === instCode)
         return result.success();
 
+    const isNotificationsEnabled = Settings.isSyncEnabled(OfflineSystem.Notifications); //TODO Ove - General system for re-enabling sync settings
     cancelSyncAll();
     await Settings.saveInstCode(instCode);
     await syncContract.externalDeleteAllData();
+    Settings.setIsSyncEnabled(OfflineSystem.Notifications, isNotificationsEnabled);
     return result.success();
 }
 
 export const syncContract = {
     externalDeleteAllData,
     externalCancelSync,
+    isEnabled: (offlineSystemKey: OfflineSystem): boolean => Settings.isSyncEnabled(offlineSystemKey),
     externalSetEnabled,
     externalRunSync,
     externalToggleMockData,

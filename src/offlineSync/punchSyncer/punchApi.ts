@@ -70,7 +70,7 @@ export async function apiAllPunches(instCode: string, abortSignal: AbortSignal):
     performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupPunch(item));
-    performanceLogger.forceLogDelta('Cleanup mc Packs');
+    performanceLogger.forceLogDelta('Cleanup');
     return results;
 }
 

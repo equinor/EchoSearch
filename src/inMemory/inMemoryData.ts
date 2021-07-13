@@ -1,14 +1,16 @@
+import { searchResult, SearchResult, searchResults, SearchResults } from './searchResult';
+
 export interface InMemoryInterface<T> {
     clearData(): void;
     clearAndInit(data: T[]): void;
 }
 
-export class InMemoryData<T> implements InMemoryInterface<T> {
+export class InMemoryData<T, Key> implements InMemoryInterface<T> {
     inMemoryData: T[];
-    getKeyValue: (arg: T) => string | number;
+    getKeyValue: (arg: T) => Key;
     isReadyFlag: boolean;
     alphabeticSort: (a: T, b: T) => number;
-    constructor(getKeyValue: (arg: T) => string | number) {
+    constructor(getKeyValue: (arg: T) => Key) {
         this.isReadyFlag = false;
         this.inMemoryData = [] as T[];
         this.getKeyValue = getKeyValue;
@@ -72,7 +74,7 @@ export class InMemoryData<T> implements InMemoryInterface<T> {
         });
     }
 
-    indexOfBinarySearch(key: string | number): number {
+    private indexOfBinarySearch(key: Key): number {
         let minNum = 0;
         let maxNum = this.inMemoryData.length - 1;
 
@@ -88,5 +90,15 @@ export class InMemoryData<T> implements InMemoryInterface<T> {
         }
 
         return -1;
+    }
+
+    get(key: Key): SearchResult<T> {
+        const maybeFoundIndex = this.indexOfBinarySearch(key);
+        return searchResult.successOrNotFound(maybeFoundIndex >= 0 ? this.inMemoryData[maybeFoundIndex] : undefined);
+    }
+
+    getAll(keys: Key[]): SearchResults<T> {
+        const foundIndexes = keys.map((key) => this.indexOfBinarySearch(key)).filter((index) => index >= 0);
+        return searchResults.successOrEmpty(foundIndexes.map((index) => this.inMemoryData[index]));
     }
 }

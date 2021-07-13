@@ -1,4 +1,3 @@
-//import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { searchResults, SearchResults } from '../inMemory/searchResult';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 
