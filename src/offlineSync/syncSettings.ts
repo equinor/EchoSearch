@@ -64,7 +64,7 @@ async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise
 
     log.create(offlineSettingItem.offlineSystemKey).debug(
         `settings done saving. IsEnabled:`,
-        offlineSettingItem.isEnable,
+        offlineSettingItem.isEnabled,
         offlineSettingItem.lastSyncedAtDate?.toISOString(),
         offlineSettingItem.newestItemDate?.toISOString()
     );
@@ -99,14 +99,14 @@ function AddMissingSettings() {
 }
 
 function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
-    const settings = getSettings(offlineSystemKey);
-    return settings.isEnable;
+    const result = dictionary[offlineSystemKey];
+    return result?.isEnabled === true;
 }
 
 function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
-    const settings = getSettings(offlineSystemKey);
-    if (isEnabled && settings.isEnable === isEnabled) return;
-    settings.isEnable = isEnabled;
+    const settings = getSettingsOrThrow(offlineSystemKey);
+    if (isEnabled && settings.isEnabled === isEnabled) return;
+    settings.isEnabled = isEnabled;
     settings.lastSyncedAtDate = undefined;
     settings.newestItemDate = undefined;
     log.create(offlineSystemKey).debug('IsEnabled: ', isEnabled);
@@ -114,11 +114,11 @@ function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): 
 }
 
 function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
-    const settings = getSettings(offlineSystemKey);
+    const settings = getSettingsOrThrow(offlineSystemKey);
     return settings.lastSyncedAtDate !== undefined;
 }
 
-function getSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
+function getSettingsOrThrow(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     const result = dictionary[offlineSystemKey];
     if (result) {
         return { ...result };
@@ -138,7 +138,7 @@ function fireAndForget(asyncFunc: () => Promise<void>): void {
 function createDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     return {
         offlineSystemKey: offlineSystemKey,
-        isEnable: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
+        isEnabled: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
         newestItemDate: undefined,
         lastSyncedAtDate: undefined
     };
@@ -149,7 +149,7 @@ export const Settings = {
     loadOfflineSettings,
 
     save: saveSettings,
-    get: getSettings,
+    get: getSettingsOrThrow,
 
     saveInstCode,
     getInstCode,
@@ -164,7 +164,7 @@ export const Settings = {
 
 export interface OfflineSettingItem {
     offlineSystemKey: OfflineSystem;
-    isEnable: boolean;
+    isEnabled: boolean;
     newestItemDate?: Date;
     lastSyncedAtDate?: Date;
 }
