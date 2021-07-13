@@ -263,9 +263,11 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
     if (!forceDeleteIfSameAlreadySelected && (await Settings.getInstCodeOrUndefinedAsync()) === instCode)
         return result.success();
 
+    const isNotificationsEnabled = Settings.isSyncEnabled(OfflineSystem.Notifications); //TODO Ove - General system for re-enabling sync settings
     cancelSyncAll();
     await Settings.saveInstCode(instCode);
     await syncContract.externalDeleteAllData();
+    Settings.setIsSyncEnabled(OfflineSystem.Notifications, isNotificationsEnabled);
     return result.success();
 }
 
