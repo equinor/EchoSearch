@@ -100,9 +100,8 @@ describe('inMemoryData', () => {
     });
 });
 
-function createDb(): InMemoryData<DummyData> {
-    const data = new InMemoryData<DummyData>((i) => i.id);
-    return data;
+function createDb(): InMemoryData<DummyData, string> {
+    return new InMemoryData<DummyData, string>((i) => i.id);
 }
 
 function create(id: string, inputName?: string): DummyData {

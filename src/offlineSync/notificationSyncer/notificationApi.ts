@@ -1,6 +1,6 @@
 import { loggerFactory } from '../../logger';
 import { apiFetchJsonToArray } from '../../service/workerFetch';
-import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
+import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
@@ -11,13 +11,13 @@ export const notificationsMock = _mock;
 
 // maintenance record properties
 export interface NotificationDb {
-    maintenanceRecordId: number;
+    maintenanceRecordId: string;
     recordTypeId: string;
     recordType: string;
     tagId?: string;
     equipmentId: string;
     title: string;
-    createdDateTime?: Date;
+    createdDateTime: Date;
     activeStatusIds: string[];
     workOrderId: string;
     functionalLocation: string;
@@ -44,7 +44,7 @@ const log = loggerFactory.notifications('Api');
 function cleanupNotification(notification: NotificationDb): NotificationDb {
     if (!notification.createdDateTime) log.warn('Undefined date', notification);
     return {
-        maintenanceRecordId: toNumber(notification.maintenanceRecordId),
+        maintenanceRecordId: orEmpty(notification.maintenanceRecordId),
         recordTypeId: orEmpty(notification.recordTypeId),
         recordType: orEmpty(notification.recordType),
         tagId: orEmpty(notification.tagId),
@@ -81,7 +81,7 @@ export async function apiAllNotifications(instCode: string, abortSignal: AbortSi
     performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
 
     const results = items.map((item) => cleanupNotification(item));
-    performanceLogger.forceLogDelta('Cleanup mc Packs');
+    performanceLogger.forceLogDelta('Cleanup');
     return results;
 }
 

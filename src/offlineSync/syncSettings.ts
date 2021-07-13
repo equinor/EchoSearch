@@ -109,6 +109,7 @@ function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): 
     settings.isEnable = isEnabled;
     settings.lastSyncedAtDate = undefined;
     settings.newestItemDate = undefined;
+    log.create(offlineSystemKey).debug('IsEnabled: ', isEnabled);
     saveSettings(settings);
 }
 

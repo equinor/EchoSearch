@@ -117,11 +117,14 @@ async function searchBtnClicked() {
     } else {
         console.log('notifications search ', notifications.error?.message?.toString());
     }
+
+    const recordLookup = await Search.Notifications.getAsync(notifications.data[0].maintenanceRecordId ?? '123');
+    console.log('Record lookup', recordLookup);
 }
 
 async function expensiveBtnClicked() {
     log.info('ExpensiveBtnClicked', count++);
-    const result = echoSearchWorker.runExpensive();
+    const result = await echoSearchWorker.runExpensive();
     log.info(result);
 }
 

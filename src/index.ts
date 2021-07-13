@@ -27,25 +27,26 @@ const searchTags = {
     searchAsync: echoSearchWorker.searchTags,
     closestTagAsync: echoSearchWorker.searchForClosestTagNo,
     getAsync: echoSearchWorker.lookupTagAsync,
-    bulkGetAsync: echoSearchWorker.lookupTagsAsync
+    getAllAsync: echoSearchWorker.lookupTagsAsync
 };
 
 const searchPunches = {
     searchAsync: echoSearchWorker.searchPunches,
     getAsync: echoSearchWorker.lookupPunchAsync,
-    bulkGetAsync: echoSearchWorker.lookupPunchesAsync
+    getAllAsync: echoSearchWorker.lookupPunchesAsync
 };
 
 const searchMcPacks = {
     searchAsync: echoSearchWorker.searchMcPacks,
     getAsync: echoSearchWorker.lookupPunchAsync,
-    bulkGetAsync: echoSearchWorker.lookupPunchesAsync
+    getAllAsync: echoSearchWorker.lookupPunchesAsync
 };
 
 const searchNotifications = {
     searchAsync: echoSearchWorker.searchNotifications,
-    getAsync: {},
-    bulkGetAsync: {}
+    searchByTagNosAsync: echoSearchWorker.searchNotificationsByTagNos,
+    getAsync: echoSearchWorker.lookupNotificationAsync,
+    getAllAsync: echoSearchWorker.lookupNotificationsAsync
 };
 
 const logConfiguration = {
@@ -69,7 +70,8 @@ export const Syncer = {
         const token = await getApiTokenInMainThread();
         return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     },
-    setEnabledAsync: echoSearchWorker.setEnabled,
+    isEnabledAsync: echoSearchWorker.isEnabledAsync,
+    setEnabledAsync: echoSearchWorker.setEnabledAsync,
     changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
         await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
     OfflineSystem,

@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
-import { result, Result } from '../baseResult';
+import { result, Result, ResultValue } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
@@ -51,18 +51,23 @@ export interface EchoWorker {
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
 
     searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>>;
-    lookupMcPackAsync(tagNo: string): Promise<SearchResult<McPackDto>>;
-    lookupMcPacksAsync(tagNos: string[]): Promise<SearchResults<McPackDto>>;
+    lookupMcPackAsync(tagNo: number): Promise<SearchResult<McPackDto>>;
+    lookupMcPacksAsync(tagNos: number[]): Promise<SearchResults<McPackDto>>;
 
     searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
 
     searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDto>>;
+    searchNotificationsByTagNos(tagNos: string[]): Promise<SearchResults<NotificationDto>>;
+
+    lookupNotificationAsync(maintenanceRecordId: string): Promise<SearchResult<NotificationDto>>;
+    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<SearchResults<NotificationDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
 
-    setEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
+    setEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
+    isEnabledAsync(offlineSystemKey: OfflineSystem): Promise<ResultValue<boolean>>;
 
     cancelSync(offlineSystemKey: OfflineSystem): void;
     runExpensive: () => string;
@@ -106,11 +111,16 @@ const echoWorker: EchoWorker = {
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalLookupPunches(...args)),
 
     searchNotifications: (...args) => tryCatchToResult(() => externalNotifications().search(...args)),
+    searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications().searchByTagNos(...args)),
+    lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications().lookup(...args)),
+    lookupNotificationsAsync: (...args) => tryCatchToResult(() => externalNotifications().lookups(...args)),
 
     changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
     runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),
     cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
-    setEnabled: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
+    setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
+    isEnabledAsync: async (...args) =>
+        tryCatchToResult(async () => result.valueSuccess(syncContract.isEnabled(...args))),
 
     runExpensive(): string {
         expensive(2000);

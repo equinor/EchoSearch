@@ -5,6 +5,12 @@ export interface Result {
     readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
 }
 
+export interface ResultValue<T> extends Result {
+    readonly isSuccess: boolean;
+    readonly value?: T;
+    readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
+}
+
 export interface InternalSyncResult extends Result {
     newestItemDate?: Date;
     itemsSyncedCount: number;
@@ -38,6 +44,10 @@ export class SyncCanceledError extends SyncError {
 const createSuccess = (): Result => {
     return { isSuccess: true };
 };
+
+function createValueSuccess<T>(value: T): ResultValue<T> {
+    return { isSuccess: true, value };
+}
 
 const createError = (error: SearchModuleError): Result => {
     return { isSuccess: false, error };
@@ -74,6 +84,7 @@ function createResultErrorFromException<T extends Result>(error: Error | BaseErr
 
 export const result = {
     success: createSuccess,
+    valueSuccess: createValueSuccess,
     errorFromException: createResultErrorFromException,
     syncError: (message: string): Result => createError({ type: ErrorType.SyncFailed, message: message }),
     notImplementedError: (message: string): Result => createError({ type: ErrorType.NotImplemented, message: message })
