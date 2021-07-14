@@ -1,6 +1,7 @@
 import { Result, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { SearchResult, SearchResults } from './inMemory/searchResult';
+import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
@@ -54,7 +55,8 @@ const logConfiguration = {
     setLevels: echoSearchWorker.setLogLevels,
     setDefaultLevel: echoSearchWorker.setDefaultLogLevel,
     getDefaultLevel: echoSearchWorker.getDefaultLogLevel,
-    getLevel: echoSearchWorker.getLogLevel
+    getLevel: echoSearchWorker.getLogLevel,
+    LogType: LogType
 };
 
 export const Search = {

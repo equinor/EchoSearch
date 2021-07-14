@@ -11,7 +11,7 @@ import * as Comlink from 'comlink';
  *   Can be overwritten per worker instance
  */
 function start(): void {
-    console.log('ctx start function');
+    // console.log('ctx start function');
 }
 
 const ctx: Comlink.Endpoint = self as any;

@@ -8,7 +8,6 @@ import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
-import { logging, LogType } from '../loggerOptions';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { notificationRandomApiErrorPercentage } from '../offlineSync/notificationSyncer/notificationApi';
@@ -28,12 +27,11 @@ import { SearchSystem } from './searchSystem';
 
 const log = logger('externalCalls');
 
-let _counter = 0;
-function functionShouldOnlyBeCalledOnce(): void {
-    log.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
-}
-
-functionShouldOnlyBeCalledOnce();
+//let _counter = 0;
+// function functionShouldOnlyBeCalledOnce(): void {
+//     log.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
+// }
+// functionShouldOnlyBeCalledOnce();
 
 let _initDone = false;
 let _mcPacksSearchSystem: SearchSystem<McPackDb>;
@@ -71,19 +69,19 @@ async function initTags(): Promise<void> {
 }
 
 async function internalInitialize(): Promise<Result> {
-    const logOptions = {
-        '': LogType.Trace
-    };
-    logging.setLogLevels(logOptions); //will be overwritten by external setLogOptions
+    // const logOptions = {
+    //     '': LogType.Trace
+    // };
+    // logging.setLogLevels(logOptions); //will be overwritten by external setLogOptions
 
-    log.info('-------------- externalInitialize ------------ ');
-    log.trace('trace');
-    log.debug('debug');
-    log.info('info');
-    log.warn('warn');
-    log.error('error');
-    log.critical('critical');
-    log.create('child').info('-- this is from the new logger 222');
+    // log.info('-------------- externalInitialize ------------ ');
+    // log.trace('trace');
+    // log.debug('debug');
+    // log.info('info');
+    // log.warn('warn');
+    // log.error('error');
+    // log.critical('critical');
+    // log.create('child').info('-- this is from the new logger 222');
 
     if (_initDone) {
         log.warn('internalInitialize already done, returning');

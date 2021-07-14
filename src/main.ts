@@ -41,10 +41,10 @@ async function runSyncClicked() {
 }
 
 async function runSyncMcPacksClicked() {
-    const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
-    const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
+    //const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
+    //const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
     const notificationsSync = Syncer.runSyncAsync(OfflineSystem.Notifications);
-    const results = await Promise.all([mcPackSync, punchesSync, notificationsSync]);
+    const results = await Promise.all([/*mcPackSync, punchesSync,*/ notificationsSync]);
     for (const result of results) {
         log.info('Sync result main:', result);
         if (!result.isSuccess) log.warn({ ...result.error });
@@ -52,6 +52,7 @@ async function runSyncMcPacksClicked() {
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
+    //await Syncer.DebugOptions.setFailureRate(OfflineSystem.Notifications, 33);
     await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Notifications, isEnabled);
