@@ -42,8 +42,9 @@ export class SearchSystem<T> {
         if (!Settings.isSyncEnabled(this._offlineSystemKey)) {
             return searchResults.syncNotEnabledError<T>(this._offlineSystemKey);
         }
+
         await this._initTask;
-        console.log(this._offlineSystemKey, 'is offline search ready:', this._isOfflineSearchReady());
+
         const data = this._isOfflineSearchReady()
             ? await this._offlineSearch(searchText, maxHits, offlinePredicate)
             : await this._onlineSearch(searchText, maxHits);

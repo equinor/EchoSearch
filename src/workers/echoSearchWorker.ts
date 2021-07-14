@@ -69,6 +69,8 @@ export interface EchoWorker {
     setEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
     isEnabledAsync(offlineSystemKey: OfflineSystem): Promise<ResultValue<boolean>>;
 
+    setFailureRateAsync(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void>;
+
     cancelSync(offlineSystemKey: OfflineSystem): void;
     runExpensive: () => string;
 
@@ -121,6 +123,8 @@ const echoWorker: EchoWorker = {
     setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
     isEnabledAsync: async (...args) =>
         tryCatchToResult(async () => result.valueSuccess(syncContract.isEnabled(...args))),
+
+    setFailureRateAsync: (...args) => syncContract.externalSetFailureRate(...args),
 
     runExpensive(): string {
         expensive(2000);

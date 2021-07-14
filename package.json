@@ -1,6 +1,6 @@
 {
   "name": "@equinor/echo-search",
-  "version": "0.1.1183",
+  "version": "0.1.1192",
   "description": "Echo Search - search and offline for echo.",
   "main": "lib/index.js",
   "types": "lib/src/index.d.ts",

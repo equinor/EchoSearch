@@ -11,6 +11,7 @@ import { logger } from '../logger';
 import { logging, LogType } from '../loggerOptions';
 import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
+import { notificationRandomApiErrorPercentage } from '../offlineSync/notificationSyncer/notificationApi';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
@@ -41,6 +42,12 @@ let _punchSearchSystem: SearchSystem<PunchDb>;
 let _notificationsSearchSystem: SearchSystem<NotificationDto>;
 
 let _initTaskInstance: Promise<Result> | undefined = undefined;
+
+let _loadOfflineSettingsTask: Promise<void> | undefined = undefined;
+async function loadOfflineSettingsTask(): Promise<void> {
+    if (!_loadOfflineSettingsTask) _loadOfflineSettingsTask = Settings.loadOfflineSettings();
+    return _loadOfflineSettingsTask;
+}
 
 export async function externalInitializeTask(): Promise<Result> {
     // const wait = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -84,7 +91,7 @@ async function internalInitialize(): Promise<Result> {
     }
 
     const performanceLogger = log.performance();
-    await Settings.loadOfflineSettings();
+    await loadOfflineSettingsTask();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
 
     externalToggleMockData();
@@ -190,6 +197,8 @@ export async function externalLookupPunches(ids: string[]): Promise<SearchResult
 }
 
 async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
+    await loadOfflineSettingsTask(); //in case init is not done yet
+
     setToken(apiAccessToken);
 
     if (offlineSystemKey === OfflineSystem.McPack) {
@@ -271,6 +280,11 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
     return result.success();
 }
 
+async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
+    if (offlineSystemKey === OfflineSystem.Notifications) notificationRandomApiErrorPercentage.value = failPercentage;
+    else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
+}
+
 export const syncContract = {
     externalDeleteAllData,
     externalCancelSync,
@@ -278,7 +292,8 @@ export const syncContract = {
     externalSetEnabled,
     externalRunSync,
     externalToggleMockData,
-    externalChangePlant
+    externalChangePlant,
+    externalSetFailureRate
 };
 
 export function externalTestCommReturnTypes(): ErrorForTesting {

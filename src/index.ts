@@ -1,4 +1,4 @@
-import { Result } from './baseResult';
+import { Result, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { SearchResult, SearchResults } from './inMemory/searchResult';
 import { OfflineSystem } from './offlineSync/syncSettings';
@@ -62,7 +62,12 @@ export const Search = {
     Punch: searchPunches,
     McPacks: searchMcPacks,
     Notifications: searchNotifications,
-    OfflineSystem
+    OfflineSystem,
+    ErrorType: SyncErrorType //TODO Ove - should this be the same as syncError?
+};
+
+export const DebugOptions = {
+    setFailureRate: echoSearchWorker.setFailureRateAsync
 };
 
 export const Syncer = {
@@ -70,10 +75,14 @@ export const Syncer = {
         const token = await getApiTokenInMainThread();
         return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
     },
-    isEnabledAsync: echoSearchWorker.isEnabledAsync,
+    isEnabledAsync: async (offlineSystemKey: OfflineSystem): Promise<boolean> =>
+        (await echoSearchWorker.isEnabledAsync(offlineSystemKey)).value === true,
+
     setEnabledAsync: echoSearchWorker.setEnabledAsync,
     changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
         await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
     OfflineSystem,
-    logConfiguration: logConfiguration
+    logConfiguration: logConfiguration,
+    ErrorType: SyncErrorType,
+    DebugOptions
 };

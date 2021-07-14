@@ -1,4 +1,11 @@
-import { BaseError, BaseErrorArgs, ForbiddenError, NotFoundError, UnauthorizedError } from '@equinor/echo-base';
+import {
+    BaseError,
+    BaseErrorArgs,
+    ErrorProperties,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError
+} from '@equinor/echo-base';
 
 export interface Result {
     readonly isSuccess: boolean;
@@ -54,28 +61,30 @@ const createError = (error: SearchModuleError): Result => {
 };
 
 function createResultErrorFromException<T extends Result>(error: Error | BaseError): T {
-    let errorType = ErrorType.Unknown;
+    let errorType = SyncErrorType.Unknown;
 
-    if (error instanceof SyncCanceledError) errorType = ErrorType.SyncCanceled;
-    else if (error instanceof NotFoundError) errorType = ErrorType.ApiNotFound;
-    else if (error instanceof ForbiddenError || error instanceof UnauthorizedError) errorType = ErrorType.ApiForbidden;
-    else if (error instanceof NotInitializedError) errorType = ErrorType.NotInitialized;
-    else if (error instanceof ArgumentError) errorType = ErrorType.BugInCode;
+    if (error instanceof SyncCanceledError) errorType = SyncErrorType.SyncCanceled;
+    else if (error instanceof NotFoundError) errorType = SyncErrorType.NotFound;
+    else if (error instanceof ForbiddenError || error instanceof UnauthorizedError) errorType = SyncErrorType.Forbidden;
+    else if (error instanceof NotInitializedError) errorType = SyncErrorType.NotInitialized;
+    else if (error instanceof ArgumentError) errorType = SyncErrorType.BugInCode;
     else if (error instanceof Error && error.message.toLowerCase().includes('abort'))
-        errorType = ErrorType.SyncCanceled; //fetch url call was aborted
+        errorType = SyncErrorType.SyncCanceled; //fetch url call was aborted
 
-    let allProperties = {};
+    let allProperties: ErrorProperties = {};
     if (error instanceof BaseError) {
         allProperties = error.getProperties(); //TODO unit test, are we missing any custom properties?
     } else if (error instanceof Error) {
-        allProperties = JSON.parse(JSON.stringify(error)); //TODO unit test how this iw working
+        allProperties = JSON.parse(JSON.stringify(error)); //TODO unit test how this iw working //TODO might not work with dexieError - circular dependency
     } //TODO handled unknown types as string
 
     const searchModuleError: SearchModuleError = {
         type: errorType,
-        message: error.message,
         name: error.name,
+        message: error.message,
         stack: error.stack,
+        httpStatusCode: allProperties?.httpStatusCode as number,
+        url: allProperties?.url as string,
         properties: { ...allProperties }
     };
     //todo url and statusCode?
@@ -86,24 +95,25 @@ export const result = {
     success: createSuccess,
     valueSuccess: createValueSuccess,
     errorFromException: createResultErrorFromException,
-    syncError: (message: string): Result => createError({ type: ErrorType.SyncFailed, message: message }),
-    notImplementedError: (message: string): Result => createError({ type: ErrorType.NotImplemented, message: message })
+    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
+    notImplementedError: (message: string): Result =>
+        createError({ type: SyncErrorType.NotImplemented, message: message })
 };
 
-export enum ErrorType {
+export enum SyncErrorType {
     Unknown = 'Unknown',
-    ApiNotFound = 'ApiNotFound',
-    ApiForbidden = 'ApiForbidden',
-    NotImplemented = 'NotImplemented',
+    NotFound = 'ApiNotFound',
+    Forbidden = 'ApiForbidden',
     SyncFailed = 'SyncFailed',
     SyncCanceled = 'SyncCanceled',
     SyncIsNotEnabled = 'SyncIsNotEnabled',
     NotInitialized = 'NotInitialized',
-    BugInCode = 'BugInCode'
+    BugInCode = 'BugInCode',
+    NotImplemented = 'NotImplemented'
 }
 
 export interface SearchModuleError {
-    type: ErrorType;
+    type: SyncErrorType;
     name?: string;
     message?: string;
     stack?: string;

@@ -7,6 +7,23 @@ import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedNotificationsString } from './notificationMocked';
 
 const _mock = new ToggleState(false);
+
+export class NumberState {
+    private _value: number;
+    constructor(isEnabled: number) {
+        this._value = isEnabled;
+    }
+
+    get value(): number {
+        return this._value;
+    }
+
+    set value(value: number) {
+        this._value = value;
+    }
+}
+
+export const notificationRandomApiErrorPercentage = new NumberState(0);
 export const notificationsMock = _mock;
 
 // maintenance record properties
@@ -99,7 +116,7 @@ export async function apiUpdatedNotifications(
 
 async function getAllNotificationsFromApi(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
-    return await apiFetchJsonToArray<NotificationDb>(url, abortSignal);
+    return await apiFetchJsonToArray<NotificationDb>(urlOrFakeError(url), abortSignal);
 }
 
 async function syncOpenAndClosedNotificationsData(
@@ -109,5 +126,16 @@ async function syncOpenAndClosedNotificationsData(
 ): Promise<NotificationDb[]> {
     const date = dateAsApiString(updatedSince);
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&top=100000`;
-    return await apiFetchJsonToArray<NotificationDb>(url, abortSignal);
+    return await apiFetchJsonToArray<NotificationDb>(urlOrFakeError(url), abortSignal);
+}
+export function urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
+    const chanceValue = randomInt(0, 100);
+    const isFailure = chanceValue < notificationRandomApiErrorPercentage.value;
+    log.trace('Failure roll:', chanceValue, notificationRandomApiErrorPercentage.value, isFailure);
+    if (!isFailure) return url;
+    return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
+}
+
+function randomInt(minIncluded: number, maxIncluded: number): number {
+    return Math.floor(Math.random() * (maxIncluded - minIncluded + 1) + minIncluded);
 }

@@ -1,7 +1,7 @@
 //interface FailureType extends string{}
 
 import { BaseError } from '@equinor/echo-base';
-import { ErrorType, result, Result } from '../baseResult';
+import { result, Result, SyncErrorType } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
 export interface SearchResults<T> extends Result {
@@ -31,7 +31,7 @@ function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T
         isSuccess: false,
         values: [],
         error: {
-            type: ErrorType.SyncIsNotEnabled,
+            type: SyncErrorType.SyncIsNotEnabled,
             message: `To search you first have to enable sync for ${offlineSystem}`
         }
     };
