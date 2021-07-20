@@ -56,7 +56,7 @@ async function syncUpdatePunches(newestItemDate: Date, abortSignal: AbortSignal)
 
     const performanceLogger = log.performance();
     const punches = await apiUpdatedPunches(getInstCode(), newestItemDate, abortSignal);
-    performanceLogger.forceLogDelta('Api, daysSinceLastUpdate: ' + daysSinceLastUpdate);
+    performanceLogger.forceLogDelta(`Api ${punches.length} daysSinceLastUpdate ${daysSinceLastUpdate}`);
     inMemoryPunchesInstance().updateItems(punches);
 
     const repository = punchesRepository();

@@ -1,32 +1,10 @@
 import { loggerFactory } from '../../logger';
-import { apiFetchJsonToArray } from '../../service/workerFetch';
+import { ApiDataFetcher } from '../apiDataFetcher';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
-import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedNotificationsString } from './notificationMocked';
 
-const _mock = new ToggleState(false);
-
-export class NumberState {
-    private _value: number;
-    constructor(isEnabled: number) {
-        this._value = isEnabled;
-    }
-
-    get value(): number {
-        return this._value;
-    }
-
-    set value(value: number) {
-        this._value = value;
-    }
-}
-
-export const notificationRandomApiErrorPercentage = new NumberState(0);
-export const notificationsMock = _mock;
-
-// maintenance record properties
 export interface NotificationDb {
     maintenanceRecordId: string;
     recordTypeId: string;
@@ -57,6 +35,7 @@ export interface NotificationDb {
 }
 
 const log = loggerFactory.notifications('Api');
+export const notificationsApi = new ApiDataFetcher(cleanupNotification);
 
 function cleanupNotification(notification: NotificationDb): NotificationDb {
     if (!notification.createdDateTime) log.warn('Undefined date', notification);
@@ -91,15 +70,8 @@ function cleanupNotification(notification: NotificationDb): NotificationDb {
 }
 
 export async function apiAllNotifications(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
-    const performanceLogger = log.performance();
-    const items: NotificationDb[] = _mock.isEnabled
-        ? JSON.parse(getMockedNotificationsString(0))
-        : await getAllNotificationsFromApi(instCode, abortSignal);
-    performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
-
-    const results = items.map((item) => cleanupNotification(item));
-    performanceLogger.forceLogDelta('Cleanup');
-    return results;
+    const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
+    return notificationsApi.fetchAll(url, abortSignal, () => getMockedNotificationsString(0));
 }
 
 export async function apiUpdatedNotifications(
@@ -107,35 +79,7 @@ export async function apiUpdatedNotifications(
     fromDate: Date,
     abortSignal: AbortSignal
 ): Promise<NotificationDb[]> {
-    const items: NotificationDb[] = _mock.isEnabled
-        ? JSON.parse(getMockedNotificationsString(50000))
-        : await syncOpenAndClosedNotificationsData(instCode, fromDate, abortSignal);
-
-    return items.map((item) => cleanupNotification(item));
-}
-
-async function getAllNotificationsFromApi(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
-    return await apiFetchJsonToArray<NotificationDb>(urlOrFakeError(url), abortSignal);
-}
-
-async function syncOpenAndClosedNotificationsData(
-    instCode: string,
-    updatedSince: Date,
-    abortSignal: AbortSignal
-): Promise<NotificationDb[]> {
-    const date = dateAsApiString(updatedSince);
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&top=100000`;
-    return await apiFetchJsonToArray<NotificationDb>(urlOrFakeError(url), abortSignal);
-}
-export function urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
-    const chanceValue = randomInt(0, 100);
-    const isFailure = chanceValue < notificationRandomApiErrorPercentage.value;
-    log.trace('Failure roll:', chanceValue, notificationRandomApiErrorPercentage.value, isFailure);
-    if (!isFailure) return url;
-    return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
-}
-
-function randomInt(minIncluded: number, maxIncluded: number): number {
-    return Math.floor(Math.random() * (maxIncluded - minIncluded + 1) + minIncluded);
+    const date = dateAsApiString(fromDate);
+    const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
+    return notificationsApi.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
 }

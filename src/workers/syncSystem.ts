@@ -65,7 +65,7 @@ export class SyncSystem<T> {
             this.log.debug(`Full ${this._offlineSystemKey} sync is not done, cannot init in memory`);
         }
 
-        const repository = this._databaseAdministrator.repository();
+        const repository = this._databaseAdministrator.repositoryTransaction();
         const data = await repository.slowlyGetAllData();
         if (data.length > 0) this._inMemoryData.clearAndInit(data);
 

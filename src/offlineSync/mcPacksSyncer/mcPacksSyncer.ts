@@ -28,7 +28,7 @@ export async function setMcPacksIsEnabled(isEnabled: boolean): Promise<void> {
 async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiAllMcPacks(getInstCode(), abortSignal);
-    performanceLogger.forceLogDelta('Api');
+    performanceLogger.forceLogDelta('Api ' + data.length);
 
     inMemoryMcPacksInstance().clearAndInit(data);
     performanceLogger.forceLogDelta('clear and init inMemoryData');
@@ -45,7 +45,7 @@ async function syncFullMcPacks(abortSignal: AbortSignal): Promise<InternalSyncRe
 async function syncUpdateMcPacks(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
     const data = await apiUpdatedMcPacks(getInstCode(), lastChangedDate, abortSignal);
-    performanceLogger.forceLogDelta('Api');
+    performanceLogger.forceLogDelta('Api ' + data.length);
 
     inMemoryMcPacksInstance().updateItems(data);
     performanceLogger.forceLogDelta('Add to inMemory, total: ' + inMemoryMcPacksInstance().length());

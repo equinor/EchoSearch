@@ -10,7 +10,7 @@ import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
 const log = loggerFactory.tags('Api');
 
-const _mock = new ToggleState(true);
+const _mock = new ToggleState(false);
 export const tagsMock = _mock;
 
 export interface TagsData {

@@ -33,5 +33,5 @@ export function mcPacksAdministrator(): DatabaseAdministrator<McPackDb> {
 }
 
 export function mcPacksRepository(): Repository<McPackDb> {
-    return mcPacksAdministrator().repository();
+    return mcPacksAdministrator().repositoryTransaction();
 }

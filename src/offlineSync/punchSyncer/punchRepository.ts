@@ -33,5 +33,5 @@ export function punchesAdministrator(): DatabaseAdministrator<PunchDb> {
 }
 
 export function punchesRepository(): Repository<PunchDb> {
-    return punchesAdministrator().repository();
+    return punchesAdministrator().repositoryTransaction();
 }

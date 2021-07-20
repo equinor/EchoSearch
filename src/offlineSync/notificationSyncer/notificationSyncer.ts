@@ -1,12 +1,11 @@
 import { InternalSyncResult } from '../../baseResult';
 import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotifications';
-//import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotifications';
 import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
 import { getInstCode, OfflineSystem } from '../syncSettings';
-import { getMaxDateFunc } from '../Utils/dateUtils';
+import { getMaxDateFunc, minusOneDay } from '../Utils/dateUtils';
 import { apiAllNotifications, apiUpdatedNotifications, NotificationDb } from './notificationApi';
-import { notificationsAdministrator, notificationsRepository } from './notificationRepository';
+import { notificationsAdministrator, notificationsRepositoryTransaction } from './notificationRepository';
 
 const log = loggerFactory.notifications('Syncer');
 
@@ -29,7 +28,7 @@ async function syncFullNotifications(abortSignal: AbortSignal): Promise<Internal
     await notificationsAdministrator().deleteAndRecreate();
     performanceLogger.forceLogDelta('deleteAndRecreate');
 
-    await notificationsRepository().addDataBulks(data, abortSignal);
+    await notificationsRepositoryTransaction().addDataBulks(data, abortSignal);
     performanceLogger.forceLogDelta('addDataBulks ' + data.length);
     const newestItemDate = getNewestItemDate(data);
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
@@ -37,14 +36,28 @@ async function syncFullNotifications(abortSignal: AbortSignal): Promise<Internal
 
 async function syncUpdateNotifications(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
-    const data = await apiUpdatedNotifications(getInstCode(), lastChangedDate, abortSignal);
-    performanceLogger.forceLogDelta('Api');
+    const data = await apiUpdatedNotifications(
+        getInstCode(),
+        minusOneDay(lastChangedDate) ?? lastChangedDate,
+        abortSignal
+    );
+    performanceLogger.forceLogDelta('Api ' + data.length);
+
+    const closedNotificationNos = data.filter((notification) => notification.completedDateTime);
 
     inMemoryNotificationsInstance().updateItems(data);
-    performanceLogger.forceLogDelta('Add to inMemory, total: ' + inMemoryNotificationsInstance().length());
+    if (closedNotificationNos.length > 0) {
+        log.debug('Delete closed inMemory notifications', closedNotificationNos.length);
+        inMemoryNotificationsInstance().removeItems(closedNotificationNos);
+    }
+    performanceLogger.forceLogDelta('Updated inMemory, total: ' + inMemoryNotificationsInstance().length());
 
-    await notificationsRepository().addDataBulks(data, abortSignal);
-    performanceLogger.forceLogDelta('Add to Dexie');
+    const transaction = notificationsRepositoryTransaction();
+    await transaction.addDataBulks(data, abortSignal);
+    if (closedNotificationNos.length > 0) {
+        await transaction.bulkDeleteData(closedNotificationNos.map((item) => item.maintenanceRecordId));
+    }
+    performanceLogger.forceLogDelta('Add/Delete to Dexie');
 
     const newestItemDate = getNewestItemDate(data);
 

@@ -1,13 +1,11 @@
-import { loggerFactory } from '../../logger';
-import { apiFetchJsonToArray } from '../../service/workerFetch';
+import { ApiDataFetcher } from '../apiDataFetcher';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { baseApiUrl } from '../syncSettings';
-import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedMcPacksString } from './mcPacksMocked';
 
-const _mock = new ToggleState(true);
-export const mcPacksMock = _mock;
+// keep const log = loggerFactory.mcPacks('Api');
+export const mcPacksApi = new ApiDataFetcher(cleanupMcPack);
 
 export interface McPackDb {
     readonly id: number;
@@ -17,8 +15,6 @@ export interface McPackDb {
     readonly projectName: string;
     readonly updatedAt: Date;
 }
-
-const log = loggerFactory.mcPacks('Api');
 
 function cleanupMcPack(mcPack: McPackDb): McPackDb {
     return {
@@ -32,15 +28,8 @@ function cleanupMcPack(mcPack: McPackDb): McPackDb {
 }
 
 export async function apiAllMcPacks(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
-    const performanceLogger = log.performance();
-    const items: McPackDb[] = _mock.isEnabled
-        ? JSON.parse(getMockedMcPacksString(0))
-        : await getAllMcPacksFromApi(instCode, abortSignal);
-    performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
-
-    const results = items.map((item) => cleanupMcPack(item));
-    performanceLogger.forceLogDelta('Cleanup mc Packs');
-    return results;
+    const url = `${baseApiUrl}/${instCode}/mcPks?paging=false`;
+    return mcPacksApi.fetchAll(url, abortSignal, () => getMockedMcPacksString(0));
 }
 
 export async function apiUpdatedMcPacks(
@@ -48,24 +37,7 @@ export async function apiUpdatedMcPacks(
     fromDate: Date,
     abortSignal: AbortSignal
 ): Promise<McPackDb[]> {
-    const items: McPackDb[] = _mock.isEnabled
-        ? JSON.parse(getMockedMcPacksString(50000))
-        : await getUpdatedMcPacksFromApi(instCode, fromDate, abortSignal);
-
-    return items.map((item) => cleanupMcPack(item));
-}
-
-async function getAllMcPacksFromApi(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
-    const url = `${baseApiUrl}/${instCode}/mcPks?paging=false`;
-    return await apiFetchJsonToArray<McPackDb>(url, abortSignal);
-}
-
-async function getUpdatedMcPacksFromApi(
-    instCode: string,
-    updatedSince: Date,
-    abortSignal: AbortSignal
-): Promise<McPackDb[]> {
-    const date = dateAsApiString(updatedSince);
+    const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/mcPks?updatedSince=${date}&paging=false`;
-    return await apiFetchJsonToArray<McPackDb>(url, abortSignal);
+    return mcPacksApi.fetchAll(url, abortSignal, () => getMockedMcPacksString(50000));
 }

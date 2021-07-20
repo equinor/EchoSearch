@@ -1,0 +1,59 @@
+import { apiFetchJsonToArray } from '../service/workerFetch';
+import { baseApiUrl } from './syncSettings';
+
+export class ApiDataFetcher<T> {
+    private _isMockEnabled: boolean;
+    private _failureRate: number;
+    private cleanup: (values: T) => T;
+
+    /**
+     * Fetch all data from url. With Optionally state: for mock data, or failure rate for debugging.
+     * @param cleanup Map/Cleanup function to run on each item returned from the api.
+     */
+    constructor(cleanup: (values: T) => T) {
+        this._isMockEnabled = false;
+        this._failureRate = 0;
+        this.cleanup = cleanup;
+    }
+
+    set isMockEnabled(isEnabled: boolean) {
+        this._isMockEnabled = isEnabled;
+    }
+    get isMockEnabled(): boolean {
+        return this._isMockEnabled;
+    }
+
+    get failureRate(): number {
+        return this._failureRate;
+    }
+
+    /**
+     * Sets the failure rate when getting data from api/url. Used for debugging
+     */
+    set failureRate(value: number) {
+        this._failureRate = value;
+    }
+
+    toggleMock(): void {
+        this.isMockEnabled = !this.isMockEnabled;
+    }
+
+    async fetchAll(url: string, abortSignal: AbortSignal, getMockData: () => string): Promise<T[]> {
+        const items: T[] = this.isMockEnabled
+            ? JSON.parse(getMockData())
+            : await apiFetchJsonToArray<T>(this.urlOrFakeError(url), abortSignal);
+        return items.map((item) => this.cleanup(item));
+    }
+
+    private urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
+        const chanceValue = this.randomInt(0, 100);
+        const isFailure = chanceValue < this._failureRate;
+        console.log('Failure roll:', chanceValue, this._failureRate, isFailure); //TODO remove
+        if (!isFailure) return url;
+        return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
+    }
+
+    private randomInt(minIncluded: number, maxIncluded: number): number {
+        return Math.floor(Math.random() * (maxIncluded - minIncluded + 1) + minIncluded);
+    }
+}

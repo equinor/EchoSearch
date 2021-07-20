@@ -32,6 +32,6 @@ export function notificationsAdministrator(): DatabaseAdministrator<Notification
     return notificationsDatabaseAdministrator;
 }
 
-export function notificationsRepository(): Repository<NotificationDb> {
-    return notificationsAdministrator().repository();
+export function notificationsRepositoryTransaction(): Repository<NotificationDb> {
+    return notificationsAdministrator().repositoryTransaction();
 }

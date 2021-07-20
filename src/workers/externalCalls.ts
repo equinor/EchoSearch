@@ -8,9 +8,9 @@ import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
-import { McPackDb, mcPacksMock } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
-import { notificationRandomApiErrorPercentage } from '../offlineSync/notificationSyncer/notificationApi';
+import { notificationsApi } from '../offlineSync/notificationSyncer/notificationApi';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
 import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
@@ -91,8 +91,6 @@ async function internalInitialize(): Promise<Result> {
     const performanceLogger = log.performance();
     await loadOfflineSettingsTask();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
-
-    externalToggleMockData();
 
     const initMcTask = mcPacksSyncSystem.initTask();
     const initTagsTask = initTags();
@@ -260,10 +258,24 @@ async function externalDeleteAllData(): Promise<void> {
 }
 
 function externalToggleMockData(): void {
-    mcPacksMock.toggle();
+    mcPacksApi.toggleMock();
     punchesMock.toggle();
     tagsMock.toggle();
-    log.info('use mock tags:', tagsMock.isEnabled, 'mcPacks', mcPacksMock.isEnabled, 'punches', punchesMock.isEnabled);
+    notificationsApi.toggleMock();
+    notificationsApi.failureRate = 30;
+
+    log.info(
+        'use mock tags:',
+        tagsMock.isEnabled,
+        'mcPacks',
+        mcPacksApi.isMockEnabled,
+        'punches',
+        punchesMock.isEnabled,
+        'notifications',
+        notificationsApi.isMockEnabled,
+        'notifications failureRate',
+        notificationsApi.failureRate
+    );
 }
 
 async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> {
@@ -279,7 +291,7 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
 }
 
 async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.Notifications) notificationRandomApiErrorPercentage.value = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.failureRate = failPercentage;
     else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
 }
 

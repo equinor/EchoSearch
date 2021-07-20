@@ -33,7 +33,7 @@ export function tagsAdministrator(): DatabaseAdministrator<TagSummaryDb> {
 }
 
 export function tagsRepository(): Repository<TagSummaryDb> {
-    return tagsAdministrator().repository();
+    return tagsAdministrator().repositoryTransaction();
 }
 
 function dbIsReady(): void {

@@ -153,7 +153,7 @@ export class DatabaseAdministrator<T> {
         this.isInitDone = true;
     }
 
-    repository(): Repository<T> {
+    repositoryTransaction(): Repository<T> {
         if (this.database !== undefined) {
             return new Repository(this.database as OfflineDataDexieBase<T>);
         }
