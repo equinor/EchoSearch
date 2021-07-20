@@ -1,16 +1,13 @@
-import { loggerFactory } from '../../logger';
-import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
+import { apiFetch } from '../../service/workerFetch';
+import { ApiDataFetcher } from '../apiDataFetcher';
 import { verifyCount } from '../dataVerification';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl, OfflineSystem } from '../syncSettings';
-import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
-import { urlOrFakeError } from '../Utils/urlOrFakeError';
-import { mockedOpenClosedRejectedPunches, randomMockedPunchesArrayString } from './punchesMocked';
+import { mockedOpenClosedRejectedAndRandomPunches, mockedOpenClosedRejectedPunches } from './punchesMocked';
 
-const log = loggerFactory.punches('Api');
-const _mock = new ToggleState(false);
-export const punchesMock = _mock;
+//keep const log = loggerFactory.punches('Api');
+export const punchesApi = new ApiDataFetcher(cleanupPunch);
 
 export interface PunchDb {
     id: number;
@@ -63,15 +60,8 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 }
 
 export async function apiAllPunches(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
-    const performanceLogger = log.performance();
-    const items: PunchDb[] = _mock.isEnabled
-        ? JSON.parse(mockedOpenClosedRejectedPunches())
-        : await getAllPunchesFromApi(instCode, abortSignal);
-    performanceLogger.forceLogDelta(_mock.isEnabled ? 'Got mocked data' : ' Got api data');
-
-    const results = items.map((item) => cleanupPunch(item));
-    performanceLogger.forceLogDelta('Cleanup');
-    return results;
+    const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
+    return punchesApi.fetchAll(url, abortSignal, () => mockedOpenClosedRejectedPunches());
 }
 
 export async function apiUpdatedPunches(
@@ -79,14 +69,12 @@ export async function apiUpdatedPunches(
     fromDate: Date,
     abortSignal: AbortSignal
 ): Promise<PunchDb[]> {
-    const items: PunchDb[] = _mock.isEnabled
-        ? mockedUpdatedPunches()
-        : await getUpdatedPunchesFromApi(instCode, fromDate, abortSignal);
-
-    return items.map((item) => cleanupPunch(item));
+    const date = dateAsApiString(fromDate);
+    const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
+    return punchesApi.fetchAll(url, abortSignal, () => mockedOpenClosedRejectedAndRandomPunches(50000));
 }
 
-export async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {
+async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {
     //Statistics/open-punches-estimated-count?instCode=JSV
     const url = `${baseApiUrl}/${instCode}/statistics/open-punches-estimated-count`;
     const response = await apiFetch(url, abortSignal);
@@ -99,27 +87,6 @@ export async function verifyPunchCount(
     punchesCount: number,
     abortSignal: AbortSignal
 ): Promise<boolean> {
-    if (_mock.isEnabled) return true;
+    if (punchesApi.isMockEnabled) return true;
     return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode, abortSignal), OfflineSystem.Punches);
-}
-
-function mockedUpdatedPunches(): PunchDb[] {
-    const punches: PunchDb[] = JSON.parse(mockedOpenClosedRejectedPunches());
-    const randomPunches: PunchDb[] = JSON.parse(randomMockedPunchesArrayString(1));
-    return punches.concat(randomPunches);
-}
-
-async function getAllPunchesFromApi(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
-    const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    return await apiFetchJsonToArray<PunchDb>(url, abortSignal);
-}
-
-async function getUpdatedPunchesFromApi(
-    instCode: string,
-    updatedSince: Date,
-    abortSignal: AbortSignal
-): Promise<PunchDb[]> {
-    const date = dateAsApiString(updatedSince);
-    const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    return await apiFetchJsonToArray<PunchDb>(urlOrFakeError(url), abortSignal);
 }

@@ -1,13 +1,18 @@
-import { randomMockedArrayString } from '../Utils/mockedUtils';
+import { randomMockedString } from '../Utils/mockedUtils';
 import { randomId, randomNumberId } from '../Utils/stringUtils';
 
-export function randomMockedPunchesArrayString(count: number): string {
-    const result = randomMockedArrayString(count, () => randomPunch());
-    return result;
+export function mockedOpenClosedRejectedPunches(): string {
+    return mockedOpenClosedRejectedAndRandomPunches(0);
 }
 
-export function mockedOpenClosedRejectedPunches(): string {
-    return '[' + openPunch() + ', ' + closedPunch() + ', ' + rejectedPunch() + ']';
+export function mockedOpenClosedRejectedAndRandomPunches(randomCount: number): string {
+    let punches = '[' + openPunch() + ', ' + closedPunch() + ', ' + rejectedPunch();
+    if (randomCount > 0) {
+        punches += ', ' + randomMockedString(randomCount, () => randomPunch());
+    }
+
+    punches = punches + ']';
+    return punches;
 }
 
 function randomPunch(): string {

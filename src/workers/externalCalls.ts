@@ -12,7 +12,7 @@ import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { notificationsApi } from '../offlineSync/notificationSyncer/notificationApi';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
-import { PunchDb, punchesMock } from '../offlineSync/punchSyncer/punchApi';
+import { PunchDb, punchesApi } from '../offlineSync/punchSyncer/punchApi';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
 import { runSync } from '../offlineSync/syncRunner';
@@ -259,7 +259,7 @@ async function externalDeleteAllData(): Promise<void> {
 
 function externalToggleMockData(): void {
     mcPacksApi.toggleMock();
-    punchesMock.toggle();
+    punchesApi.toggleMock();
     tagsMock.toggle();
     notificationsApi.toggleMock();
     notificationsApi.failureRate = 30;
@@ -270,7 +270,7 @@ function externalToggleMockData(): void {
         'mcPacks',
         mcPacksApi.isMockEnabled,
         'punches',
-        punchesMock.isEnabled,
+        punchesApi.isMockEnabled,
         'notifications',
         notificationsApi.isMockEnabled,
         'notifications failureRate',
@@ -291,6 +291,8 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
 }
 
 async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
+    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.failureRate = failPercentage;
     if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.failureRate = failPercentage;
     else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
 }
