@@ -52,6 +52,9 @@ async function runSyncMcPacksClicked() {
 }
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
+    //(await echoSearchWorker.anotherHelloNotWorking).hello('test');
+    console.log('1');
+
     //await Syncer.DebugOptions.setFailureRate(OfflineSystem.Notifications, 33);
     await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);

@@ -19,7 +19,7 @@ type Body =
 const workerFetch = async (
     endpoint: string,
     token: string,
-    signal: AbortSignal,
+    signal?: AbortSignal,
     logFetchToConsole = true,
     method = 'GET',
     headerOptions: Record<string, unknown> = {},
@@ -76,6 +76,12 @@ export async function apiFetch(url: string, abortSignal: AbortSignal): Promise<R
     const response = await workerFetch(url, getToken(), abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return response;
+}
+
+export async function apiFetchToType<T>(url: string, abortSignal: AbortSignal): Promise<T> {
+    const response = await workerFetch(url, getToken(), abortSignal);
+    await throwErrorIfNotSuccess(response, url);
+    return (await response.json()) as T;
 }
 
 /**

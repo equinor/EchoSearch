@@ -258,23 +258,23 @@ async function externalDeleteAllData(): Promise<void> {
 }
 
 function externalToggleMockData(): void {
-    mcPacksApi.toggleMock();
-    punchesApi.toggleMock();
+    mcPacksApi.state.toggleMock();
+    punchesApi.state.toggleMock();
     tagsMock.toggle();
-    notificationsApi.toggleMock();
-    notificationsApi.failureRate = 30;
+    notificationsApi.state.toggleMock();
+    notificationsApi.state.failureRate = 30;
 
     log.info(
         'use mock tags:',
         tagsMock.isEnabled,
         'mcPacks',
-        mcPacksApi.isMockEnabled,
+        mcPacksApi.state.isMockEnabled,
         'punches',
-        punchesApi.isMockEnabled,
+        punchesApi.state.isMockEnabled,
         'notifications',
-        notificationsApi.isMockEnabled,
+        notificationsApi.state.isMockEnabled,
         'notifications failureRate',
-        notificationsApi.failureRate
+        notificationsApi.state.failureRate
     );
 }
 
@@ -291,9 +291,9 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
 }
 
 async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.state.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.state.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.state.failureRate = failPercentage;
     else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
 }
 

@@ -34,8 +34,59 @@ export interface NotificationDb {
     wbs: string;
 }
 
+export interface FailureInformation {
+    failureImpactId: string;
+    failureImpact: string;
+    failureModeGroupId: string;
+    failureModeId: string;
+    failureModeGroup: string;
+    failureMode: string;
+    failureMechanismGroupId: string;
+    failureMechanismId: string;
+    failureMechanismGroup: string;
+    failureMechanism: string;
+    detectionMethodGroupId: string;
+    detectionMethodId: string;
+    detectionMethodGroup: string;
+    detectionMethod: string;
+}
+
+export interface ActiveStatusDetail {
+    statusId: string;
+    status: string;
+    statusType: string;
+}
+
+export interface NotificationTagDetails {
+    tagId: string;
+    tag: string;
+    maintenancePlantId: string;
+    locationId: string;
+    location: string;
+    area: string;
+    systemId: string;
+    abcIndicatorId: string;
+    catalogProfileId: string;
+    parentFunctionalLocationId: string;
+    parentTagId: string;
+}
+
+export interface NotificationDetails extends NotificationDb {
+    longText: string;
+    failureInformation: FailureInformation;
+    activeStatusDetails: ActiveStatusDetail[];
+    tagDetails: NotificationTagDetails;
+}
+
 const log = loggerFactory.notifications('Api');
-export const notificationsApi = new ApiDataFetcher(cleanupNotification);
+const notificationsApiFetcher = new ApiDataFetcher(cleanupNotification);
+
+export const notificationsApi = {
+    openAndClosedForTagNo: getOpenClosedNotificationsForTagApi,
+    notificationDetails: getNotificationDetailsApi,
+
+    state: notificationsApiFetcher.state
+};
 
 function cleanupNotification(notification: NotificationDb): NotificationDb {
     if (!notification.createdDateTime) log.warn('Undefined date', notification);
@@ -71,7 +122,7 @@ function cleanupNotification(notification: NotificationDb): NotificationDb {
 
 export async function apiAllNotifications(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
-    return notificationsApi.fetchAll(url, abortSignal, () => getMockedNotificationsString(0));
+    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(0));
 }
 
 export async function apiUpdatedNotifications(
@@ -81,5 +132,42 @@ export async function apiUpdatedNotifications(
 ): Promise<NotificationDb[]> {
     const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
-    return notificationsApi.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
+    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
+}
+
+async function getOpenClosedNotificationsForTagApi(
+    instCode: string,
+    tagNo: string,
+    abortSignal: AbortSignal
+): Promise<NotificationDb[]> {
+    const url = `${baseApiUrl}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
+        tagNo
+    )}`;
+    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
+}
+
+async function getNotificationDetailsApi(
+    id: string,
+    includeFailureInformation: boolean,
+    includeLongText: boolean,
+    includeStatusDetails: boolean,
+    includeTagDetails: boolean,
+    abortSignal: AbortSignal
+): Promise<NotificationDetails> {
+    let url = `${baseApiUrl}/maintenance-record/${id}`;
+
+    let params = '';
+    if (includeFailureInformation) params += '&includeFailureInformation=true';
+    if (includeLongText) params += '&includeLongText=true';
+    if (includeStatusDetails) params += '&includeStatusDetails=true';
+    if (includeTagDetails) params += '&includeTagDetails=true';
+
+    url += params.replace('&', '?');
+
+    return await notificationsApiFetcher.fetch<NotificationDetails>(
+        url,
+        abortSignal,
+        (item) => item,
+        () => ''
+    );
 }

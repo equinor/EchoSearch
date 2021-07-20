@@ -1,6 +1,7 @@
 import { apiFetch } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { verifyCount } from '../dataVerification';
+import { notificationsApi } from '../notificationSyncer/notificationApi';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
 import { baseApiUrl, OfflineSystem } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
@@ -87,6 +88,6 @@ export async function verifyPunchCount(
     punchesCount: number,
     abortSignal: AbortSignal
 ): Promise<boolean> {
-    if (punchesApi.isMockEnabled) return true;
+    if (notificationsApi.state.isMockEnabled) return true;
     return await verifyCount(punchesCount, () => apiEstimatedPunchCount(instCode, abortSignal), OfflineSystem.Punches);
 }

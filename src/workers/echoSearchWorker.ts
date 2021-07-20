@@ -37,6 +37,14 @@ function expensive(time: number): number {
     return count;
 }
 
+interface AnotherI {
+    hello: (arg: string) => string;
+}
+
+const hello: AnotherI = {
+    hello: (arg: string) => 'hello ' + arg
+};
+
 const log = logger('EchoSearchWorker');
 
 export const sleep = (ms: number): Promise<unknown> => new Promise((res) => setTimeout(res, ms));
@@ -83,6 +91,7 @@ export interface EchoWorker {
     setDefaultLogLevel: (defaultLogLevel: LogType) => void;
     getDefaultLogLevel: () => LogType;
     getLogLevel: (context: string) => LogType;
+    anotherHelloNotWorking: AnotherI;
 }
 
 async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promise<T> {
@@ -150,7 +159,9 @@ const echoWorker: EchoWorker = {
     setLogLevels: logging.setLogLevels,
     setDefaultLogLevel: logging.setDefaultLogLevel,
     getDefaultLogLevel: logging.getDefaultLogLevel,
-    getLogLevel: logging.getLogLevel
+    getLogLevel: logging.getLogLevel,
+
+    anotherHelloNotWorking: hello
 };
 
 //used for debugging in vsCode locally
