@@ -3,5 +3,5 @@ export function queryParameter(
     parameterValue?: string | number,
     queryParameterSeparator = '&'
 ): string {
-    return parameterValue ? `${queryParameterSeparator}${parameterName}=${parameterValue}` : '';
+    return parameterValue ? `${queryParameterSeparator}${parameterName}=${encodeURIComponent(parameterValue)}` : '';
 }

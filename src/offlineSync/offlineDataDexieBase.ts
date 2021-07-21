@@ -67,9 +67,7 @@ export class OfflineDataDexieBase<T> extends Dexie {
             index++;
 
             await database.bulkPut(chunk); //bulkAdd doesn't make any speed difference with 500k items with id as number.
-            //TODO Ove - do we need retry?
-            // currentIndex++;
-            // if (currentIndex == 15) throw new Error('Testing failing dexie syncing');
+            // if (currentIndex++ == 15) throw new Error('Testing failing dexie syncing');
         }
         if (abortSignal.aborted) {
             this.log.info('Sync canceled');

@@ -72,7 +72,6 @@ export class ApiDataFetcher<T> {
     private urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
         const chanceValue = this.randomInt(0, 100);
         const isFailure = chanceValue < this._state.failureRate;
-        console.log('Failure roll:', chanceValue, this._state.failureRate, isFailure); //TODO remove
         if (!isFailure) return url;
         return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
     }

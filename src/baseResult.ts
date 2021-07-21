@@ -87,7 +87,7 @@ function createResultErrorFromException<T extends Result>(error: Error | BaseErr
         url: allProperties?.url as string,
         properties: { ...allProperties }
     };
-    //todo url and statusCode?
+
     return createError(searchModuleError) as T;
 }
 

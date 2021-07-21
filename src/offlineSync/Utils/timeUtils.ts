@@ -1,5 +1,3 @@
-//TODO - should be in commonlib
-
 /**
  * Returns the elapsed time in seconds between start and end time.
  * @param startTimeMs The start time to measure elapsed time from in milliseconds.

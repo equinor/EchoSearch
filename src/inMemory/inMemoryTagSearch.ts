@@ -10,7 +10,6 @@ import { TrieResult } from './trie/levTrie';
 const log = loggerFactory.tags('InMemory.Search');
 
 export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
-    //TODO should we return not ready if it hasn't been init yet?
     const tagNoCleaned = asAlphaNumeric(tagNo);
     const maybeTagAlphaNumeric = tagsLevTrie.instance().closest(tagNoCleaned, 6);
 

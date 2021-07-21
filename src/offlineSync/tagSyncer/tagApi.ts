@@ -1,9 +1,11 @@
 import { JsonParseError, SyncError } from '../../baseResult';
 import { loggerFactory } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
+import { queryParameter } from '../apiHelper';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
 import { baseApiUrl, getInstCode, Settings } from '../syncSettings';
 import { ToggleState } from '../toggleState';
+import { distinct } from '../Utils/distinct';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
 import { TagSummaryDb } from './tagSummaryDb';
@@ -63,7 +65,9 @@ export async function searchTagsOnline(
 ): Promise<TagSummaryDb[]> {
     maxHits = maxHits <= 0 ? maxHits : 25;
     instCode = instCode ?? Settings.getInstCode();
-    const url = `${baseApiUrl}/${instCode}/tags?tagNo=${searchText}&take=${maxHits}`;
+    let url = `${baseApiUrl}/${instCode}/tags?take=${maxHits}`;
+    url += queryParameter('tagNo', searchText);
+
     let results = await apiFetchJsonToArray<TagSummaryDb>(url, abortSignal);
     if (results.length < maxHits) {
         //TODO performance test - is it worth it?
@@ -71,17 +75,6 @@ export async function searchTagsOnline(
         results = distinct(results.concat(descriptionResults), (tag) => tag.tagNo);
     }
     return results.slice(0, maxHits);
-}
-
-function distinct<T, Key>(allMatches: ReadonlyArray<T>, getKeyValue: (arg: T) => Key): T[] {
-    //TODO Ove move and unit test
-    return allMatches.filter(
-        (item, i, arr) =>
-            arr.indexOf(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                arr.find((arrayItem) => getKeyValue(arrayItem) === getKeyValue(item))!
-            ) === i
-    );
 }
 
 function extractDateFromHeader(response: Response, headerName: string): Date {

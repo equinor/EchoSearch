@@ -54,7 +54,8 @@ async function apiSearchMcPacks(
     abortSignal?: AbortSignal
 ): Promise<McPackDb[]> {
     instCode = instCode ?? Settings.getInstCode();
-    let url = `${baseApiUrl}/${instCode}/mcPks?containsText=${searchText}`; //TODO Ove Stringify Search text
+    let url = `${baseApiUrl}/${instCode}/mcPks`;
+    url += queryParameter('containsText', searchText, '?');
     url += queryParameter('projectCodeContains', projectCode);
     url += queryParameter('itemsPerPage', maxHits);
     return mcPacksApiFetcher.fetchAll(url, () => getMockedMcPacksString(100), abortSignal);
