@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
+import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
 import { result, Result, ResultValue } from '../baseResult';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
@@ -23,6 +23,7 @@ import {
     externalTestCommReturnTypes,
     syncContract
 } from './externalCalls';
+import { externalCommPackSearch, externalLookupCommPack, externalLookupCommPacks } from './externalCommPacks';
 
 function expensive(time: number): number {
     const start = Date.now();
@@ -61,6 +62,10 @@ export interface EchoWorker {
     searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>>;
     lookupMcPackAsync(tagNo: number): Promise<SearchResult<McPackDto>>;
     lookupMcPacksAsync(tagNos: number[]): Promise<SearchResults<McPackDto>>;
+
+    searchCommPacks(searchText: string, maxHits: number): Promise<SearchResults<CommPackDto>>;
+    lookupCommPackAsync(tagNo: number): Promise<SearchResult<CommPackDto>>;
+    lookupCommPacksAsync(tagNos: number[]): Promise<SearchResults<CommPackDto>>;
 
     searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
@@ -116,6 +121,10 @@ const echoWorker: EchoWorker = {
     searchMcPacks: (...args) => tryCatchToResult(() => externalMcPackSearch(...args)),
     lookupMcPackAsync: (...args) => tryCatchToResult(() => externalLookupMcPack(...args)),
     lookupMcPacksAsync: (...args) => tryCatchToResult(() => externalLookupMcPacks(...args)),
+
+    searchCommPacks: (...args) => tryCatchToResult(() => externalCommPackSearch(...args)),
+    lookupCommPackAsync: (...args) => tryCatchToResult(() => externalLookupCommPack(...args)),
+    lookupCommPacksAsync: (...args) => tryCatchToResult(() => externalLookupCommPacks(...args)),
 
     searchPunches: (...args) => tryCatchToResult(() => externalPunchesSearch(...args)),
     lookupPunchAsync: (...args) => tryCatchToResult(() => externalLookupPunch(...args)),

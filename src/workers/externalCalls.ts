@@ -8,6 +8,8 @@ import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
+import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
+import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
 import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { notificationsApi } from '../offlineSync/notificationSyncer/notificationApi';
@@ -23,6 +25,7 @@ import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
 import { NotificationDto } from './dataTypes';
+import { externalInitCommPacksTask } from './externalCommPacks';
 import { SearchSystem } from './searchSystem';
 
 const log = logger('externalCalls');
@@ -45,6 +48,10 @@ let _loadOfflineSettingsTask: Promise<void> | undefined = undefined;
 async function loadOfflineSettingsTask(): Promise<void> {
     if (!_loadOfflineSettingsTask) _loadOfflineSettingsTask = Settings.loadOfflineSettings();
     return _loadOfflineSettingsTask;
+}
+
+function allSyncSystems() {
+    return [tagsSyncSystem, notificationsSyncSystem, punchesSyncSystem, mcPacksSyncSystem, commPacksSyncSystem];
 }
 
 export async function externalInitializeTask(): Promise<Result> {
@@ -93,6 +100,7 @@ async function internalInitialize(): Promise<Result> {
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
 
     const initMcTask = mcPacksSyncSystem.initTask();
+    const initCommTask = externalInitCommPacksTask();
     const initTagsTask = initTags();
     const initPunchesTask = punchesSyncSystem.initTask();
     const initNotificationTask = notificationsSyncSystem.initTask();
@@ -134,7 +142,7 @@ async function internalInitialize(): Promise<Result> {
 
     performanceLogger.forceLog('SearchSystems instantiated');
 
-    await Promise.all([initMcTask, initPunchesTask, initTagsTask, initNotificationTask]);
+    await Promise.all([initMcTask, initCommTask, initPunchesTask, initTagsTask, initNotificationTask]);
     performanceLogger.forceLog('----------- Search module initialize done -----------');
     _initDone = true;
     return result.success();
@@ -167,9 +175,6 @@ export async function externalLookupTags(tagNos: string[]): Promise<SearchResult
 }
 
 export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>> {
-    // if (mcPacksSearcher === undefined) {
-    //     return [];
-    // }
     return await _mcPacksSearchSystem.search(searchText, maxHits);
 }
 export async function externalLookupMcPack(id: number): Promise<SearchResult<McPackDto>> {
@@ -197,8 +202,13 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
 
     setToken(apiAccessToken);
 
+    //const system = getSyncSystem(offlineSystemKey); //TODO Ask Chris - why is this not working?
+    //if (system) return await runSync(system);
+
     if (offlineSystemKey === OfflineSystem.McPack) {
         return await runSync(mcPacksSyncSystem);
+    } else if (offlineSystemKey === OfflineSystem.CommPack) {
+        return await runSync(commPacksSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
         return await runSync(tagsSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
@@ -229,36 +239,12 @@ async function externalCancelSync(offlineSystemKey: OfflineSystem): Promise<Resu
 const cancelSyncAll = () => allSyncSystems().forEach((item) => item.cancelSync());
 
 function getSyncSystem(offlineSystemKey: OfflineSystem) {
-    switch (offlineSystemKey) {
-        case OfflineSystem.Tags:
-            return tagsSyncSystem;
-        case OfflineSystem.Punches:
-            return punchesSyncSystem;
-        case OfflineSystem.McPack:
-            return mcPacksSyncSystem;
-        case OfflineSystem.Notifications:
-            return notificationsSyncSystem;
-    }
-    return undefined;
-}
-
-function allSyncSystems() {
-    return [tagsSyncSystem, notificationsSyncSystem, punchesSyncSystem, mcPacksSyncSystem];
-}
-
-async function externalDeleteAllData(): Promise<void> {
-    const performanceLogger = log.performance('..Delete All Data');
-    performanceLogger.forceLog(' - Started');
-    externalCancelSync(OfflineSystem.McPack);
-
-    const all = allSyncSystems();
-    await Promise.all(all.map(async (item) => await item.clearAllData()));
-
-    performanceLogger.forceLog(' - Done');
+    return allSyncSystems().find((item) => item.offlineSystemKey === offlineSystemKey);
 }
 
 function externalToggleMockData(): void {
     mcPacksApi.state.toggleMock();
+    commPacksApi.state.toggleMock();
     punchesApi.state.toggleMock();
     tagsMock.toggle();
     notificationsApi.state.toggleMock();
@@ -278,6 +264,14 @@ function externalToggleMockData(): void {
     );
 }
 
+async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
+    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.state.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.CommPack) commPacksApi.state.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.state.failureRate = failPercentage;
+    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.state.failureRate = failPercentage;
+    else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
+}
+
 async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> {
     if (!forceDeleteIfSameAlreadySelected && (await Settings.getInstCodeOrUndefinedAsync()) === instCode)
         return result.success();
@@ -293,11 +287,15 @@ async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySel
     return result.success();
 }
 
-async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.state.failureRate = failPercentage;
-    else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
+async function externalDeleteAllData(): Promise<void> {
+    const performanceLogger = log.performance('..Delete All Data');
+    performanceLogger.forceLog(' - Started');
+    cancelSyncAll();
+
+    const all = allSyncSystems();
+    await Promise.all(all.map(async (item) => await item.clearAllData()));
+
+    performanceLogger.forceLog(' - Done');
 }
 
 export const syncContract = {

@@ -1,5 +1,5 @@
 import EchoCore from '@equinor/echo-core';
-import { Search, Syncer } from '.';
+import { Search, SearchResults, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { logger } from './logger';
 import { logging, LogType } from './loggerOptions';
@@ -42,9 +42,11 @@ async function runSyncClicked() {
 
 async function runSyncMcPacksClicked() {
     const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
+    const commPackSync = Syncer.runSyncAsync(OfflineSystem.CommPack);
     const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
     const notificationsSync = Syncer.runSyncAsync(OfflineSystem.Notifications);
-    const results = await Promise.all([mcPackSync, punchesSync, notificationsSync]);
+
+    const results = await Promise.all([mcPackSync, commPackSync, punchesSync, notificationsSync]);
     for (const result of results) {
         log.info('Sync result main:', result);
         if (!result.isSuccess) log.warn({ ...result.error });
@@ -53,10 +55,9 @@ async function runSyncMcPacksClicked() {
 
 async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
     //(await echoSearchWorker.anotherHelloNotWorking).hello('test');
-    console.log('1');
-
     //await Syncer.DebugOptions.setFailureRate(OfflineSystem.Notifications, 33);
     await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
+    await Syncer.setEnabledAsync(OfflineSystem.CommPack, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
     await Syncer.setEnabledAsync(OfflineSystem.Notifications, isEnabled);
 }
@@ -71,56 +72,61 @@ async function cameraSearchClicked() {
     console.log(similarTag, 'camera search: found tag', tag);
 }
 
+function print<T>(
+    name: string,
+    mcPacks: SearchResults<T>,
+    valuesToPrint: (item: T) => (string | number | Date | undefined)[]
+): void {
+    if (mcPacks.isSuccess) {
+        console.log(
+            name,
+            'search',
+            mcPacks.values.map((item) => valuesToPrint(item).join(' '))
+        );
+    } else {
+        console.log(name, 'search error ', mcPacks.error?.message?.toString());
+    }
+}
+
 async function searchBtnClicked() {
     try {
         const tags = await Search.Tags.searchAsync('a73 pedes cran', 5);
-        if (tags.isSuccess) {
-            console.log(
-                'found tags:',
-                tags.values.map((i) => i.tagNo)
-            );
-        } else {
-            console.log('tags search error', tags.error);
-        }
+        print('tags', tags, (item) => [item.tagNo, item.description]);
     } catch (e) {
         console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
     const mcPacks = await Search.McPacks.searchAsync('0001-A01', 2);
-    if (mcPacks.isSuccess) {
-        console.log(
-            'mc packs search',
-            mcPacks.values.map((item) =>
-                [item.description, item.commPkgNo, item.mcPkgNo, item.projectName, item.updatedAt].join(' ')
-            )
-        );
-    } else {
-        console.log('mc packs search ', mcPacks.error?.message?.toString());
-    }
+    print('mcPacks', mcPacks, (item) => [
+        item.description,
+        item.commPkgNo,
+        item.mcPkgNo,
+        item.projectName,
+        item.updatedAt
+    ]);
+
+    const commPacks = await Search.CommPacks.searchAsync('A-73MA001', 2);
+    print('commPacks', commPacks, (item) => [item.commPkgNo, item.description]);
 
     const punches = await Search.Punch.searchAsync('A-73MA001', 2);
-    if (punches.isSuccess) {
-        console.log(
-            'punches search',
-            punches.values.map((item) =>
-                [item.id, item.description, item.tagNo, item.commPkgNo, item.mcPkgNo, item.updatedAt].join(' ')
-            )
-        );
-    } else {
-        console.log('punches search ', punches.error?.message?.toString());
-    }
+    print('punches', punches, (item) => [
+        item.id,
+        item.description,
+        item.tagNo,
+        item.commPkgNo,
+        item.mcPkgNo,
+        item.updatedAt
+    ]);
 
     const notifications = await Search.Notifications.searchAsync('A-73MA001', 2);
-    if (notifications.isSuccess) {
-        console.log(
-            'notifications search',
-            notifications.values.map((item) =>
-                [item.maintenanceRecordId, item.title, item.tagId, item.wbsId, item.wbs, item.changedDateTime].join(' ')
-            )
-        );
-    } else {
-        console.log('notifications search ', notifications.error?.message?.toString());
-    }
+    print('notifications', notifications, (item) => [
+        item.maintenanceRecordId,
+        item.title,
+        item.tagId,
+        item.wbsId,
+        item.wbs,
+        item.changedDateTime
+    ]);
 
     const recordLookup = await Search.Notifications.getAsync(notifications.values[0]?.maintenanceRecordId ?? '123');
     console.log('Record lookup', recordLookup);

@@ -5,12 +5,12 @@ import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
-import { McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
+import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
 export type { Result };
 export type { SearchResult, SearchResults };
 export type { TagStatus, TagSummaryDto };
-export type { McPackDto, NotificationDto, PunchDto };
+export type { McPackDto, CommPackDto, NotificationDto, PunchDto };
 
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
     let value = 0;
@@ -39,8 +39,14 @@ const searchPunches = {
 
 const searchMcPacks = {
     searchAsync: echoSearchWorker.searchMcPacks,
-    getAsync: echoSearchWorker.lookupPunchAsync,
-    getAllAsync: echoSearchWorker.lookupPunchesAsync
+    getAsync: echoSearchWorker.lookupMcPackAsync,
+    getAllAsync: echoSearchWorker.lookupMcPacksAsync
+};
+
+const searchCommPacks = {
+    searchAsync: echoSearchWorker.searchCommPacks,
+    getAsync: echoSearchWorker.lookupCommPackAsync,
+    getAllAsync: echoSearchWorker.lookupCommPacksAsync
 };
 
 const searchNotifications = {
@@ -63,6 +69,7 @@ export const Search = {
     Tags: searchTags,
     Punch: searchPunches,
     McPacks: searchMcPacks,
+    CommPacks: searchCommPacks,
     Notifications: searchNotifications,
     OfflineSystem,
     ErrorType: SyncErrorType //TODO Ove - should this be the same as syncError?

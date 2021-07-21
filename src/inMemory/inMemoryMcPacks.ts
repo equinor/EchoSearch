@@ -3,7 +3,6 @@ import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 
-//McPacks init
 const inMemoryDbMcPacks: InMemoryData<McPackDb, number> = new InMemoryData<McPackDb, number>((item) => item.id);
 
 export function inMemoryMcPacksInstance(): InMemoryData<McPackDb, number> {

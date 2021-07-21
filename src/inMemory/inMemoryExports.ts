@@ -1,4 +1,5 @@
 import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
+import { inMemoryCommPacksInstance, searchInMemoryCommPacksWithText } from './inMemoryCommPacks';
 import { inMemoryMcPacksInstance, searchInMemoryMcPacksWithText } from './inMemoryMcPacks';
 import { inMemoryNotificationsInstance, searchInMemoryNotificationsWithText } from './inMemoryNotifications';
 import { inMemoryPunchesInstance, searchInMemoryPunchesWithText } from './inMemoryPunches';
@@ -20,6 +21,11 @@ const McPacks = {
     search: searchInMemoryMcPacksWithText
 };
 
+const CommPacks = {
+    isReady: (): boolean => inMemoryCommPacksInstance().isReady(),
+    search: searchInMemoryCommPacksWithText
+};
+
 const Tags = {
     isReady: isInMemoryTagsReady,
     search: searchTags,
@@ -28,6 +34,7 @@ const Tags = {
 
 export const inMemory = {
     McPacks,
+    CommPacks,
     Notifications,
     Punches,
     Tags
