@@ -122,7 +122,7 @@ function cleanupNotification(notification: NotificationDb): NotificationDb {
 
 export async function apiAllNotifications(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
-    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(0));
+    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(0), abortSignal);
 }
 
 export async function apiUpdatedNotifications(
@@ -132,7 +132,7 @@ export async function apiUpdatedNotifications(
 ): Promise<NotificationDb[]> {
     const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
-    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
+    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
 }
 
 async function getOpenClosedNotificationsForTagApi(
@@ -143,7 +143,7 @@ async function getOpenClosedNotificationsForTagApi(
     const url = `${baseApiUrl}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
         tagNo
     )}`;
-    return notificationsApiFetcher.fetchAll(url, abortSignal, () => getMockedNotificationsString(50000));
+    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
 }
 
 async function getNotificationDetailsApi(

@@ -62,7 +62,9 @@ export class SyncSystem<T> {
         await this._databaseAdministrator.init();
 
         if (Settings.isSyncEnabled(this._offlineSystemKey) && !Settings.isFullSyncDone(this._offlineSystemKey)) {
-            this.log.debug(`Full ${this._offlineSystemKey} sync is not done, cannot init in memory`);
+            const logMessage = `Full ${this._offlineSystemKey} sync is not done, cannot init in memory`;
+            Settings.isSyncEnabled(this._offlineSystemKey) ? this.log.warn(logMessage) : this.log.debug(logMessage);
+            return;
         }
 
         const repository = this._databaseAdministrator.repositoryTransaction();

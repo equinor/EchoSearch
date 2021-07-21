@@ -122,7 +122,7 @@ async function searchBtnClicked() {
         console.log('notifications search ', notifications.error?.message?.toString());
     }
 
-    const recordLookup = await Search.Notifications.getAsync(notifications.values[0].maintenanceRecordId ?? '123');
+    const recordLookup = await Search.Notifications.getAsync(notifications.values[0]?.maintenanceRecordId ?? '123');
     console.log('Record lookup', recordLookup);
 }
 

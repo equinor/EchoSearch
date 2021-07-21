@@ -104,7 +104,7 @@ async function internalInitialize(): Promise<Result> {
         initMcTask,
         () => inMemory.McPacks.isReady(),
         async (searchText, maxHits) => inMemory.McPacks.search(searchText, maxHits),
-        async (searchText, maxHits) => inMemory.McPacks.searchOnline(searchText, maxHits)
+        async (searchText, maxHits) => mcPacksApi.search(searchText, maxHits)
     );
 
     _tagSearchSystem = new SearchSystem<TagSummaryDb>(

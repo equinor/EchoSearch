@@ -1,3 +1,4 @@
+import { NotInitializedError } from '../baseResult';
 import { loggerFactory } from '../logger';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
@@ -15,7 +16,7 @@ export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
 
     if (maybeTagAlphaNumeric === undefined) {
         log.info('No match found for ', tagNo, 'has Tags in LevTrie:', tagsLevTrie.isReady());
-        return;
+        throw new NotInitializedError('Search not ready yet, tag sync has to finish first');
     }
 
     const fullTagNo = getInMemoryTagsSorted().find(

@@ -3,7 +3,7 @@ import { NotInitializedError } from '../baseResult';
 import { logger } from '../logger';
 
 const log = logger('SyncSettings');
-export const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net/';
+export const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net'; //TODO Ove configuration
 
 /**
  * START Settings Repository

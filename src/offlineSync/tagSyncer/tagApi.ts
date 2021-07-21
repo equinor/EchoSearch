@@ -2,11 +2,11 @@ import { JsonParseError, SyncError } from '../../baseResult';
 import { loggerFactory } from '../../logger';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { baseApiUrl, getInstCode } from '../syncSettings';
+import { baseApiUrl, getInstCode, Settings } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
-import { TagStatus, TagSummaryDb } from './tagSummaryDb';
+import { TagSummaryDb } from './tagSummaryDb';
 
 const log = loggerFactory.tags('Api');
 
@@ -55,16 +55,33 @@ function ExtractDate(stringWithDate: string): Date {
     return new Date(dateStrings[0]);
 }
 
-export async function searchTagsOnline(searchText: string, maxHits: number): Promise<TagSummaryDb[]> {
-    return [
-        {
-            tagNo: 'online search found ' + searchText,
-            description: 'This is a mocked online search ' + maxHits,
-            tagStatus: TagStatus.AsBuilt,
-            tagCategoryDescription: 'Mechanical',
-            tagType: 'A tag type'
-        } as TagSummaryDb
-    ];
+export async function searchTagsOnline(
+    searchText: string,
+    maxHits: number,
+    instCode?: string,
+    abortSignal?: AbortSignal
+): Promise<TagSummaryDb[]> {
+    maxHits = maxHits <= 0 ? maxHits : 25;
+    instCode = instCode ?? Settings.getInstCode();
+    const url = `${baseApiUrl}/${instCode}/tags?tagNo=${searchText}&take=${maxHits}`;
+    let results = await apiFetchJsonToArray<TagSummaryDb>(url, abortSignal);
+    if (results.length < maxHits) {
+        //TODO performance test - is it worth it?
+        const descriptionResults = await apiFetchJsonToArray<TagSummaryDb>(url.replace('tagNo', 'description'));
+        results = distinct(results.concat(descriptionResults), (tag) => tag.tagNo);
+    }
+    return results.slice(0, maxHits);
+}
+
+function distinct<T, Key>(allMatches: ReadonlyArray<T>, getKeyValue: (arg: T) => Key): T[] {
+    //TODO Ove move and unit test
+    return allMatches.filter(
+        (item, i, arr) =>
+            arr.indexOf(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                arr.find((arrayItem) => getKeyValue(arrayItem) === getKeyValue(item))!
+            ) === i
+    );
 }
 
 function extractDateFromHeader(response: Response, headerName: string): Date {

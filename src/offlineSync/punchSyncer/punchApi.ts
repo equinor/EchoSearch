@@ -62,7 +62,7 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 
 export async function apiAllPunches(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
     const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
-    return punchesApi.fetchAll(url, abortSignal, () => mockedOpenClosedRejectedPunches());
+    return punchesApi.fetchAll(url, () => mockedOpenClosedRejectedPunches(), abortSignal);
 }
 
 export async function apiUpdatedPunches(
@@ -72,7 +72,7 @@ export async function apiUpdatedPunches(
 ): Promise<PunchDb[]> {
     const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    return punchesApi.fetchAll(url, abortSignal, () => mockedOpenClosedRejectedAndRandomPunches(50000));
+    return punchesApi.fetchAll(url, () => mockedOpenClosedRejectedAndRandomPunches(50000), abortSignal);
 }
 
 async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {

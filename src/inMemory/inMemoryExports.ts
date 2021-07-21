@@ -1,4 +1,3 @@
-import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
 import { inMemoryMcPacksInstance, searchInMemoryMcPacksWithText } from './inMemoryMcPacks';
 import { inMemoryNotificationsInstance, searchInMemoryNotificationsWithText } from './inMemoryNotifications';
@@ -18,8 +17,7 @@ const Punches = {
 
 const McPacks = {
     isReady: (): boolean => inMemoryMcPacksInstance().isReady(),
-    search: searchInMemoryMcPacksWithText,
-    searchOnline: searchMcPacksOnlineNotImplemented
+    search: searchInMemoryMcPacksWithText
 };
 
 const Tags = {
@@ -34,17 +32,3 @@ export const inMemory = {
     Punches,
     Tags
 };
-
-async function searchMcPacksOnlineNotImplemented(searchText: string, maxHits: number): Promise<McPackDb[]> {
-    //TODO
-    return [
-        {
-            commPkgNo: '1',
-            description: 'McPacks online Search NOT IMPLEMENTED',
-            mcPkgNo: searchText,
-            projectName: maxHits.toString(),
-            id: 5,
-            updatedAt: new Date()
-        } as McPackDb
-    ];
-}

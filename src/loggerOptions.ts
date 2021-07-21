@@ -41,7 +41,7 @@ export enum LogType {
     Critical
 }
 
-const logOptions: LogOptions = { '': LogType.Error }; //Default
+const logOptions: LogOptions = { '': LogType.Warn }; //Default
 
 function formatContext(context: string) {
     const stripChars = '[]';

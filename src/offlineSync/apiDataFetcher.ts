@@ -50,7 +50,7 @@ export class ApiDataFetcher<T> {
         return this._state;
     }
 
-    async fetchAll(url: string, abortSignal: AbortSignal, getMockData: () => string): Promise<T[]> {
+    async fetchAll(url: string, getMockData: () => string, abortSignal?: AbortSignal): Promise<T[]> {
         const items: T[] = this._state.isMockEnabled
             ? JSON.parse(getMockData())
             : await apiFetchJsonToArray<T>(this.urlOrFakeError(url), abortSignal);

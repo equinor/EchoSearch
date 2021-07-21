@@ -1,11 +1,19 @@
 import { ApiDataFetcher } from '../apiDataFetcher';
+import { queryParameter } from '../apiHelper';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { baseApiUrl, Settings } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedMcPacksString } from './mcPacksMocked';
 
 // keep const log = loggerFactory.mcPacks('Api');
-export const mcPacksApi = new ApiDataFetcher(cleanupMcPack);
+const mcPacksApiFetcher = new ApiDataFetcher(cleanupMcPack);
+
+export const mcPacksApi = {
+    all: apiAllMcPacks,
+    updated: apiUpdatedMcPacks,
+    search: apiSearchMcPacks,
+    state: mcPacksApiFetcher.state
+};
 
 export interface McPackDb {
     readonly id: number;
@@ -27,17 +35,27 @@ function cleanupMcPack(mcPack: McPackDb): McPackDb {
     };
 }
 
-export async function apiAllMcPacks(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
+async function apiAllMcPacks(instCode: string, abortSignal: AbortSignal): Promise<McPackDb[]> {
     const url = `${baseApiUrl}/${instCode}/mcPks?paging=false`;
-    return mcPacksApi.fetchAll(url, abortSignal, () => getMockedMcPacksString(0));
+    return mcPacksApiFetcher.fetchAll(url, () => getMockedMcPacksString(0), abortSignal);
 }
 
-export async function apiUpdatedMcPacks(
-    instCode: string,
-    fromDate: Date,
-    abortSignal: AbortSignal
-): Promise<McPackDb[]> {
+async function apiUpdatedMcPacks(instCode: string, fromDate: Date, abortSignal: AbortSignal): Promise<McPackDb[]> {
     const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/mcPks?updatedSince=${date}&paging=false`;
-    return mcPacksApi.fetchAll(url, abortSignal, () => getMockedMcPacksString(50000));
+    return mcPacksApiFetcher.fetchAll(url, () => getMockedMcPacksString(50000), abortSignal);
+}
+
+async function apiSearchMcPacks(
+    searchText: string,
+    maxHits: number,
+    instCode?: string,
+    projectCode?: string,
+    abortSignal?: AbortSignal
+): Promise<McPackDb[]> {
+    instCode = instCode ?? Settings.getInstCode();
+    let url = `${baseApiUrl}/${instCode}/mcPks?containsText=${searchText}`; //TODO Ove Stringify Search text
+    url += queryParameter('projectCodeContains', projectCode);
+    url += queryParameter('itemsPerPage', maxHits);
+    return mcPacksApiFetcher.fetchAll(url, () => getMockedMcPacksString(100), abortSignal);
 }
