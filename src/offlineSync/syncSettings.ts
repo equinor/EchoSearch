@@ -73,7 +73,7 @@ async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise
 async function loadOfflineSettings(): Promise<void> {
     const settings = await instance().offlineStatus.toArray();
     settings.forEach((setting) => {
-        dictionary[setting.offlineSystemKey] = setting;
+        _dictionary[setting.offlineSystemKey] = setting;
     });
 
     const instCodeArg = await getInstCodeOrUndefinedAsync();
@@ -87,19 +87,19 @@ async function loadOfflineSettings(): Promise<void> {
  * END Settings Repository
  */
 
-const dictionary: Record<string, OfflineSettingItem> = {};
+const _dictionary: Record<string, OfflineSettingItem> = {};
 
 function AddMissingSettings() {
     for (const item in OfflineSystem) {
-        const hasSetting = dictionary[item];
+        const hasSetting = _dictionary[item];
         if (!hasSetting) {
-            dictionary[item] = Settings.createDefaultSettings(item as OfflineSystem);
+            _dictionary[item] = Settings.createDefaultSettings(item as OfflineSystem);
         }
     }
 }
 
 function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
-    const result = dictionary[offlineSystemKey];
+    const result = _dictionary[offlineSystemKey];
     return result?.isEnabled === true;
 }
 
@@ -119,7 +119,7 @@ function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
 }
 
 function getSettingsOrThrow(offlineSystemKey: OfflineSystem): OfflineSettingItem {
-    const result = dictionary[offlineSystemKey];
+    const result = _dictionary[offlineSystemKey];
     if (result) {
         return { ...result };
     }
@@ -127,7 +127,7 @@ function getSettingsOrThrow(offlineSystemKey: OfflineSystem): OfflineSettingItem
 }
 
 function saveSettings(settings: OfflineSettingItem): void {
-    dictionary[settings.offlineSystemKey] = settings;
+    _dictionary[settings.offlineSystemKey] = settings;
     fireAndForget(() => saveToRepository(settings));
 }
 
@@ -144,12 +144,22 @@ function createDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingI
     };
 }
 
+function allSettings(): Readonly<OfflineSettingItem>[] {
+    const all = Object.values(_dictionary);
+    return all.map((item) => cloneReadOnly(item));
+}
+
+function cloneReadOnly(offlineSettingItem: OfflineSettingItem): Readonly<OfflineSettingItem> {
+    return { ...offlineSettingItem } as const;
+}
+
 export const Settings = {
     createDefaultSettings,
     loadOfflineSettings,
 
     save: saveSettings,
     get: getSettingsOrThrow,
+    all: allSettings,
 
     saveInstCode,
     getInstCode,
