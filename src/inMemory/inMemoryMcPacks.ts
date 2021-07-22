@@ -2,6 +2,7 @@ import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
+import { Filter } from './searchFilter';
 
 const inMemoryDbMcPacks: InMemoryData<McPackDb, number> = new InMemoryData<McPackDb, number>((item) => item.id);
 
@@ -12,6 +13,7 @@ export function inMemoryMcPacksInstance(): InMemoryData<McPackDb, number> {
 export function searchInMemoryMcPacksWithText(
     searchText: string,
     maxHits: number,
+    filter?: Filter<McPackDb>,
     predicate?: (mcPack: McPackDb) => boolean
 ): McPackDb[] {
     return searchOrderedByBestMatch(
@@ -19,7 +21,8 @@ export function searchInMemoryMcPacksWithText(
         (item) => [item.mcPkgNo, item.commPkgNo, item.description, item.projectName],
         searchText,
         maxHits,
-        OfflineSystem.Punches,
+        OfflineSystem.McPack,
+        filter,
         predicate
     );
 }

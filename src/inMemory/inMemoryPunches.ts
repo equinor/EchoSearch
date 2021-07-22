@@ -2,6 +2,7 @@ import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
+import { Filter } from './searchFilter';
 
 const inMemoryDbPunches: InMemoryData<PunchDb, number> = new InMemoryData<PunchDb, number>((item) => item.id);
 
@@ -12,6 +13,7 @@ export function inMemoryPunchesInstance(): InMemoryData<PunchDb, number> {
 export function searchInMemoryPunchesWithText(
     searchText: string,
     maxHits: number,
+    filter?: Filter<PunchDb>,
     predicate?: (punch: PunchDb) => boolean
 ): PunchDb[] {
     return searchOrderedByBestMatch(
@@ -29,6 +31,7 @@ export function searchInMemoryPunchesWithText(
         searchText,
         maxHits,
         OfflineSystem.Punches,
+        filter,
         predicate
     );
 }

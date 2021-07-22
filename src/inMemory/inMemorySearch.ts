@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
+import { Filter, filterOnProps } from './searchFilter';
 
 /**
  * Search the collection and return results sorted on best match.
@@ -16,8 +17,9 @@ export function searchOrderedByBestMatch<T>(
     searchText: string,
     maxHits: number,
     typeNameForLogging: string,
+    filter?: Filter<T>,
     predicate?: (arg: T) => boolean,
-    alwaysPerformanceLogging = false
+    alwaysPerformanceLogging = true
 ): T[] {
     const performanceLogger = logger(typeNameForLogging).create('Search').performance();
     const results = searchOrderedByBestMatchLogic(
@@ -25,11 +27,12 @@ export function searchOrderedByBestMatch<T>(
         getSearchableFieldsPrioritizedFunc,
         searchText,
         maxHits,
+        filter,
         predicate
     );
     alwaysPerformanceLogging
-        ? performanceLogger.forceLog(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`)
-        : performanceLogger.log(`${typeNameForLogging} BestMatch Search (${searchText}) found(${results.length})`);
+        ? performanceLogger.forceLog(`BestMatch Search (${searchText}) found(${results.length})`)
+        : performanceLogger.log(`$BestMatch Search (${searchText}) found(${results.length})`);
 
     return results;
 }
@@ -46,6 +49,7 @@ export function searchOrderedByBestMatchLogic<T>(
     getSearchableFieldsPrioritizedFunc: (arg: T) => string[],
     searchText: string,
     maxHits: number,
+    filter?: Filter<T>,
     predicate?: (arg: T) => boolean
 ): T[] {
     const searchTextWords = getAllWordsAsAlphaNumericUpperCase(searchText);
@@ -59,6 +63,9 @@ export function searchOrderedByBestMatchLogic<T>(
     let perfectHits = 0;
     for (let index = 0; perfectHits < maxHits && index < collection.length; index++) {
         const item = collection[index];
+        if (filter && !filterOnProps(item, filter)) {
+            continue;
+        }
         if (predicate && !predicate(item)) {
             continue;
         }

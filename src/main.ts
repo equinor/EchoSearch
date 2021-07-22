@@ -104,7 +104,8 @@ async function searchBtnClicked() {
         console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
-    const mcPacks = await Search.McPacks.searchAsync('0001-A01', 2);
+    const filter = { projectName: 'L.O265C.001' };
+    const mcPacks = await Search.McPacks.searchAsync('0001-A01', 2, filter);
     print('mcPacks', mcPacks, (item) => [
         item.description,
         item.commPkgNo,

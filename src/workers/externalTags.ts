@@ -20,8 +20,8 @@ async function internalInitTags(): Promise<void> {
     await tagsSyncSystem.initTask();
     await initLevTrieFromInMemoryTags();
 
-    const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
-    await wait(5000);
+    //const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    //await wait(5000);
 
     performanceLogger.forceLogDelta('done');
 }
@@ -29,20 +29,17 @@ async function internalInitTags(): Promise<void> {
 async function initTagsTask(): Promise<void> {
     const task = internalInitTags();
 
-    _tagSearchSystem = new SearchSystem<TagSummaryDb>(
-        OfflineSystem.Tags,
-        task,
-        () => inMemory.Tags.isReady(),
-        async (searchText, maxHits) => inMemory.Tags.search(searchText, maxHits),
-        async (searchText, maxHits) => inMemory.Tags.searchOnline(searchText, maxHits)
-    );
+    _tagSearchSystem = new SearchSystem<TagSummaryDb>(OfflineSystem.Tags, task, () => inMemory.Tags.isReady());
 
     return await task;
 }
 
 async function search(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
-    return await _tagSearchSystem.search(searchText, maxHits);
+    return await _tagSearchSystem.search(
+        async () => inMemory.Tags.search(searchText, maxHits),
+        async () => inMemory.Tags.searchOnline(searchText, maxHits)
+    );
 }
 async function findClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);

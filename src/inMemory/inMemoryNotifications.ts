@@ -2,6 +2,7 @@ import { NotificationDto } from '..';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
+import { Filter } from './searchFilter';
 import { SearchResults, searchResults } from './searchResult';
 
 //Notifications init
@@ -18,6 +19,7 @@ const all = () => inMemoryNotificationsInstance().all();
 export function searchInMemoryNotificationsWithText(
     searchText: string,
     maxHits: number,
+    filter?: Filter<NotificationDto>,
     predicate?: (notification: NotificationDto) => boolean
 ): NotificationDto[] {
     return searchOrderedByBestMatch(
@@ -31,7 +33,8 @@ export function searchInMemoryNotificationsWithText(
         ],
         searchText,
         maxHits,
-        OfflineSystem.Punches,
+        OfflineSystem.Notifications,
+        filter,
         predicate
     );
 }

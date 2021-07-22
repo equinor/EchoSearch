@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
 import { result, Result, ResultValue } from '../baseResult';
+import { Filter } from '../inMemory/searchFilter';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
@@ -48,19 +49,35 @@ export interface EchoWorker {
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
 
-    searchMcPacks(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>>;
+    searchMcPacks(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<McPackDto>
+    ): Promise<SearchResults<McPackDto>>;
     lookupMcPackAsync(tagNo: number): Promise<SearchResult<McPackDto>>;
     lookupMcPacksAsync(tagNos: number[]): Promise<SearchResults<McPackDto>>;
 
-    searchCommPacks(searchText: string, maxHits: number): Promise<SearchResults<CommPackDto>>;
+    searchCommPacks(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<CommPackDto>
+    ): Promise<SearchResults<CommPackDto>>;
     lookupCommPackAsync(tagNo: number): Promise<SearchResult<CommPackDto>>;
     lookupCommPacksAsync(tagNos: number[]): Promise<SearchResults<CommPackDto>>;
 
-    searchPunches(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>>;
+    searchPunches(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<PunchDto>
+    ): Promise<SearchResults<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
 
-    searchNotifications(searchText: string, maxHits: number): Promise<SearchResults<NotificationDto>>;
+    searchNotifications(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<PunchDto>
+    ): Promise<SearchResults<NotificationDto>>;
     searchNotificationsByTagNos(tagNos: string[]): Promise<SearchResults<NotificationDto>>;
 
     lookupNotificationAsync(maintenanceRecordId: string): Promise<SearchResult<NotificationDto>>;
