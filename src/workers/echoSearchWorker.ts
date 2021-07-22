@@ -49,6 +49,12 @@ export interface EchoWorker {
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
 
+    /**
+     * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
+     * @param searchText The text to search for.
+     * @param maxHits Max hits to return. May return more than if online search, since we do multiple searches online, and can't determine the best hits properly.
+     * @param tryToApplyFilter Applies the filter fully if offline Search. Applies the filter partially if online-search (projectCode).
+     */
     searchMcPacks(
         searchText: string,
         maxHits: number,

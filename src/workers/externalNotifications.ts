@@ -29,6 +29,7 @@ async function search(
         async () => []
     );
 }
+
 async function lookup(id: string): Promise<SearchResult<NotificationDto>> {
     return inMemoryNotificationsInstance().get(id);
 }

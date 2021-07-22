@@ -1,4 +1,5 @@
 import { searchResults, SearchResults } from '../inMemory/searchResult';
+import { loggerFactory } from '../logger';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 
 export class SearchSystem<T> {
@@ -26,7 +27,10 @@ export class SearchSystem<T> {
 
         await this._initTask;
 
-        const data = this._isOfflineSearchReady() ? await offlineSearch() : await onlineSearch();
+        const isOfflineSearch = this._isOfflineSearchReady();
+        loggerFactory.default(this._offlineSystemKey + '.SearchSystem').debug(isOfflineSearch ? 'Offline' : 'Online');
+
+        const data = isOfflineSearch ? await offlineSearch() : await onlineSearch();
         return searchResults.successOrEmpty(data);
     }
 }

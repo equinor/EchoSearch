@@ -1,8 +1,8 @@
 import { SearchResult, SearchResults } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
-import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
+import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { PunchDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
@@ -10,7 +10,7 @@ import { SearchSystem } from './searchSystem';
 let _punchSearchSystem: SearchSystem<PunchDto>;
 
 async function initTask(): Promise<void> {
-    const initPunchesTask = notificationsSyncSystem.initTask();
+    const initPunchesTask = punchesSyncSystem.initTask();
 
     _punchSearchSystem = new SearchSystem<PunchDto>(OfflineSystem.Punches, initPunchesTask, () =>
         inMemory.Punches.isReady()
