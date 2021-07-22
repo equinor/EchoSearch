@@ -7,23 +7,12 @@ import { logging, LogOptions, LogType } from '../loggerOptions';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
-import {
-    externalInitializeTask,
-    externalLookupMcPack,
-    externalLookupMcPacks,
-    externalLookupPunch,
-    externalLookupPunches,
-    externalLookupTag,
-    externalLookupTags,
-    externalMcPackSearch,
-    externalNotifications,
-    externalPunchesSearch,
-    externalSearchForClosestTagNo,
-    externalTagSearch,
-    externalTestCommReturnTypes,
-    syncContract
-} from './externalCalls';
-import { externalCommPackSearch, externalLookupCommPack, externalLookupCommPacks } from './externalCommPacks';
+import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
+import { externalCommPacks } from './externalCommPacks';
+import { externalMcPacks } from './externalMcPacks';
+import { externalNotifications } from './externalNotifications';
+import { externalPunches } from './externalPunches';
+import { externalTags } from './externalTags';
 
 function expensive(time: number): number {
     const start = Date.now();
@@ -113,27 +102,27 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
 const echoWorker: EchoWorker = {
     initialize: (...args) => tryCatchToResult(() => externalInitializeTask(...args)),
 
-    searchTags: (...args) => tryCatchToResult(() => externalTagSearch(...args)),
-    searchForClosestTagNo: (...args) => tryCatchToResult(() => externalSearchForClosestTagNo(...args)),
-    lookupTagAsync: (...args) => tryCatchToResult(() => externalLookupTag(...args)),
-    lookupTagsAsync: (...args) => tryCatchToResult(() => externalLookupTags(...args)),
+    searchTags: (...args) => tryCatchToResult(() => externalTags.search(...args)),
+    searchForClosestTagNo: (...args) => tryCatchToResult(() => externalTags.searchForClosestTagNo(...args)),
+    lookupTagAsync: (...args) => tryCatchToResult(() => externalTags.lookup(...args)),
+    lookupTagsAsync: (...args) => tryCatchToResult(() => externalTags.lookupAll(...args)),
 
-    searchMcPacks: (...args) => tryCatchToResult(() => externalMcPackSearch(...args)),
-    lookupMcPackAsync: (...args) => tryCatchToResult(() => externalLookupMcPack(...args)),
-    lookupMcPacksAsync: (...args) => tryCatchToResult(() => externalLookupMcPacks(...args)),
+    searchMcPacks: (...args) => tryCatchToResult(() => externalMcPacks.search(...args)),
+    lookupMcPackAsync: (...args) => tryCatchToResult(() => externalMcPacks.lookup(...args)),
+    lookupMcPacksAsync: (...args) => tryCatchToResult(() => externalMcPacks.lookupAll(...args)),
 
-    searchCommPacks: (...args) => tryCatchToResult(() => externalCommPackSearch(...args)),
-    lookupCommPackAsync: (...args) => tryCatchToResult(() => externalLookupCommPack(...args)),
-    lookupCommPacksAsync: (...args) => tryCatchToResult(() => externalLookupCommPacks(...args)),
+    searchCommPacks: (...args) => tryCatchToResult(() => externalCommPacks.search(...args)),
+    lookupCommPackAsync: (...args) => tryCatchToResult(() => externalCommPacks.lookup(...args)),
+    lookupCommPacksAsync: (...args) => tryCatchToResult(() => externalCommPacks.lookupAll(...args)),
 
-    searchPunches: (...args) => tryCatchToResult(() => externalPunchesSearch(...args)),
-    lookupPunchAsync: (...args) => tryCatchToResult(() => externalLookupPunch(...args)),
-    lookupPunchesAsync: (...args) => tryCatchToResult(() => externalLookupPunches(...args)),
+    searchPunches: (...args) => tryCatchToResult(() => externalPunches.search(...args)),
+    lookupPunchAsync: (...args) => tryCatchToResult(() => externalPunches.lookup(...args)),
+    lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
 
-    searchNotifications: (...args) => tryCatchToResult(() => externalNotifications().search(...args)),
-    searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications().searchByTagNos(...args)),
-    lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications().lookup(...args)),
-    lookupNotificationsAsync: (...args) => tryCatchToResult(() => externalNotifications().lookups(...args)),
+    searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
+    searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),
+    lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications.lookup(...args)),
+    lookupNotificationsAsync: (...args) => tryCatchToResult(() => externalNotifications.lookupAll(...args)),
 
     changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
     runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),

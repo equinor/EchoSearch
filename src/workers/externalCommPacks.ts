@@ -8,7 +8,7 @@ import { SearchSystem } from './searchSystem';
 
 let _commPacksSearchSystem: SearchSystem<CommPackDb>;
 
-export async function externalInitCommPacksTask(): Promise<void> {
+async function initTask(): Promise<void> {
     const initCommTask = commPacksSyncSystem.initTask();
 
     _commPacksSearchSystem = new SearchSystem<CommPackDb>(
@@ -21,13 +21,20 @@ export async function externalInitCommPacksTask(): Promise<void> {
 
     return await initCommTask;
 }
-export async function externalCommPackSearch(searchText: string, maxHits: number): Promise<SearchResults<CommPackDto>> {
+async function search(searchText: string, maxHits: number): Promise<SearchResults<CommPackDto>> {
     return await _commPacksSearchSystem.search(searchText, maxHits);
 }
-export async function externalLookupCommPack(id: number): Promise<SearchResult<CommPackDto>> {
+async function lookup(id: number): Promise<SearchResult<CommPackDto>> {
     return inMemoryCommPacksInstance().get(id);
 }
 
-export async function externalLookupCommPacks(ids: number[]): Promise<SearchResults<CommPackDto>> {
+async function lookupAll(ids: number[]): Promise<SearchResults<CommPackDto>> {
     return inMemoryCommPacksInstance().getAll(ids);
 }
+
+export const externalCommPacks = {
+    initTask,
+    search,
+    lookup,
+    lookupAll
+};

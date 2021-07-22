@@ -8,16 +8,16 @@ import { ErrorForTesting } from './workers/externalCalls';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
 document.getElementById('SearchBtn')?.addEventListener('click', searchBtnClicked);
-document.getElementById('runSyncBtn')?.addEventListener('click', runSyncClicked);
+document.getElementById('runSyncBtn')?.addEventListener('click', runSyncTagsClicked);
 document.getElementById('cameraSearchBtn')?.addEventListener('click', cameraSearchClicked);
 
-document.getElementById('runSyncMcPacksBtn')?.addEventListener('click', runSyncMcPacksClicked);
+document.getElementById('runSyncMcPacksBtn')?.addEventListener('click', runSyncAllClicked);
 
-document.getElementById('mcPackEnableBtn')?.addEventListener('click', () => setMcPackEnabled(true));
-document.getElementById('mcPackDisableBtn')?.addEventListener('click', () => setMcPackEnabled(false));
+document.getElementById('mcPackEnableBtn')?.addEventListener('click', () => setAllEnabled(true));
+document.getElementById('mcPackDisableBtn')?.addEventListener('click', () => setAllEnabled(false));
+document.getElementById('CancelBtn')?.addEventListener('click', cancelAllClicked);
 
 document.getElementById('startBtn')?.addEventListener('click', handleClick);
-document.getElementById('CancelBtn')?.addEventListener('click', cancelBtnClicked);
 document.getElementById('ExpensiveBtn')?.addEventListener('click', expensiveBtnClicked);
 document.getElementById('doStuffBtn2')?.addEventListener('click', doStuffBtn2Clicked);
 
@@ -34,32 +34,40 @@ Syncer.logConfiguration.setLevels(logOptions);
 logging.setLogLevels(logOptions);
 const log = logger('Main');
 
-async function runSyncClicked() {
+async function runSyncTagsClicked() {
     const result = await Syncer.runSyncAsync(OfflineSystem.Tags);
     log.info(result);
     log.info('with pretext', result);
 }
 
-async function runSyncMcPacksClicked() {
-    const mcPackSync = Syncer.runSyncAsync(OfflineSystem.McPack);
-    const commPackSync = Syncer.runSyncAsync(OfflineSystem.CommPack);
-    const punchesSync = Syncer.runSyncAsync(OfflineSystem.Punches);
-    const notificationsSync = Syncer.runSyncAsync(OfflineSystem.Notifications);
+async function runSyncAllClicked() {
+    const keys = Object.values(OfflineSystem).filter((key) => key !== OfflineSystem.Tags);
+    const syncTasks = keys.map((key) => Syncer.runSyncAsync(key));
 
-    const results = await Promise.all([mcPackSync, commPackSync, punchesSync, notificationsSync]);
+    const results = await Promise.all(syncTasks);
     for (const result of results) {
         log.info('Sync result main:', result);
         if (!result.isSuccess) log.warn({ ...result.error });
     }
 }
 
-async function setMcPackEnabled(isEnabled: boolean): Promise<void> {
+async function setAllEnabled(isEnabled: boolean): Promise<void> {
     //(await echoSearchWorker.anotherHelloNotWorking).hello('test');
     //await Syncer.DebugOptions.setFailureRate(OfflineSystem.Notifications, 33);
-    await Syncer.setEnabledAsync(OfflineSystem.McPack, isEnabled);
-    await Syncer.setEnabledAsync(OfflineSystem.CommPack, isEnabled);
-    await Syncer.setEnabledAsync(OfflineSystem.Punches, isEnabled);
-    await Syncer.setEnabledAsync(OfflineSystem.Notifications, isEnabled);
+
+    for (const key in OfflineSystem) {
+        const offlineSystemKey = key as OfflineSystem;
+        if (offlineSystemKey !== OfflineSystem.Tags) {
+            await Syncer.setEnabledAsync(offlineSystemKey, isEnabled);
+        }
+    }
+}
+
+async function cancelAllClicked() {
+    log.info('CancelBtnClicked', count++);
+    for (const key in OfflineSystem) {
+        echoSearchWorker.cancelSync(key as OfflineSystem);
+    }
 }
 
 async function changePlantBtnClicked() {
@@ -179,12 +187,4 @@ async function handleClick(): Promise<void> {
     //         num: 10000000
     //     })
     // );
-}
-
-async function cancelBtnClicked() {
-    log.info('CancelBtnClicked', count++);
-
-    echoSearchWorker.cancelSync(OfflineSystem.Tags);
-    echoSearchWorker.cancelSync(OfflineSystem.McPack);
-    echoSearchWorker.cancelSync(OfflineSystem.Punches);
 }

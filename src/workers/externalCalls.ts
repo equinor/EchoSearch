@@ -1,32 +1,24 @@
 import { NotFoundError } from '@equinor/echo-base';
-import { McPackDto, PunchDto, TagSummaryDto } from '..';
 import { NotImplementedError, result, Result } from '../baseResult';
-import { inMemory } from '../inMemory/inMemoryExports';
-import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
-import { inMemoryNotificationsInstance, searchInMemoryNotificationsByTagNos } from '../inMemory/inMemoryNotifications';
-import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
-import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
-import { searchResult, SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
-import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
+import { mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { notificationsApi } from '../offlineSync/notificationSyncer/notificationApi';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
-import { PunchDb, punchesApi } from '../offlineSync/punchSyncer/punchApi';
-import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
+import { punchesApi } from '../offlineSync/punchSyncer/punchApi';
 import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
 import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsMock } from '../offlineSync/tagSyncer/tagApi';
-import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
-import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
-import { NotificationDto } from './dataTypes';
-import { externalInitCommPacksTask } from './externalCommPacks';
-import { SearchSystem } from './searchSystem';
+import { externalCommPacks } from './externalCommPacks';
+import { externalMcPacks } from './externalMcPacks';
+import { externalNotifications } from './externalNotifications';
+import { externalPunches } from './externalPunches';
+import { externalTags } from './externalTags';
 
 const log = logger('externalCalls');
 
@@ -37,11 +29,6 @@ const log = logger('externalCalls');
 // functionShouldOnlyBeCalledOnce();
 
 let _initDone = false;
-let _mcPacksSearchSystem: SearchSystem<McPackDb>;
-let _tagSearchSystem: SearchSystem<TagSummaryDb>;
-let _punchSearchSystem: SearchSystem<PunchDb>;
-let _notificationsSearchSystem: SearchSystem<NotificationDto>;
-
 let _initTaskInstance: Promise<Result> | undefined = undefined;
 
 let _loadOfflineSettingsTask: Promise<void> | undefined = undefined;
@@ -64,31 +51,11 @@ export async function externalInitializeTask(): Promise<Result> {
     return _initTaskInstance;
 }
 
-async function initTags(): Promise<void> {
-    const performanceLogger = log.performance('Init Tags');
-    await tagsSyncSystem.initTask();
-    await initLevTrieFromInMemoryTags();
-
-    const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
-    await wait(5000);
-
-    performanceLogger.forceLogDelta('done');
-}
-
 async function internalInitialize(): Promise<Result> {
     // const logOptions = {
     //     '': LogType.Trace
     // };
     // logging.setLogLevels(logOptions); //will be overwritten by external setLogOptions
-
-    // log.info('-------------- externalInitialize ------------ ');
-    // log.trace('trace');
-    // log.debug('debug');
-    // log.info('info');
-    // log.warn('warn');
-    // log.error('error');
-    // log.critical('critical');
-    // log.create('child').info('-- this is from the new logger 222');
 
     if (_initDone) {
         log.warn('internalInitialize already done, returning');
@@ -96,105 +63,21 @@ async function internalInitialize(): Promise<Result> {
     }
 
     const performanceLogger = log.performance();
+    performanceLogger.forceLog('----------- Search module init START -----------');
+
     await loadOfflineSettingsTask();
     performanceLogger.forceLogDelta('Loaded Offline Settings 11');
 
-    const initMcTask = mcPacksSyncSystem.initTask();
-    const initCommTask = externalInitCommPacksTask();
-    const initTagsTask = initTags();
-    const initPunchesTask = punchesSyncSystem.initTask();
-    const initNotificationTask = notificationsSyncSystem.initTask();
-
-    performanceLogger.forceLog('SearchSystems starting');
-
-    _mcPacksSearchSystem = new SearchSystem<McPackDb>(
-        OfflineSystem.McPack,
-        initMcTask,
-        () => inMemory.McPacks.isReady(),
-        async (searchText, maxHits) => inMemory.McPacks.search(searchText, maxHits),
-        async (searchText, maxHits) => mcPacksApi.search(searchText, maxHits)
-    );
-
-    _tagSearchSystem = new SearchSystem<TagSummaryDb>(
-        OfflineSystem.Tags,
-        initTagsTask,
-        () => inMemory.Tags.isReady(),
-        async (searchText, maxHits) => inMemory.Tags.search(searchText, maxHits),
-        async (searchText, maxHits) => inMemory.Tags.searchOnline(searchText, maxHits)
-    );
-
-    _punchSearchSystem = new SearchSystem<PunchDb>(
-        OfflineSystem.Punches,
-        initPunchesTask,
-        () => inMemory.Punches.isReady(),
-        async (searchText, maxHits) => inMemory.Punches.search(searchText, maxHits),
-        async () => []
-        //async (searchText, maxHits) => [], //searchTagsOnline(searchText, maxHits),
-    );
-
-    _notificationsSearchSystem = new SearchSystem<NotificationDto>(
-        OfflineSystem.Notifications,
-        initNotificationTask,
-        () => inMemory.Notifications.isReady(),
-        async (searchText, maxHits) => inMemory.Notifications.search(searchText, maxHits),
-        async () => []
-    );
-
-    performanceLogger.forceLog('SearchSystems instantiated');
+    const initCommTask = externalCommPacks.initTask();
+    const initMcTask = externalMcPacks.initTask();
+    const initTagsTask = externalTags.initTagsTask();
+    const initPunchesTask = externalPunches.initTask();
+    const initNotificationTask = externalNotifications.initTask();
 
     await Promise.all([initMcTask, initCommTask, initPunchesTask, initTagsTask, initNotificationTask]);
     performanceLogger.forceLog('----------- Search module initialize done -----------');
     _initDone = true;
     return result.success();
-}
-
-export function externalNotifications() {
-    return {
-        search: (searchText: string, maxHits: number) => _notificationsSearchSystem.search(searchText, maxHits),
-        searchByTagNos: async (tagNos: string[]) => searchInMemoryNotificationsByTagNos(tagNos),
-        lookup: async (key: string) => inMemoryNotificationsInstance().get(key),
-        lookups: async (keys: string[]) => inMemoryNotificationsInstance().getAll(keys)
-    };
-}
-
-export async function externalTagSearch(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>> {
-    //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
-    return await _tagSearchSystem.search(searchText, maxHits);
-}
-export async function externalSearchForClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
-    const possibleTag = searchForClosestTagNo(tagNo);
-    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
-}
-
-export async function externalLookupTag(tagNo: string): Promise<SearchResult<TagSummaryDto>> {
-    return await tagsRepository().get(tagNo);
-}
-
-export async function externalLookupTags(tagNos: string[]): Promise<SearchResults<TagSummaryDto>> {
-    return await tagsRepository().bulkGet(tagNos);
-}
-
-export async function externalMcPackSearch(searchText: string, maxHits: number): Promise<SearchResults<McPackDto>> {
-    return await _mcPacksSearchSystem.search(searchText, maxHits);
-}
-export async function externalLookupMcPack(id: number): Promise<SearchResult<McPackDto>> {
-    return inMemoryMcPacksInstance().get(id);
-}
-
-export async function externalLookupMcPacks(ids: number[]): Promise<SearchResults<McPackDto>> {
-    return inMemoryMcPacksInstance().getAll(ids);
-}
-
-export async function externalPunchesSearch(searchText: string, maxHits: number): Promise<SearchResults<PunchDto>> {
-    return await _punchSearchSystem.search(searchText, maxHits);
-}
-
-export async function externalLookupPunch(id: string): Promise<SearchResult<PunchDto>> {
-    return await punchesRepository().get(id);
-}
-
-export async function externalLookupPunches(ids: string[]): Promise<SearchResults<PunchDto>> {
-    return await punchesRepository().bulkGet(ids);
 }
 
 async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
