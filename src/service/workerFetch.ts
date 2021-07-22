@@ -3,7 +3,6 @@ import { logger } from '../logger';
 import { getToken } from '../tokenHelper';
 
 const log = logger('FETCH');
-const logColor = 'background: green; color: white; display: block;';
 
 type Body =
     | string

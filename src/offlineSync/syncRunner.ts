@@ -1,4 +1,4 @@
-import { result, Result } from '../baseResult';
+import { NotInitializedError, result, Result } from '../baseResult';
 import { logger } from '../logger';
 import { SyncSystem } from '../workers/syncSystem';
 import { OfflineSystem, Settings } from './syncSettings';
@@ -67,7 +67,7 @@ async function runSyncInternal<T>(searchSystem: SyncSystem<T>): Promise<Result> 
 
     const result = needFullSync
         ? await searchSystem.runFullSync()
-        : await searchSystem.runUpdateSync(settings.newestItemDate!);
+        : await searchSystem.runUpdateSync(getDateOrThrow(settings.newestItemDate, searchSystem.offlineSystemKey));
 
     if (result.isSuccess) {
         updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.newestItemDate);
@@ -76,6 +76,14 @@ async function runSyncInternal<T>(searchSystem: SyncSystem<T>): Promise<Result> 
     const tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
     performance.forceLog(` Sync ${tagSyncStatus}`);
     return { ...result };
+}
+
+function getDateOrThrow(date: Date | undefined, offlineSystemKey: OfflineSystem): Date {
+    if (!date)
+        throw new NotInitializedError(
+            `runSyncInternal.runUpdateSync ${offlineSystemKey}: date cannot be null - bug in code`
+        );
+    return date;
 }
 
 function updateLastSyncedDate(offlineSystemKey: OfflineSystem, lastSyncedAtDate: Date, newestItemDate?: Date): void {

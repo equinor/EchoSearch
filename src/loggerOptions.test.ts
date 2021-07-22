@@ -1,8 +1,8 @@
 import { isLogEnabled, logging, LogOptions, LogType } from './loggerOptions';
 
 describe('loggerOptions default', () => {
-    it('Default log level should be set to Error', () => {
-        expect(logging.getDefaultLogLevel()).toBe(LogType.Error);
+    it('Default log level should be set to Warn', () => {
+        expect(logging.getDefaultLogLevel()).toBe(LogType.Warn);
     });
 });
 

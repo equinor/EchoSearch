@@ -1,5 +1,6 @@
 import { EchoEnv } from '@equinor/echo-core';
 import { searchIn, searchOrderedByBestMatchLogic } from './inMemorySearch';
+import { Filter } from './searchFilter';
 
 jest.mock('@equinor/echo-core', () => {
     return {
@@ -142,8 +143,21 @@ describe('searchLogic bestMatchSearch', () => {
             items,
             searchText,
             1000,
+            undefined,
             (item: Item): boolean => item.moreText === 'L.O265C.002'
         );
+        expect(actual).toEqual([items[1], items[2]]);
+    });
+
+    it('should only return results where filter is true', () => {
+        const searchText = '1234';
+        const items = [
+            create(searchText, '1', 'L.O265C.001'),
+            create(searchText, '2', 'L.O265C.002'),
+            create('56', searchText, 'L.O265C.002'),
+            create(searchText, '4, To Riser Hang Off Template G', 'L.O265C.001')
+        ];
+        const actual = searchBestMatch(items, searchText, 1000, { moreText: 'L.O265C.002' });
         expect(actual).toEqual([items[1], items[2]]);
     });
 
@@ -170,6 +184,7 @@ function searchBestMatch(
     collection: Item[],
     searchText: string,
     maxHits = 1000,
+    filter?: Filter<Item>,
     predicate?: (arg: Item) => boolean
 ): Item[] {
     return searchOrderedByBestMatchLogic(
@@ -177,6 +192,7 @@ function searchBestMatch(
         (arg) => [arg.id, arg.description, arg.moreText],
         searchText,
         maxHits,
+        filter,
         predicate
     );
 }
