@@ -89,10 +89,17 @@ export async function apiFetchToType<T>(url: string, abortSignal: AbortSignal): 
  * @param url The url to fetch
  * @returns An array of the specified return type
  */
-export async function apiFetchJsonToArray<T>(url: string, abortSignal?: AbortSignal): Promise<T[]> {
+export async function apiFetchJsonToArray<T>(
+    url: string,
+    abortSignal?: AbortSignal,
+    responseInspector?: (response: Response) => void
+): Promise<T[]> {
     log.info(url);
     const performanceLogger = log.performance();
     const response = await workerFetch(url, getToken(), abortSignal, false);
+
+    if (responseInspector) responseInspector(response);
+
     if (response.status === 200) {
         const result = (await response.json()) as T[];
         performanceLogger.forceLog(`Done ${response.status} items: ${result.length} ${url}`);

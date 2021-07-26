@@ -3,6 +3,8 @@ import { NotImplementedError, result, Result } from '../baseResult';
 import { logger } from '../logger';
 import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
+import { documentsApi } from '../offlineSync/documentsSyncer/documentsApi';
+import { documentsSyncSystem } from '../offlineSync/documentsSyncer/documentsSyncer';
 import { mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { notificationsApi } from '../offlineSync/notificationSyncer/notificationApi';
@@ -15,6 +17,7 @@ import { tagsMock } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
 import { externalCommPacks } from './externalCommPacks';
+import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
 import { externalNotifications } from './externalNotifications';
 import { externalPunches } from './externalPunches';
@@ -38,7 +41,14 @@ async function loadOfflineSettingsTask(): Promise<void> {
 }
 
 function allSyncSystems() {
-    return [tagsSyncSystem, notificationsSyncSystem, punchesSyncSystem, mcPacksSyncSystem, commPacksSyncSystem];
+    return [
+        tagsSyncSystem,
+        documentsSyncSystem,
+        notificationsSyncSystem,
+        punchesSyncSystem,
+        mcPacksSyncSystem,
+        commPacksSyncSystem
+    ];
 }
 
 export async function externalInitializeTask(): Promise<Result> {
@@ -71,10 +81,18 @@ async function internalInitialize(): Promise<Result> {
     const initCommTask = externalCommPacks.initTask();
     const initMcTask = externalMcPacks.initTask();
     const initTagsTask = externalTags.initTagsTask();
+    const initDocumentsTasks = externalDocuments.initTask();
     const initPunchesTask = externalPunches.initTask();
     const initNotificationTask = externalNotifications.initTask();
 
-    await Promise.all([initMcTask, initCommTask, initPunchesTask, initTagsTask, initNotificationTask]);
+    await Promise.all([
+        initMcTask,
+        initCommTask,
+        initPunchesTask,
+        initTagsTask,
+        initDocumentsTasks,
+        initNotificationTask
+    ]);
     performanceLogger.forceLog('----------- Search module initialize done -----------');
     _initDone = true;
     return result.success();
@@ -94,6 +112,8 @@ async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: 
         return await runSync(commPacksSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
         return await runSync(tagsSyncSystem);
+    } else if (offlineSystemKey === OfflineSystem.Documents) {
+        return await runSync(documentsSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Punches) {
         return await runSync(punchesSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Notifications) {
@@ -130,6 +150,7 @@ function externalToggleMockData(): void {
     commPacksApi.state.toggleMock();
     punchesApi.state.toggleMock();
     tagsMock.toggle();
+    documentsApi.state.toggleMock();
     notificationsApi.state.toggleMock();
     notificationsApi.state.failureRate = 30;
 
@@ -148,6 +169,7 @@ function externalToggleMockData(): void {
 }
 
 async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
+    if (offlineSystemKey === OfflineSystem.Documents) documentsApi.state.failureRate = failPercentage;
     if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.state.failureRate = failPercentage;
     if (offlineSystemKey === OfflineSystem.CommPack) commPacksApi.state.failureRate = failPercentage;
     if (offlineSystemKey === OfflineSystem.Punches) punchesApi.state.failureRate = failPercentage;

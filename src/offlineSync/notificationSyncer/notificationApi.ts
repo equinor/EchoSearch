@@ -164,10 +164,10 @@ async function getNotificationDetailsApi(
 
     url += params.replace('&', '?');
 
-    return await notificationsApiFetcher.fetch<NotificationDetails>(
+    return await notificationsApiFetcher.fetchSingle<NotificationDetails>(
         url,
         abortSignal,
-        (item) => item,
-        () => ''
+        (item) => item, //TODO cleanup
+        () => '' //TODO mocked data
     );
 }

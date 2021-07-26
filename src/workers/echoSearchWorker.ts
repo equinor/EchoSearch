@@ -5,11 +5,14 @@ import { Filter } from '../inMemory/searchFilter';
 import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
+import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
+import { DocumentSummaryDto } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
 import { externalCommPacks } from './externalCommPacks';
+import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
 import { externalNotifications } from './externalNotifications';
 import { externalPunches } from './externalPunches';
@@ -48,6 +51,14 @@ export interface EchoWorker {
     searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
     lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
     lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
+
+    searchDocumentsAsync(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<DocumentSummaryDto>
+    ): Promise<SearchResults<DocumentSummaryDto>>;
+    lookupDocumentAsync(id: DocumentSummaryKey): Promise<SearchResult<DocumentSummaryDto>>;
+    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<SearchResults<DocumentSummaryDto>>;
 
     /**
      * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
@@ -129,6 +140,10 @@ const echoWorker: EchoWorker = {
     searchForClosestTagNo: (...args) => tryCatchToResult(() => externalTags.searchForClosestTagNo(...args)),
     lookupTagAsync: (...args) => tryCatchToResult(() => externalTags.lookup(...args)),
     lookupTagsAsync: (...args) => tryCatchToResult(() => externalTags.lookupAll(...args)),
+
+    searchDocumentsAsync: (...args) => tryCatchToResult(() => externalDocuments.search(...args)),
+    lookupDocumentAsync: (...args) => tryCatchToResult(() => externalDocuments.lookup(...args)),
+    lookupAllDocumentsAsync: (...args) => tryCatchToResult(() => externalDocuments.lookupAll(...args)),
 
     searchMcPacks: (...args) => tryCatchToResult(() => externalMcPacks.search(...args)),
     lookupMcPackAsync: (...args) => tryCatchToResult(() => externalMcPacks.lookup(...args)),

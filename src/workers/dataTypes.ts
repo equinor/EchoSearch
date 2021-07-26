@@ -1,10 +1,12 @@
 import { CommPackDb } from '../offlineSync/commPacksSyncer/commPacksApi';
+import { DocumentSummaryDb } from '../offlineSync/documentsSyncer/documentDb';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 
 export type TagSummaryDto = TagSummaryDb;
+export type DocumentSummaryDto = DocumentSummaryDb;
 export type McPackDto = McPackDb;
 export type CommPackDto = CommPackDb;
 

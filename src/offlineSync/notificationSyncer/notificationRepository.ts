@@ -13,7 +13,6 @@ class NotificationsDatabase extends OfflineDataDexieBase<NotificationDb> {
         super(databaseNamePreFix + version, tableNameCannotBeRenamed);
 
         //Database versioning: https://dexie.org/docs/Tutorial/Design#database-versioning
-        //=== Old Databases here - don't change this code, needed for migration ===
 
         this.version(1.0) //It is preferred to increment the version by 0.1.
             .stores({

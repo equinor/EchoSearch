@@ -1,5 +1,7 @@
 import { searchTagsOnline } from '../offlineSync/tagSyncer/tagApi';
+import { DocumentSummaryDto } from '../workers/dataTypes';
 import { inMemoryCommPacksInstance, searchInMemoryCommPacksWithText } from './inMemoryCommPacks';
+import { inMemoryDocumentsInstance, searchInMemoryDocumentsWithText } from './inMemoryDocuments';
 import { inMemoryMcPacksInstance, searchInMemoryMcPacksWithText } from './inMemoryMcPacks';
 import { inMemoryNotificationsInstance, searchInMemoryNotificationsWithText } from './inMemoryNotifications';
 import { inMemoryPunchesInstance, searchInMemoryPunchesWithText } from './inMemoryPunches';
@@ -32,10 +34,17 @@ const Tags = {
     searchOnline: searchTagsOnline
 };
 
+const Documents = {
+    isReady: (): boolean => inMemoryDocumentsInstance().isReady(),
+    search: searchInMemoryDocumentsWithText,
+    searchOnline: async (): Promise<DocumentSummaryDto[]> => [] //TODO
+};
+
 export const inMemory = {
     McPacks,
     CommPacks,
     Notifications,
     Punches,
-    Tags
+    Tags,
+    Documents
 };

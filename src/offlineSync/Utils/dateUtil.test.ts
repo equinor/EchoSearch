@@ -1,4 +1,27 @@
-import { dateDifferenceInDays, getMaxDate, getMaxDateFunc, getMaxDateInCollection, minusOneDay } from './dateUtils';
+import {
+    dateDifferenceInDays,
+    extractDate,
+    getMaxDate,
+    getMaxDateFunc,
+    getMaxDateInCollection,
+    minusOneDay
+} from './dateUtils';
+
+function parseJsonDates(dateString1: string | null, dateString2?: string | null): DateObject[] {
+    const json = `{"date1": ${getJsonString(dateString1)}, "date2": ${getJsonString(dateString2)}}`;
+    const dates = JSON.parse(json) as DateObject;
+    return [dates];
+}
+
+function getJsonString(value: string | undefined | null): string | null {
+    if (!value) return null;
+    return `"${value}"`;
+}
+
+interface DateObject {
+    date1?: Date;
+    date2?: Date;
+}
 
 describe('getMaxDate', () => {
     it('should get max date', () => {
@@ -118,18 +141,23 @@ describe('dateDifferenceInDays', () => {
     });
 });
 
-function parseJsonDates(dateString1: string | null, dateString2?: string | null): DateObject[] {
-    const json = `{"date1": ${getJsonString(dateString1)}, "date2": ${getJsonString(dateString2)}}`;
-    const dates = JSON.parse(json) as DateObject;
-    return [dates];
-}
+describe('ExtractDate', () => {
+    it('Should return undefined if no date in string', () => {
+        const dateString = 'not a date';
+        const actual = extractDate(dateString);
+        expect(actual).toEqual(undefined);
+    });
+    it('Should return undefined if null string', () => {
+        const actual = extractDate(null);
+        expect(actual).toEqual(undefined);
+    });
 
-function getJsonString(value: string | undefined | null): string | null {
-    if (!value) return null;
-    return `"${value}"`;
-}
-
-interface DateObject {
-    date1?: Date;
-    date2?: Date;
-}
+    const cases = [['2020-01-19'], ['20-01-1980']];
+    describe('Should extract year month day from string', () => {
+        test.each(cases)('with format %p', (dateAsString) => {
+            const stringWithTextAndDate = 'start text' + dateAsString + 'more text';
+            const actual = extractDate(stringWithTextAndDate);
+            expect(actual?.getTime()).toEqual(new Date(dateAsString).getTime());
+        });
+    });
+});

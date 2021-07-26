@@ -1,9 +1,11 @@
 import EchoCore from '@equinor/echo-core';
 import { Search, SearchResults, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
+import { Filter } from './inMemory/searchFilter';
 import { logger } from './logger';
 import { logging, LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
+import { McPackDto } from './workers/dataTypes';
 import { ErrorForTesting } from './workers/externalCalls';
 
 document.getElementById('ChangePlantBtn')?.addEventListener('click', changePlantBtnClicked);
@@ -104,38 +106,21 @@ async function searchBtnClicked() {
         console.log('caught in main', JSON.parse(JSON.stringify(e)));
     }
 
-    const filter = { projectName: 'L.O265C.001' };
+    const documents = await Search.Documents.searchAsync('USER MANUAL', 2);
+    print('documents', documents, (item) => [item.docNo, item.docTitle, item.projectCode]);
+
+    const filter: Filter<McPackDto> = { projectName: 'L.O265C.001' };
     const mcPacks = await Search.McPacks.searchAsync('0001-A01', 2, filter);
-    print('mcPacks', mcPacks, (item) => [
-        item.description,
-        item.commPkgNo,
-        item.mcPkgNo,
-        item.projectName,
-        item.updatedAt
-    ]);
+    print('mcPacks', mcPacks, (item) => [item.description, item.commPkgNo, item.mcPkgNo, item.projectName]);
 
     const commPacks = await Search.CommPacks.searchAsync('A-73MA001', 2);
     print('commPacks', commPacks, (item) => [item.commPkgNo, item.description]);
 
     const punches = await Search.Punch.searchAsync('A-73MA001', 2);
-    print('punches', punches, (item) => [
-        item.id,
-        item.description,
-        item.tagNo,
-        item.commPkgNo,
-        item.mcPkgNo,
-        item.updatedAt
-    ]);
+    print('punches', punches, (i) => [i.id, i.description, i.tagNo, i.commPkgNo, i.mcPkgNo, i.updatedAt]);
 
     const notifications = await Search.Notifications.searchAsync('A-73MA001', 2);
-    print('notifications', notifications, (item) => [
-        item.maintenanceRecordId,
-        item.title,
-        item.tagId,
-        item.wbsId,
-        item.wbs,
-        item.changedDateTime
-    ]);
+    print('notifications', notifications, (i) => [i.maintenanceRecordId, i.title, i.tagId, i.wbsId, i.wbs]);
 
     const recordLookup = await Search.Notifications.getAsync(notifications.values[0]?.maintenanceRecordId ?? '123');
     console.log('Record lookup', recordLookup);

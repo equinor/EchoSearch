@@ -31,6 +31,12 @@ const searchTags = {
     getAllAsync: echoSearchWorker.lookupTagsAsync
 };
 
+const searchDocuments = {
+    searchAsync: echoSearchWorker.searchDocumentsAsync,
+    getAsync: echoSearchWorker.lookupDocumentAsync,
+    getAllAsync: echoSearchWorker.lookupAllDocumentsAsync
+};
+
 const searchPunches = {
     searchAsync: echoSearchWorker.searchPunches,
     getAsync: echoSearchWorker.lookupPunchAsync,
@@ -73,6 +79,7 @@ const logConfiguration = {
 
 export const Search = {
     Tags: searchTags,
+    Documents: searchDocuments,
     Punch: searchPunches,
     McPacks: searchMcPacks,
     CommPacks: searchCommPacks,

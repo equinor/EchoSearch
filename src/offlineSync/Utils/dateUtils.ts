@@ -46,3 +46,11 @@ export function dateDifferenceInDays(date1?: Date, date2?: Date): number {
     const diff = Math.abs(date1.getTime() - date2.getTime());
     return Math.floor(diff / (1000 * 3600 * 24));
 }
+
+export function extractDate(stringWithDate: string | undefined | null): Date | undefined {
+    if (!stringWithDate) return undefined;
+    const regex = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/g;
+    const dateStrings = stringWithDate?.match(regex) as string[];
+    if (!dateStrings) return undefined;
+    return new Date(dateStrings[0]);
+}
