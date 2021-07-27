@@ -18,7 +18,7 @@ function createdMocked(): string {
     {
       "operationHandoverStatus": 4,
       "id": ${randomNumberId(9)},
-      "description": "Pedestal Crane A-73MA001",
+      "description": "mocked Pedestal Crane A-73MA001",
       "projectName": "L.O265C.00${randomNumberId(1)}",
       "commPkgNo": "7${randomNumberId(2)}0-A0${randomNumberId(1)}",
       "commissioningHandoverStatus": 4,
@@ -53,7 +53,7 @@ function getRealMockDataString(): string {
     return `{
       "operationHandoverStatus": 2,
       "id": 109692395,
-      "description": "Pedestal Crane A-73MA002",
+      "description": "mocked Pedestal Crane A-73MA002",
       "projectName": "L.O265C.001",
       "commPkgNo": "1101-A24",
       "commissioningHandoverStatus": 2,
@@ -62,7 +62,7 @@ function getRealMockDataString(): string {
     {
       "operationHandoverStatus": 0,
       "id": 116178898,
-      "description": "DEL I: P1 SØR - Kran A-73MA001: Skifte kranstol A-73MZ004",
+      "description": "mocked DEL I: P1 SØR - Kran A-73MA001: Skifte kranstol A-73MZ004",
       "projectName": "T.O265C.DA.3102",
       "commPkgNo": "1103-C04",
       "commissioningHandoverStatus": 0,
@@ -71,7 +71,7 @@ function getRealMockDataString(): string {
     {
       "operationHandoverStatus": 4,
       "id": 114644308,
-      "description": "HVAC mod. Deck Crane South A-73MA001",
+      "description": "mocked HVAC mod. Deck Crane South A-73MA001",
       "projectName": "L.O265C.001",
       "commPkgNo": "1102-A04",
       "commissioningHandoverStatus": 4,
@@ -80,7 +80,7 @@ function getRealMockDataString(): string {
     {
       "operationHandoverStatus": 4,
       "id": 106298252,
-      "description": "Area Completion - S/C Crane & Pedestal (A-73MA001)",
+      "description": "mocked Area Completion - S/C Crane & Pedestal (A-73MA001)",
       "projectName": "L.O265C.001",
       "commPkgNo": "1101-A24",
       "commissioningHandoverStatus": 4,

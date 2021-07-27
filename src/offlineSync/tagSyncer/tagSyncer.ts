@@ -8,7 +8,7 @@ import {
 import { tagsLevTrie } from '../../inMemory/inMemoryTagsLevTrie';
 import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
-import { OfflineSystem } from '../syncSettings';
+import { OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllTags, apiUpdatedTags } from './tagApi';
 import { tagsAdministrator, tagsRepository } from './tagRepository';
@@ -27,7 +27,7 @@ export const tagsSyncSystem = new SyncSystem(
 export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     log.trace('Full Sync Started');
     try {
-        const data = await apiAllTags(abortSignal);
+        const data = await apiAllTags(Settings.getInstCode(), abortSignal);
         await tagsAdministrator().deleteAndRecreate();
         await tagsRepository().addDataBulks(data.tags, abortSignal); //TODO test exception and error handling inside addDataBulks
         clearAndInitInMemoryTags(data.tags); //we are dependent on summary from indexDb, so have to sync in memory after indexDb is done :(
@@ -46,12 +46,12 @@ export async function syncFullTags(abortSignal: AbortSignal): Promise<InternalSy
 
 export async function syncUpdateTags(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     log.trace('Update Sync Started');
-    const data = await apiUpdatedTags(lastChangedDate, abortSignal);
-    await tagsRepository().addDataBulks(data.tags, abortSignal);
-    updateInMemoryTags(data.tags);
-    tagsLevTrie.populateWithTags(data.tags.map((item) => item.tagNo));
-    const newestItemDate = getNewestItemDate(data.tags);
-    return { isSuccess: true, newestItemDate, itemsSyncedCount: data.tags.length };
+    const data = await apiUpdatedTags(Settings.getInstCode(), lastChangedDate, abortSignal);
+    await tagsRepository().addDataBulks(data, abortSignal);
+    updateInMemoryTags(data);
+    tagsLevTrie.populateWithTags(data.map((item) => item.tagNo));
+    const newestItemDate = getNewestItemDate(data);
+    return { isSuccess: true, newestItemDate, itemsSyncedCount: data.length };
 }
 
 function getNewestItemDate(data: TagSummaryDb[]): Date | undefined {

@@ -15,7 +15,7 @@ export function randomMockedTagsString(count: number): string {
 function createMockedTag(): string {
     return `{
       "tagNo": "${randomId(9)}",
-      "description": "this ${randomId(9)} is description",
+      "description": "mocked ${randomId(9)} is description",
       "tagStatus": "ASBUILT",
       "tagCategoryDescription": "MAIN ${randomId(9)} EQUIPMENT",
       "tagType": "MA",
@@ -40,14 +40,14 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
     [ ${randomTags}     
       {
         "tagNo": "A-73MA001",
-        "description": "PEDESTAL CRANE P1 SOUTH",
+        "description": "mocked PEDESTAL CRANE P1 SOUTH",
         "tagStatus": "ASBUILT",
         "tagCategoryDescription": "MAIN EQUIPMENT",
         "tagType": "MA",
         "updatedDate": "2020-05-15T11:12:19"
       },
       {
-        "tagNo": "A-73MA001-B01",
+        "tagNo": "A-73MA001-B01 mocked",
         "description": null,
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": null,
@@ -56,7 +56,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B02",
-        "description": "JUNCTION BOX MAIN WINCH 690VAC",
+        "description": "mocked JUNCTION BOX MAIN WINCH 690VAC",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -64,7 +64,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B03",
-        "description": "JUNCTION BOX MAIN WINCH 230VAC",
+        "description": "mocked JUNCTION BOX MAIN WINCH 230VAC",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -72,7 +72,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B04",
-        "description": "JUNCTION BOX LIGHT FIXTURES",
+        "description": "mocked JUNCTION BOX LIGHT FIXTURES",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -80,7 +80,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B05",
-        "description": "JUNCTION BOX MAIN WINCH 690VAC",
+        "description": "mocked JUNCTION BOX MAIN WINCH 690VAC",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -88,7 +88,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B06",
-        "description": "JUNCTION BOX MAIN WINCH 230VAC",
+        "description": "mocked JUNCTION BOX MAIN WINCH 230VAC",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -96,7 +96,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B07",
-        "description": "JUNCTION BOX LIGHT FIXTURES",
+        "description": "mocked JUNCTION BOX LIGHT FIXTURES",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -104,7 +104,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B08",
-        "description": "JUNCTION BOX LIGHT FIXTURES",
+        "description": "mocked JUNCTION BOX LIGHT FIXTURES",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -112,7 +112,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B09",
-        "description": "JUNCTION BOX F&G DAMPER",
+        "description": "mocked JUNCTION BOX F&G DAMPER",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -120,7 +120,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B10",
-        "description": "JUNCTION BOX F&G DAMPER",
+        "description": "mocked JUNCTION BOX F&G DAMPER",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -128,7 +128,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-B11",
-        "description": "JUNCTION BOX F&G DAMPER",
+        "description": "mocked JUNCTION BOX F&G DAMPER",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "B",
@@ -136,7 +136,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E05",
-        "description": "FLOOD LIGHT LUFFING WINCH",
+        "description": "mocked FLOOD LIGHT LUFFING WINCH",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -144,7 +144,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E06",
-        "description": "ESCAPE LIGHT CABIN",
+        "description": "mocked ESCAPE LIGHT CABIN",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -152,7 +152,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E07",
-        "description": "ESCAPE LIGHT CABIN AIR LOCK",
+        "description": "mocked ESCAPE LIGHT CABIN AIR LOCK",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -160,7 +160,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E08",
-        "description": "ESCAPE LIGHT E-ROOM AIB",
+        "description": "mocked ESCAPE LIGHT E-ROOM AIB",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -168,7 +168,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E09",
-        "description": "ESCAPE LIGHT E-ROOM",
+        "description": "mocked ESCAPE LIGHT E-ROOM",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -176,7 +176,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E11",
-        "description": "HELI LIGHT A-FRAME",
+        "description": "mocked HELI LIGHT A-FRAME",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -184,7 +184,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E12",
-        "description": "HELI LIGHT JIB",
+        "description": "mocked HELI LIGHT JIB",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -192,7 +192,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E13",
-        "description": "HELI LIGHT JIB",
+        "description": "mocked HELI LIGHT JIB",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -200,7 +200,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E14",
-        "description": "HELI LIGHT JIB TIP",
+        "description": "mocked HELI LIGHT JIB TIP",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -208,7 +208,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E15",
-        "description": "FLOOD LIGHT MAIN WINCH",
+        "description": "mocked FLOOD LIGHT MAIN WINCH",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -216,7 +216,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E16",
-        "description": "FLOOD LIGHT JIB TIP",
+        "description": "mocked FLOOD LIGHT JIB TIP",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -224,7 +224,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E17",
-        "description": "FLOOD LIGHT JIB TIP",
+        "description": "mocked FLOOD LIGHT JIB TIP",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -232,7 +232,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E18",
-        "description": "EMERGENCY LIGHT CABIN AIR LOCK",
+        "description": "mocked EMERGENCY LIGHT CABIN AIR LOCK",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -240,7 +240,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E19",
-        "description": "EMERGENCY LIGHT E-ROOM",
+        "description": "mocked EMERGENCY LIGHT E-ROOM",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -248,7 +248,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E20",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -256,7 +256,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E21",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -264,7 +264,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E22",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -272,7 +272,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E23",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -280,7 +280,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E24",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -288,7 +288,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E25",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -296,7 +296,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E26",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -304,7 +304,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E27",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -312,7 +312,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E28",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -320,7 +320,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E29",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -328,7 +328,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E30",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -336,7 +336,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E31",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -344,7 +344,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-E32",
-        "description": "EX LED LIGHT FIXTURE MAX LED 4500",
+        "description": "mocked EX LED LIGHT FIXTURE MAX LED 4500",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Electrical",
         "tagType": "E",
@@ -352,7 +352,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M01",
-        "description": "MAIN WINCH MOTOR 1",
+        "description": "mocked MAIN WINCH MOTOR 1",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -360,7 +360,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M02",
-        "description": "MAIN WINCH MOTOR 2",
+        "description": "mocked MAIN WINCH MOTOR 2",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -368,7 +368,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M03",
-        "description": "MAIN WINCH MOTOR 3",
+        "description": "mocked MAIN WINCH MOTOR 3",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -376,7 +376,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M04",
-        "description": "MAIN WINCH MOTOR 4",
+        "description": "mocked MAIN WINCH MOTOR 4",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -384,7 +384,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M05",
-        "description": "SLEWING MOTOR 1",
+        "description": "mocked SLEWING MOTOR 1",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -392,7 +392,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M06",
-        "description": "SLEWING MOTOR 2",
+        "description": "mocked SLEWING MOTOR 2",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -400,7 +400,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M07",
-        "description": "SLEWING MOTOR 3",
+        "description": "mocked SLEWING MOTOR 3",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -408,7 +408,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M08",
-        "description": "SLEWING MOTOR 4",
+        "description": "mocked SLEWING MOTOR 4",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -416,7 +416,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M09",
-        "description": "SLEWING MOTOR 5",
+        "description": "mocked SLEWING MOTOR 5",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -424,7 +424,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M10",
-        "description": "SLEWING MOTOR 6",
+        "description": "mocked SLEWING MOTOR 6",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",
@@ -432,7 +432,7 @@ export function getMockedTagsStringInternal(randomTagsCount: number): string {
       },
       {
         "tagNo": "A-73MA001-M11",
-        "description": "LUFFING WINCH MOTOR 1",
+        "description": "mocked LUFFING WINCH MOTOR 1",
         "tagStatus": "AsBuilt",
         "tagCategoryDescription": "Main Equipment",
         "tagType": "M",

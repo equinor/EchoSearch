@@ -18,7 +18,7 @@ function createdMocked(): string {
       "id": ${randomNumberId(18)},
       "projectName": "L.O265C.001",
       "commPkgNo": "0001-A01",
-      "description": "this ${randomId(9)} is description",
+      "description": "mocked ${randomId(9)} is description",
       "mcPkgNo": "0001-A001",
       "updatedAt": "2017-12-11T12:47:24"
     }`;
@@ -49,7 +49,7 @@ function getMockedStringInternal(randomItemsToCreateCount: number): string {
 
 function getRealMockDataString(): string {
     return `{
-            "id": "105971470",
+            "id": "105971470 mocked",
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-A01",
             "description": null,
@@ -62,7 +62,7 @@ function getRealMockDataString(): string {
             "id": 105971602,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-L01",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A002",
             "updatedAt": "2018-02-15T13:32:25"
           },
@@ -70,7 +70,7 @@ function getRealMockDataString(): string {
             "id": 105971648,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-R01",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A003",
             "updatedAt": "2017-11-24T10:31:37"
           },
@@ -78,7 +78,7 @@ function getRealMockDataString(): string {
             "id": 105972242,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-D01",
-            "description": "LCI-1 Deliverable (excl. PO No. ER325)",
+            "description": "mocked LCI-1 Deliverable (excl. PO No. ER325)",
             "mcPkgNo": "0001-A004",
             "updatedAt": "2017-12-07T11:08:12"
           },
@@ -86,7 +86,7 @@ function getRealMockDataString(): string {
             "id": 106135888,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-R00",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A005",
             "updatedAt": "2017-12-14T14:02:37"
           },
@@ -94,7 +94,7 @@ function getRealMockDataString(): string {
             "id": 106175812,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-D00",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A006",
             "updatedAt": "2017-12-19T11:10:39"
           },
@@ -102,7 +102,7 @@ function getRealMockDataString(): string {
             "id": 106245458,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-A00",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A007",
             "updatedAt": "2018-02-09T14:39:53"
           },
@@ -110,7 +110,7 @@ function getRealMockDataString(): string {
             "id": 106256376,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-L00",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A008",
             "updatedAt": "2018-06-14T11:24:47"
           },
@@ -118,7 +118,7 @@ function getRealMockDataString(): string {
             "id": 106461038,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-R02",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A009",
             "updatedAt": "2017-11-30T13:28:33"
           },
@@ -126,7 +126,7 @@ function getRealMockDataString(): string {
             "id": 106461042,
             "projectName": "L.O265C.001",
             "commPkgNo": "0001-R03",
-            "description": "LCI-1 Deliverable",
+            "description": "mocked LCI-1 Deliverable",
             "mcPkgNo": "0001-A010",
             "updatedAt": "2017-12-04T13:46:44"
           }`;

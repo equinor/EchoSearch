@@ -13,7 +13,7 @@ import { punchesApi } from '../offlineSync/punchSyncer/punchApi';
 import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
 import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
-import { tagsMock } from '../offlineSync/tagSyncer/tagApi';
+import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { setToken } from '../tokenHelper';
 import { externalCommPacks } from './externalCommPacks';
@@ -149,14 +149,14 @@ function externalToggleMockData(): void {
     mcPacksApi.state.toggleMock();
     commPacksApi.state.toggleMock();
     punchesApi.state.toggleMock();
-    tagsMock.toggle();
+    tagsApi.state.toggleMock();
     documentsApi.state.toggleMock();
     notificationsApi.state.toggleMock();
     notificationsApi.state.failureRate = 30;
 
     log.info(
         'use mock tags:',
-        tagsMock.isEnabled,
+        tagsApi.state.isMockEnabled,
         'mcPacks',
         mcPacksApi.state.isMockEnabled,
         'punches',
