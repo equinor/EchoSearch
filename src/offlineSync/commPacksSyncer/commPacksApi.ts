@@ -1,3 +1,4 @@
+import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { queryParameter } from '../apiHelper';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
@@ -11,6 +12,7 @@ const commPacksApiFetcher = new ApiDataFetcher(cleanupCommPack);
 export const commPacksApi = {
     all: apiAllCommPacks,
     updated: apiUpdatedCommPacks,
+    allCommPackNos: apiAllCommPackNos,
     search: apiSearchCommPacks,
     state: commPacksApiFetcher.state
 };
@@ -46,6 +48,12 @@ async function apiUpdatedCommPacks(instCode: string, fromDate: Date, abortSignal
     const date = dateAsApiString(fromDate);
     const url = `${baseApiUrl}/${instCode}/commPks?updatedSince=${date}&paging=false`;
     return commPacksApiFetcher.fetchAll(url, () => getMockedCommPacksString(50000), abortSignal);
+}
+
+async function apiAllCommPackNos(instCode: string, abortSignal: AbortSignal): Promise<string[]> {
+    const url = `${baseApiUrl}/${instCode}/commPks?paging=false`;
+    const result = await apiFetchJsonToArray<CommPackDb>(url, abortSignal);
+    return result.map((i) => i.commPkgNo);
 }
 
 async function apiSearchCommPacks(

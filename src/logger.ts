@@ -140,9 +140,10 @@ export function logger(context: string): LoggerFunctions {
 export const loggerFactory = {
     default: logger,
     tags: (context: string) => logger('Tags').create(context),
-    punches: (context: string) => logger('Punch').create(context),
-    mcPacks: (context: string) => logger('McPacks').create(context),
+    documents: (context: string) => logger('Documents').create(context),
     commPacks: (context: string) => logger('CommPacks').create(context),
-    notifications: (context: string) => logger('Notifications').create(context),
-    documents: (context: string) => logger('Documents').create(context)
+    mcPacks: (context: string) => logger('McPacks').create(context),
+    checklists: (context: string) => logger('Checklists').create(context),
+    punches: (context: string) => logger('Punch').create(context),
+    notifications: (context: string) => logger('Notifications').create(context)
 };
