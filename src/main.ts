@@ -29,6 +29,8 @@ document.getElementById('testCommReturnTypes')?.addEventListener('click', testCo
 
 let count = 0;
 
+console.log('console.log from main.tsx');
+
 const logOptions = {
     '': LogType.Trace
 };

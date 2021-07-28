@@ -43,7 +43,7 @@ const config = {
     plugins: [
         del({ targets: 'lib/*', runOnce: true }),
         nodeResolve({ extensions }),
-        workerLoader({ preserveFileNames: false, inline: true, targetPlatform: 'browser' }),
+        workerLoader({ preserveFileNames: true, inline: false /*, targetPlatform: 'browser'*/ }),
         typescript(),
         // this will strip away libs in peerDeps in release, we should get the same instance as echopedia use instead.
         // note that peer dependencies doesn't work in worker/comlink
@@ -65,11 +65,12 @@ const config = {
         }),
         commonJs(),
 
-        injectProcessEnv({
-            NODE_ENV: environment,
-            SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
-            UNUSED: null
-        }),
+        isDevelopment &&
+            injectProcessEnv({
+                NODE_ENV: environment,
+                SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
+                UNUSED: null
+            }),
         isDevelopment &&
             html2({
                 template: 'public/index.html'
