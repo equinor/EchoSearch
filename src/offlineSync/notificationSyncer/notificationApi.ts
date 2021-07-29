@@ -1,7 +1,7 @@
 import { loggerFactory } from '../../logger';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedNotificationsString } from './notificationMocked';
 
@@ -121,7 +121,7 @@ function cleanupNotification(notification: NotificationDb): NotificationDb {
 }
 
 export async function apiAllNotifications(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
+    const url = `${getApiBaseUrl()}/${instCode}/maintenance-records/open?take=100000`;
     return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(0), abortSignal);
 }
 
@@ -131,7 +131,7 @@ export async function apiUpdatedNotifications(
     abortSignal: AbortSignal
 ): Promise<NotificationDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
+    const url = `${getApiBaseUrl()}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
     return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
 }
 
@@ -140,7 +140,7 @@ async function getOpenClosedNotificationsForTagApi(
     tagNo: string,
     abortSignal: AbortSignal
 ): Promise<NotificationDb[]> {
-    const url = `${baseApiUrl}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
+    const url = `${getApiBaseUrl()}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
         tagNo
     )}`;
     return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
@@ -154,7 +154,7 @@ async function getNotificationDetailsApi(
     includeTagDetails: boolean,
     abortSignal: AbortSignal
 ): Promise<NotificationDetails> {
-    let url = `${baseApiUrl}/maintenance-record/${id}`;
+    let url = `${getApiBaseUrl()}/maintenance-record/${id}`;
 
     let params = '';
     if (includeFailureInformation) params += '&includeFailureInformation=true';

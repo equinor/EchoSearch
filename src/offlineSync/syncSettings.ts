@@ -3,7 +3,19 @@ import { NotInitializedError } from '../baseResult';
 import { logger } from '../logger';
 
 const log = logger('SyncSettings');
-export const baseApiUrl = 'https://dt-echopedia-api-dev.azurewebsites.net'; //TODO Ove configuration
+let _baseApiUrl: string | undefined = undefined;
+export function getApiBaseUrl(): string {
+    if (!_baseApiUrl)
+        throw new NotInitializedError(
+            'Echo Api base-url has not been set, did you forget to call setBaseApiUrl(baseUrl: string)?'
+        );
+    return _baseApiUrl;
+}
+
+function setApiBaseUrl(baseUrl: string): void {
+    _baseApiUrl = baseUrl;
+    if (_baseApiUrl.endsWith('/')) _baseApiUrl = _baseApiUrl.slice(0, -1);
+}
 
 /**
  * START Settings Repository
@@ -169,7 +181,9 @@ export const Settings = {
     isSyncEnabled,
     setIsSyncEnabled,
 
-    isFullSyncDone
+    isFullSyncDone,
+
+    setApiBaseUrl
 };
 
 export interface OfflineSettingItem {

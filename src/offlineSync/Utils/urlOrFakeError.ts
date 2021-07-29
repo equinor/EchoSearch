@@ -1,4 +1,4 @@
-import { baseApiUrl } from '../syncSettings';
+import { getApiBaseUrl } from '../syncSettings';
 import { ToggleState } from '../toggleState';
 
 const _randomApiError = new ToggleState(false);
@@ -7,5 +7,5 @@ const _randomApiError = new ToggleState(false);
  */
 export function urlOrFakeError(url: string, httpStatusCode = 404, errorMessage = 'errorMessage'): string {
     if (!_randomApiError.isEnabled) return url;
-    return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
+    return `${getApiBaseUrl()}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
 }

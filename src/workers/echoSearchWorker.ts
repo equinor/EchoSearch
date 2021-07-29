@@ -6,9 +6,10 @@ import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
+import { setTokenInWorker } from '../workerTokenHelper';
 import { DocumentSummaryDto } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
 import { externalCommPacks } from './externalCommPacks';
@@ -119,6 +120,9 @@ export interface EchoWorker {
     setDefaultLogLevel: (defaultLogLevel: LogType) => void;
     getDefaultLogLevel: () => LogType;
     getLogLevel: (context: string) => LogType;
+    setApiBaseUrl(baseUrl: string): void;
+    setAccessToken(token: string): void;
+
     anotherHelloNotWorking: AnotherI;
 }
 
@@ -196,6 +200,8 @@ const echoWorker: EchoWorker = {
     setDefaultLogLevel: logging.setDefaultLogLevel,
     getDefaultLogLevel: logging.getDefaultLogLevel,
     getLogLevel: logging.getLogLevel,
+    setApiBaseUrl: (...args) => Settings.setApiBaseUrl(...args),
+    setAccessToken: (...args) => setTokenInWorker(...args),
 
     anotherHelloNotWorking: hello
 };

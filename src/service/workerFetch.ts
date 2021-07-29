@@ -1,6 +1,6 @@
 import { initializeError, NetworkError, NetworkErrorArgs } from '@equinor/echo-base';
 import { logger } from '../logger';
-import { getToken } from '../tokenHelper';
+import { getTokenInWorker } from '../workerTokenHelper';
 
 const log = logger('FETCH');
 
@@ -15,13 +15,22 @@ type Body =
     | null
     | undefined;
 
+export const initialOptions = {
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'test',
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate'
+    }
+};
+
 const workerFetch = async (
     endpoint: string,
     token: string,
     signal?: AbortSignal,
     logFetchToConsole = true,
     method = 'GET',
-    headerOptions: Record<string, unknown> = {},
+    options: Record<string, unknown> = initialOptions,
     body?: Body
 ): Promise<Response> => {
     if (!token.toLowerCase().includes('bearer')) token = 'Bearer ' + token;
@@ -29,12 +38,12 @@ const workerFetch = async (
     const headers = body
         ? {
               Authorization: token,
-              ...headerOptions
+              ...options
           }
         : {
               Authorization: token,
               'Content-Type': 'application/json',
-              ...headerOptions
+              ...options
           };
 
     logFetchToConsole && log.info(endpoint);
@@ -72,13 +81,13 @@ async function throwErrorIfNotSuccess(response: Response, url: string): Promise<
 }
 
 export async function apiFetch(url: string, abortSignal: AbortSignal): Promise<Response> {
-    const response = await workerFetch(url, getToken(), abortSignal);
+    const response = await workerFetch(url, getTokenInWorker(), abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return response;
 }
 
 export async function apiFetchToType<T>(url: string, abortSignal: AbortSignal): Promise<T> {
-    const response = await workerFetch(url, getToken(), abortSignal);
+    const response = await workerFetch(url, getTokenInWorker(), abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return (await response.json()) as T;
 }
@@ -96,7 +105,7 @@ export async function apiFetchJsonToArray<T>(
 ): Promise<T[]> {
     log.info(url);
     const performanceLogger = log.performance();
-    const response = await workerFetch(url, getToken(), abortSignal, false);
+    const response = await workerFetch(url, getTokenInWorker(), abortSignal, false);
 
     if (responseInspector) responseInspector(response);
 

@@ -34,7 +34,9 @@ console.log('console.log from main.tsx');
 const logOptions = {
     '': LogType.Trace
 };
-Syncer.logConfiguration.setLevels(logOptions);
+
+Syncer.configuration.setApiBaseUrl('https://dt-echopedia-api-dev.azurewebsites.net/');
+Syncer.configuration.log.setLevels(logOptions);
 logging.setLogLevels(logOptions);
 const log = logger('Main');
 

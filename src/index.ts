@@ -77,6 +77,22 @@ const logConfiguration = {
     LogType: LogType
 };
 
+const debugOptions = {
+    setFailureRate: echoSearchWorker.setFailureRateAsync
+};
+
+const syncConfiguration = {
+    async setApiBaseUrl(apiBaseUrl: string): Promise<void> {
+        await echoSearchWorker.setApiBaseUrl(apiBaseUrl);
+
+        await updateAccessToken();
+    },
+
+    log: logConfiguration,
+
+    debugOptions
+};
+
 export const Search = {
     Tags: searchTags,
     Documents: searchDocuments,
@@ -86,10 +102,6 @@ export const Search = {
     Notifications: searchNotifications,
     OfflineSystem,
     ErrorType: SyncErrorType //TODO Ove - should this be the same as syncError?
-};
-
-export const DebugOptions = {
-    setFailureRate: echoSearchWorker.setFailureRateAsync
 };
 
 export const Syncer = {
@@ -104,7 +116,13 @@ export const Syncer = {
     changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
         await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
     OfflineSystem,
-    logConfiguration: logConfiguration,
-    ErrorType: SyncErrorType,
-    DebugOptions
+
+    configuration: syncConfiguration,
+
+    ErrorType: SyncErrorType
 };
+
+async function updateAccessToken() {
+    const token = await getApiTokenInMainThread();
+    await echoSearchWorker.setAccessToken(token);
+}

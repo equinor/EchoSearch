@@ -4,7 +4,7 @@ import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { extractDateFromHeader, queryParameter } from '../apiHelper';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { baseApiUrl, Settings } from '../syncSettings';
+import { getApiBaseUrl, Settings } from '../syncSettings';
 import { distinct } from '../Utils/distinct';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
@@ -39,7 +39,7 @@ function cleanupTag(tag: TagSummaryDb): TagSummaryDb {
 }
 
 export async function apiAllTags(instCode: string, abortSignal: AbortSignal): Promise<TagsData> {
-    const url = `${baseApiUrl}/${instCode}/archived-tags-file`;
+    const url = `${getApiBaseUrl()}/${instCode}/archived-tags-file`;
     let dateSyncedAt: Date | undefined = undefined;
     const tags = await _tagsApiFetcher.fetchAll(
         url,
@@ -61,7 +61,7 @@ export async function apiUpdatedTags(
     abortSignal: AbortSignal
 ): Promise<TagSummaryDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/tags?updatedSince=${date}&take=5000000`;
+    const url = `${getApiBaseUrl()}/${instCode}/tags?updatedSince=${date}&take=5000000`;
 
     const tags = await _tagsApiFetcher.fetchAll(url, () => getMockedTagsString(50000), abortSignal);
     return tags;
@@ -75,7 +75,7 @@ export async function searchTagsOnline(
 ): Promise<TagSummaryDb[]> {
     maxHits = maxHits <= 0 ? maxHits : 25;
     instCode = instCode ?? Settings.getInstCode();
-    let url = `${baseApiUrl}/${instCode}/tags?take=${maxHits}`;
+    let url = `${getApiBaseUrl()}/${instCode}/tags?take=${maxHits}`;
     url += queryParameter('tagNo', searchText);
 
     let results = await apiFetchJsonToArray<TagSummaryDb>(url, abortSignal);
@@ -88,7 +88,7 @@ export async function searchTagsOnline(
 }
 
 async function getAllTagsFromApi(instCode: string, abortSignal: AbortSignal): Promise<TagsData> {
-    const url = `${baseApiUrl}/${instCode}/archived-tags-file`;
+    const url = `${getApiBaseUrl()}/${instCode}/archived-tags-file`;
     const response = await apiFetch(url, abortSignal); //TODO handle not ok, forbidden, etc
 
     try {
