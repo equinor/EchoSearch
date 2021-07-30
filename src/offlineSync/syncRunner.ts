@@ -1,32 +1,25 @@
 import { NotInitializedError, result, Result } from '../baseResult';
-import { logger } from '../logger';
+import { loggerFactory, LoggerFunctions } from '../logger';
 import { SyncSystem } from '../workers/syncSystem';
 import { OfflineSystem, Settings } from './syncSettings';
 import { getMaxDate, minusOneDay } from './Utils/dateUtils';
 import { asyncUsing } from './Utils/usingDisposable';
 
-export function syncIsOutdated(date: Date): boolean {
-    //TODO Ove Use this
-    const currDate = new Date();
-    const timeDiff = (currDate.valueOf() - date.valueOf()) / 1000;
-
-    const tenMinutes = 60 * 10;
-    return timeDiff > tenMinutes;
+function logCreate(offlineSystemKey: OfflineSystem): LoggerFunctions {
+    return loggerFactory.default(offlineSystemKey + '.SyncRunner');
 }
-
-const log = logger('SyncRunner');
 const currentlySyncing: OfflineSystem[] = [];
 
 export async function runSync<T>(searchSystem: SyncSystem<T>): Promise<Result> {
     if (!Settings.isSyncEnabled(searchSystem.offlineSystemKey)) {
         const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
-        log.create(searchSystem.offlineSystemKey).warn(message);
+        logCreate(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }
 
     if (isSyncing(searchSystem.offlineSystemKey)) {
         const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
-        log.create(searchSystem.offlineSystemKey).warn(message);
+        logCreate(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }
 
@@ -44,7 +37,7 @@ function isSyncing(offlineSystemKey: OfflineSystem): boolean {
 }
 
 function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState: boolean) {
-    log.create(offlineSystemKey).info(`isSyncing`, syncEnabledState);
+    logCreate(offlineSystemKey).info(`isSyncing`, syncEnabledState);
     if (syncEnabledState) {
         currentlySyncing.push(offlineSystemKey);
         return;
@@ -57,24 +50,24 @@ function setIsSyncing(offlineSystemKey: OfflineSystem, syncEnabledState: boolean
 }
 
 async function runSyncInternal<T>(searchSystem: SyncSystem<T>): Promise<Result> {
-    const performance = log.create(searchSystem.offlineSystemKey).performance();
+    const performance = logCreate(searchSystem.offlineSystemKey).performance();
 
-    const syncTime = new Date();
+    const syncDateTime = new Date();
     const settings = Settings.get(searchSystem.offlineSystemKey);
 
     const needFullSync = !settings.lastSyncedAtDate;
-    log.create(searchSystem.offlineSystemKey).trace('Need full sync:', needFullSync);
+    logCreate(searchSystem.offlineSystemKey).trace('Need full sync:', needFullSync);
 
     const result = needFullSync
         ? await searchSystem.runFullSync()
         : await searchSystem.runUpdateSync(getDateOrThrow(settings.newestItemDate, searchSystem.offlineSystemKey));
 
     if (result.isSuccess) {
-        updateLastSyncedDate(searchSystem.offlineSystemKey, syncTime, result.newestItemDate);
+        updateLastSyncedDate(searchSystem.offlineSystemKey, syncDateTime, result.newestItemDate);
     }
 
-    const tagSyncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
-    performance.forceLog(` Sync ${tagSyncStatus}`);
+    const syncStatus = result.isSuccess ? `SUCCESS found(${result.itemsSyncedCount})` : 'Failed :(';
+    performance.forceLog(` Sync ${syncStatus}`);
     return { ...result };
 }
 
