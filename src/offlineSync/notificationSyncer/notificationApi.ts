@@ -1,7 +1,7 @@
 import { loggerFactory } from '../../logger';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedNotificationsString } from './notificationMocked';
 
@@ -79,13 +79,13 @@ export interface NotificationDetails extends NotificationDb {
 }
 
 const log = loggerFactory.notifications('Api');
-const notificationsApiFetcher = new ApiDataFetcher(cleanupNotification);
+const notificationsFetcher = new ApiDataFetcher(cleanupNotification);
 
 export const notificationsApi = {
     openAndClosedForTagNo: getOpenClosedNotificationsForTagApi,
     notificationDetails: getNotificationDetailsApi,
 
-    state: notificationsApiFetcher.state
+    state: notificationsFetcher.state
 };
 
 function cleanupNotification(notification: NotificationDb): NotificationDb {
@@ -120,9 +120,11 @@ function cleanupNotification(notification: NotificationDb): NotificationDb {
     };
 }
 
+const getMockedString = getMockedNotificationsString;
+
 export async function apiAllNotifications(instCode: string, abortSignal: AbortSignal): Promise<NotificationDb[]> {
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open?take=100000`;
-    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(0), abortSignal);
+    const url = `${getApiBaseUrl()}/${instCode}/maintenance-records/open?take=100000`;
+    return notificationsFetcher.fetchAll(url, () => getMockedString(0), abortSignal);
 }
 
 export async function apiUpdatedNotifications(
@@ -131,8 +133,13 @@ export async function apiUpdatedNotifications(
     abortSignal: AbortSignal
 ): Promise<NotificationDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
-    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
+    const changedUrl = `${getApiBaseUrl()}/${instCode}/maintenance-records/open-and-closed?changedDateFrom=${date}&take=100000`;
+    const createdUrl = changedUrl.replace('changedDateFrom', 'createdDateFrom');
+
+    const changedTask = notificationsFetcher.fetchAll(changedUrl, () => getMockedString(25000), abortSignal);
+    const createdTask = notificationsFetcher.fetchAll(createdUrl, () => getMockedString(25000), abortSignal);
+    const results = await Promise.all([changedTask, createdTask]);
+    return results[0].concat(results[1]);
 }
 
 async function getOpenClosedNotificationsForTagApi(
@@ -140,10 +147,10 @@ async function getOpenClosedNotificationsForTagApi(
     tagNo: string,
     abortSignal: AbortSignal
 ): Promise<NotificationDb[]> {
-    const url = `${baseApiUrl}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
+    const url = `${getApiBaseUrl()}/${instCode}/tag/maintenance-records?includeCompleted=true&take=1000&tagNo=${encodeURIComponent(
         tagNo
     )}`;
-    return notificationsApiFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
+    return notificationsFetcher.fetchAll(url, () => getMockedNotificationsString(50000), abortSignal);
 }
 
 async function getNotificationDetailsApi(
@@ -154,7 +161,7 @@ async function getNotificationDetailsApi(
     includeTagDetails: boolean,
     abortSignal: AbortSignal
 ): Promise<NotificationDetails> {
-    let url = `${baseApiUrl}/maintenance-record/${id}`;
+    let url = `${getApiBaseUrl()}/maintenance-record/${id}`;
 
     let params = '';
     if (includeFailureInformation) params += '&includeFailureInformation=true';
@@ -164,7 +171,7 @@ async function getNotificationDetailsApi(
 
     url += params.replace('&', '?');
 
-    return await notificationsApiFetcher.fetchSingle<NotificationDetails>(
+    return await notificationsFetcher.fetchSingle<NotificationDetails>(
         url,
         abortSignal,
         (item) => item, //TODO cleanup

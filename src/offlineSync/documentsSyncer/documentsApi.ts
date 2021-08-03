@@ -3,7 +3,7 @@ import { loggerFactory } from '../../logger';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { extractDateFromHeader } from '../apiHelper';
 import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { DocumentSummaryDb, FileDb } from './documentDb';
 import { getMockedDocumentString } from './documentsMocked';
@@ -64,7 +64,7 @@ function cleanupFile(file: FileDb): FileDb {
 }
 
 async function getAllDocumentsFromApi(instCode: string, abortSignal: AbortSignal): Promise<DocumentsData> {
-    const url = `${baseApiUrl}/${instCode}/archived-docs-file`;
+    const url = `${getApiBaseUrl()}/${instCode}/archived-docs-file`;
     let dateSyncedAt: Date | undefined = undefined;
     const documents = await documentsApiFetcher.fetchAll(
         url,
@@ -92,7 +92,7 @@ async function getUpdatedDocumentsFromApi(
     abortSignal: AbortSignal
 ): Promise<DocumentSummaryDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/documents/diagrams?updatedSince=${date}&take=99000000`;
+    const url = `${getApiBaseUrl()}/${instCode}/documents/diagrams?updatedSince=${date}&take=99000000`;
 
     const documents = await documentsApiFetcher.fetchAll(url, () => getMockedDocumentString(50000), abortSignal);
     return documents;

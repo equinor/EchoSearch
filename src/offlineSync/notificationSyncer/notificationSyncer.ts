@@ -2,8 +2,8 @@ import { InternalSyncResult } from '../../baseResult';
 import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotifications';
 import { loggerFactory } from '../../logger';
 import { SyncSystem } from '../../workers/syncSystem';
-import { getInstCode, OfflineSystem } from '../syncSettings';
-import { getMaxDateFunc, minusOneDay } from '../Utils/dateUtils';
+import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
+import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllNotifications, apiUpdatedNotifications, NotificationDb } from './notificationApi';
 import { notificationsAdministrator, notificationsRepositoryTransaction } from './notificationRepository';
 
@@ -35,12 +35,18 @@ async function syncFullNotifications(abortSignal: AbortSignal): Promise<Internal
 }
 
 async function syncUpdateNotifications(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
+    const lastSyncedAtDate = Settings.get(OfflineSystem.Notifications).lastSyncedAtDate;
+    const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
+    const fullSyncNeeded = daysSinceLastUpdate > 30; // we only want to get open notifications if many days has passed. Getting all closed will be too much data, so it's easier to resync everything.
+    if (fullSyncNeeded) {
+        log.debug(`Run full sync instead of update, days since last sync:`, daysSinceLastUpdate);
+        return await syncFullNotifications(abortSignal);
+    } else {
+        log.trace('daysSinceLastUpdate', daysSinceLastUpdate);
+    }
+
     const performanceLogger = log.performance();
-    const data = await apiUpdatedNotifications(
-        getInstCode(),
-        minusOneDay(lastChangedDate) ?? lastChangedDate,
-        abortSignal
-    );
+    const data = await apiUpdatedNotifications(getInstCode(), lastChangedDate, abortSignal);
     performanceLogger.forceLogDelta('Api ' + data.length);
 
     const closedNotificationNos = data.filter((notification) => notification.completedDateTime);

@@ -31,9 +31,13 @@ export function getMaxDate(maxDate?: Date, itemDate?: Date): Date | undefined {
 }
 
 export function minusOneDay(date?: Date): Date | undefined {
+    return minusDays(date, 1);
+}
+
+export function minusDays(date: Date | undefined, minusDaysCount: number): Date | undefined {
     if (!date) return undefined;
     if (typeof date === 'string') date = new Date(date);
-    date.setDate(date.getDate() - 1);
+    date.setDate(date.getDate() - Math.abs(minusDaysCount));
     return date;
 }
 

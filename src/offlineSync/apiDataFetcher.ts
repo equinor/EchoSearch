@@ -1,5 +1,5 @@
 import { apiFetchJsonToArray, apiFetchToType } from '../service/workerFetch';
-import { baseApiUrl } from './syncSettings';
+import { getApiBaseUrl } from './syncSettings';
 
 export class ApiFetchState {
     private _isMockEnabled: boolean;
@@ -93,7 +93,7 @@ export class ApiDataFetcher<T> {
 
     private urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
         if (!this.isRandomFailure()) return url;
-        return `${baseApiUrl}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
+        return `${getApiBaseUrl()}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
     }
 
     private isRandomFailure(): boolean {

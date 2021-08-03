@@ -3,7 +3,7 @@ import { ApiDataFetcher } from '../apiDataFetcher';
 import { verifyCount } from '../dataVerification';
 import { notificationsApi } from '../notificationSyncer/notificationApi';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
-import { baseApiUrl, OfflineSystem } from '../syncSettings';
+import { getApiBaseUrl, OfflineSystem } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { mockedOpenClosedRejectedAndRandomPunches, mockedOpenClosedRejectedPunches } from './punchesMocked';
 
@@ -61,7 +61,7 @@ function cleanupPunch(punch: PunchDb): PunchDb {
 }
 
 export async function apiAllPunches(instCode: string, abortSignal: AbortSignal): Promise<PunchDb[]> {
-    const url = `${baseApiUrl}/${instCode}/tag/punches?paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/tag/punches?paging=false`;
     return punchesApi.fetchAll(url, () => mockedOpenClosedRejectedPunches(), abortSignal);
 }
 
@@ -71,13 +71,13 @@ export async function apiUpdatedPunches(
     abortSignal: AbortSignal
 ): Promise<PunchDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
     return punchesApi.fetchAll(url, () => mockedOpenClosedRejectedAndRandomPunches(50000), abortSignal);
 }
 
 async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {
     //Statistics/open-punches-estimated-count?instCode=JSV
-    const url = `${baseApiUrl}/${instCode}/statistics/open-punches-estimated-count`;
+    const url = `${getApiBaseUrl()}/${instCode}/statistics/open-punches-estimated-count`;
     const response = await apiFetch(url, abortSignal);
     if (response.ok) return Number.parseInt(await response.text());
     return 0;

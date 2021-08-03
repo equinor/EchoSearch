@@ -65,11 +65,12 @@ const config = {
         }),
         commonJs(),
 
-        injectProcessEnv({
-            NODE_ENV: environment,
-            SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
-            UNUSED: null
-        }),
+        isDevelopment &&
+            injectProcessEnv({
+                NODE_ENV: environment,
+                SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
+                UNUSED: null
+            }),
         isDevelopment &&
             html2({
                 template: 'public/index.html'

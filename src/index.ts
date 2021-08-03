@@ -1,3 +1,4 @@
+import * as Comlink from 'comlink';
 import { Result, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { SearchResult, SearchResults } from './inMemory/searchResult';
@@ -77,6 +78,21 @@ const logConfiguration = {
     LogType: LogType
 };
 
+const debugOptions = {
+    setFailureRate: echoSearchWorker.setFailureRateAsync
+};
+
+const syncConfiguration = {
+    async setApiBaseUrl(apiBaseUrl: string): Promise<void> {
+        await echoSearchWorker.setTokenCallback(Comlink.proxy(getApiTokenInMainThread));
+        await echoSearchWorker.setApiBaseUrl(apiBaseUrl);
+    },
+
+    log: logConfiguration,
+
+    debugOptions
+};
+
 export const Search = {
     Tags: searchTags,
     Documents: searchDocuments,
@@ -88,14 +104,9 @@ export const Search = {
     ErrorType: SyncErrorType //TODO Ove - should this be the same as syncError?
 };
 
-export const DebugOptions = {
-    setFailureRate: echoSearchWorker.setFailureRateAsync
-};
-
 export const Syncer = {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<Result> {
-        const token = await getApiTokenInMainThread();
-        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
+        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey);
     },
     isEnabledAsync: async (offlineSystemKey: OfflineSystem): Promise<boolean> =>
         (await echoSearchWorker.isEnabledAsync(offlineSystemKey)).value === true,
@@ -104,7 +115,8 @@ export const Syncer = {
     changePlantAsync: async (instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> =>
         await echoSearchWorker.changePlantAsync(instCode, forceDeleteIfSameAlreadySelected),
     OfflineSystem,
-    logConfiguration: logConfiguration,
-    ErrorType: SyncErrorType,
-    DebugOptions
+
+    configuration: syncConfiguration,
+
+    ErrorType: SyncErrorType
 };

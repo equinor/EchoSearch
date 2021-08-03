@@ -2,7 +2,7 @@ import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { queryParameter } from '../apiHelper';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
-import { baseApiUrl, Settings } from '../syncSettings';
+import { getApiBaseUrl, Settings } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedCommPacksString } from './commPacksMocked';
 
@@ -40,13 +40,13 @@ function cleanupCommPack(commPack: CommPackDb): CommPackDb {
 }
 
 async function apiAllCommPacks(instCode: string, abortSignal: AbortSignal): Promise<CommPackDb[]> {
-    const url = `${baseApiUrl}/${instCode}/commPks?paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/commPks?paging=false`;
     return commPacksApiFetcher.fetchAll(url, () => getMockedCommPacksString(0), abortSignal);
 }
 
 async function apiUpdatedCommPacks(instCode: string, fromDate: Date, abortSignal: AbortSignal): Promise<CommPackDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/commPks?updatedSince=${date}&paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/commPks?updatedSince=${date}&paging=false`;
     return commPacksApiFetcher.fetchAll(url, () => getMockedCommPacksString(50000), abortSignal);
 }
 
@@ -64,7 +64,7 @@ async function apiSearchCommPacks(
     abortSignal?: AbortSignal
 ): Promise<CommPackDb[]> {
     instCode = instCode ?? Settings.getInstCode();
-    let url = `${baseApiUrl}/${instCode}/commPks`;
+    let url = `${getApiBaseUrl()}/${instCode}/commPks`;
     url += queryParameter('containsText', searchText, '?');
     url += queryParameter('projectCodeContains', projectCode);
     url += queryParameter('itemsPerPage', maxHits);
