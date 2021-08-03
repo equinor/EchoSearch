@@ -15,7 +15,6 @@ import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
-import { setTokenInWorker } from '../workerTokenHelper';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
@@ -98,10 +97,8 @@ async function internalInitialize(): Promise<Result> {
     return result.success();
 }
 
-async function externalRunSync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result> {
+async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<Result> {
     await loadOfflineSettingsTask(); //in case init is not done yet
-
-    setTokenInWorker(apiAccessToken);
 
     //const system = getSyncSystem(offlineSystemKey); //TODO Ask Chris - why is this not working?
     //if (system) return await runSync(system);

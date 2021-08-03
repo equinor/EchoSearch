@@ -1,3 +1,4 @@
+import * as Comlink from 'comlink';
 import { Result, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { SearchResult, SearchResults } from './inMemory/searchResult';
@@ -83,9 +84,8 @@ const debugOptions = {
 
 const syncConfiguration = {
     async setApiBaseUrl(apiBaseUrl: string): Promise<void> {
+        await echoSearchWorker.setTokenCallback(Comlink.proxy(getApiTokenInMainThread));
         await echoSearchWorker.setApiBaseUrl(apiBaseUrl);
-
-        await updateAccessToken();
     },
 
     log: logConfiguration,
@@ -106,8 +106,7 @@ export const Search = {
 
 export const Syncer = {
     async runSyncAsync(offlineSystemKey: OfflineSystem): Promise<Result> {
-        const token = await getApiTokenInMainThread();
-        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey, token);
+        return await echoSearchWorker.runSyncWorkerAsync(offlineSystemKey);
     },
     isEnabledAsync: async (offlineSystemKey: OfflineSystem): Promise<boolean> =>
         (await echoSearchWorker.isEnabledAsync(offlineSystemKey)).value === true,
@@ -121,8 +120,3 @@ export const Syncer = {
 
     ErrorType: SyncErrorType
 };
-
-async function updateAccessToken() {
-    const token = await getApiTokenInMainThread();
-    await echoSearchWorker.setAccessToken(token);
-}

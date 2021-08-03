@@ -1,6 +1,6 @@
 import { initializeError, NetworkError, NetworkErrorArgs } from '@equinor/echo-base';
 import { logger } from '../logger';
-import { getTokenInWorker } from '../workerTokenHelper';
+import { getTokenInWorkerAsync } from '../workerTokenHelper';
 
 const log = logger('FETCH');
 
@@ -81,13 +81,15 @@ async function throwErrorIfNotSuccess(response: Response, url: string): Promise<
 }
 
 export async function apiFetch(url: string, abortSignal: AbortSignal): Promise<Response> {
-    const response = await workerFetch(url, getTokenInWorker(), abortSignal);
+    const token = await getTokenInWorkerAsync();
+    const response = await workerFetch(url, token, abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return response;
 }
 
 export async function apiFetchToType<T>(url: string, abortSignal: AbortSignal): Promise<T> {
-    const response = await workerFetch(url, getTokenInWorker(), abortSignal);
+    const token = await getTokenInWorkerAsync();
+    const response = await workerFetch(url, token, abortSignal);
     await throwErrorIfNotSuccess(response, url);
     return (await response.json()) as T;
 }
@@ -105,7 +107,8 @@ export async function apiFetchJsonToArray<T>(
 ): Promise<T[]> {
     log.info(url);
     const performanceLogger = log.performance();
-    const response = await workerFetch(url, getTokenInWorker(), abortSignal, false);
+    const token = await getTokenInWorkerAsync();
+    const response = await workerFetch(url, token, abortSignal, false);
 
     if (responseInspector) responseInspector(response);
 

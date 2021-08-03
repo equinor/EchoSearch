@@ -9,7 +9,7 @@ import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
-import { setTokenInWorker } from '../workerTokenHelper';
+import { setTokenGetterInWorker } from '../workerTokenHelper';
 import { DocumentSummaryDto } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
 import { externalCommPacks } from './externalCommPacks';
@@ -101,7 +101,7 @@ export interface EchoWorker {
     lookupNotificationAsync(maintenanceRecordId: string): Promise<SearchResult<NotificationDto>>;
     lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<SearchResults<NotificationDto>>;
 
-    runSyncWorkerAsync(offlineSystemKey: OfflineSystem, apiAccessToken: string): Promise<Result>;
+    runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<Result>;
 
     setEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
     isEnabledAsync(offlineSystemKey: OfflineSystem): Promise<ResultValue<boolean>>;
@@ -121,7 +121,8 @@ export interface EchoWorker {
     getDefaultLogLevel: () => LogType;
     getLogLevel: (context: string) => LogType;
     setApiBaseUrl(baseUrl: string): void;
-    setAccessToken(token: string): void;
+
+    setTokenCallback(getToken: () => Promise<string>): void;
 
     anotherHelloNotWorking: AnotherI;
 }
@@ -201,10 +202,15 @@ const echoWorker: EchoWorker = {
     getDefaultLogLevel: logging.getDefaultLogLevel,
     getLogLevel: logging.getLogLevel,
     setApiBaseUrl: (...args) => Settings.setApiBaseUrl(...args),
-    setAccessToken: (...args) => setTokenInWorker(...args),
+
+    setTokenCallback: Comlink.proxy(setTokenCallback),
 
     anotherHelloNotWorking: hello
 };
+
+async function setTokenCallback(getToken: () => Promise<string>): Promise<void> {
+    setTokenGetterInWorker(getToken);
+}
 
 //used for debugging in vsCode locally
 export const echoWorkerDebugDontUseThis = echoWorker;
