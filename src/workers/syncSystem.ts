@@ -9,14 +9,14 @@ export class SyncSystem<T> {
 
     private _initTask: Promise<void> | undefined;
     private _abortController: AbortController;
-    private _inMemoryData: InMemoryInterface<T>;
+    private _inMemoryData?: InMemoryInterface<T>;
     private _databaseAdministrator: DatabaseAdministrator<T>;
     private _offlineSystemKey: OfflineSystem;
     private _fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>;
     private _updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>;
     constructor(
         _offlineSystemKey: OfflineSystem,
-        inMemoryData: InMemoryInterface<T>,
+        inMemoryData: InMemoryInterface<T> | undefined,
         databaseAdministrator: DatabaseAdministrator<T>,
         fullSync: (abortSignal: AbortSignal) => Promise<InternalSyncResult>,
         updateSync: (lastChangedDate: Date, abortSignal: AbortSignal) => Promise<InternalSyncResult>
@@ -38,7 +38,7 @@ export class SyncSystem<T> {
         Settings.setIsSyncEnabled(this._offlineSystemKey, isEnabled);
         if (!isEnabled) {
             await this._databaseAdministrator.deleteAndRecreate();
-            this._inMemoryData.clearData();
+            this._inMemoryData?.clearData();
         }
     }
 
@@ -60,6 +60,10 @@ export class SyncSystem<T> {
     private async internalInitTask(): Promise<void> {
         const performanceLogger = this.log.performance('Init');
         await this._databaseAdministrator.init();
+
+        if (!this._inMemoryData) {
+            return;
+        }
 
         if (Settings.isSyncEnabled(this._offlineSystemKey) && !Settings.isFullSyncDone(this._offlineSystemKey)) {
             const logMessage = `Full ${this._offlineSystemKey} sync is not done, cannot init in memory`;
@@ -87,7 +91,7 @@ export class SyncSystem<T> {
         this.cancelSync();
         await this._databaseAdministrator.deleteAndRecreate();
         this.ClearSettings(this._offlineSystemKey);
-        this._inMemoryData.clearData();
+        this._inMemoryData?.clearData();
         this.log.trace('Finished clearing data');
     }
 

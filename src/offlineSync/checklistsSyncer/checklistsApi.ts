@@ -1,6 +1,6 @@
 import { ApiDataFetcher } from '../apiDataFetcher';
-import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
-import { baseApiUrl } from '../syncSettings';
+import { orEmpty, toDateOrUndefined, toNumber } from '../stringUtils';
+import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedChecklistsString } from './checklistsMocked';
 
@@ -8,7 +8,7 @@ import { getMockedChecklistsString } from './checklistsMocked';
 const checklistsApiFetcher = new ApiDataFetcher(cleanupChecklist);
 
 export const checklistsApi = {
-    all: apiAllChecklistsByCommPackNoStartsWith,
+    allBy: apiAllChecklistsByCommPackNoStartsWith,
     updated: apiUpdatedChecklists,
     //search: apiSearchChecklists,
     state: checklistsApiFetcher.state
@@ -20,7 +20,7 @@ export interface ChecklistDb {
     formStatus: string;
     commPackNo: string;
     formResponsibleId: string;
-    formUpdatedAt: Date;
+    formUpdatedAt?: Date;
     formGroupDescription: string;
     tagNo: string;
     mcPackNo: string;
@@ -46,7 +46,7 @@ function cleanupChecklist(checklist: ChecklistDb): ChecklistDb {
         formStatus: orEmpty(checklist.formStatus),
         commPackNo: orEmpty(checklist.commPackNo),
         formResponsibleId: orEmpty(checklist.formResponsibleId),
-        formUpdatedAt: toDateOrThrowError(checklist.formUpdatedAt),
+        formUpdatedAt: toDateOrUndefined(checklist.formUpdatedAt),
         formGroupDescription: orEmpty(checklist.formGroupDescription),
         tagNo: orEmpty(checklist.tagNo),
         mcPackNo: orEmpty(checklist.mcPackNo),
@@ -71,8 +71,8 @@ async function apiAllChecklistsByCommPackNoStartsWith(
     commPackNoStartsWith: string,
     abortSignal?: AbortSignal
 ): Promise<ChecklistDb[]> {
-    const url = `${baseApiUrl}/${instCode}/checkLists?paging=false&commPkgNo=${commPackNoStartsWith}`;
-    return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(0), abortSignal);
+    const url = `${getApiBaseUrl()}/${instCode}/checkLists?paging=false&commPkgNo=${commPackNoStartsWith}`;
+    return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(1000), abortSignal);
 }
 
 async function apiUpdatedChecklists(
@@ -81,7 +81,7 @@ async function apiUpdatedChecklists(
     abortSignal?: AbortSignal
 ): Promise<ChecklistDb[]> {
     const date = dateAsApiString(fromDate);
-    const url = `${baseApiUrl}/${instCode}/checkLists?updatedSince=${date}&paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/checkLists?updatedSince=${date}&paging=false`;
     return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(50000), abortSignal);
 }
 

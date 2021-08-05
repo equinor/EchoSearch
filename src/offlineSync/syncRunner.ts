@@ -80,7 +80,7 @@ function getDateOrThrow(date: Date | undefined, offlineSystemKey: OfflineSystem)
 }
 
 function updateLastSyncedDate(offlineSystemKey: OfflineSystem, lastSyncedAtDate: Date, newestItemDate?: Date): void {
-    const setting = Settings.get(offlineSystemKey);
+    const setting = { ...Settings.get(offlineSystemKey) };
     setting.lastSyncedAtDate = lastSyncedAtDate;
 
     if (newestItemDate) {

@@ -51,7 +51,7 @@ async function apiUpdatedCommPacks(instCode: string, fromDate: Date, abortSignal
 }
 
 async function apiAllCommPackNos(instCode: string, abortSignal: AbortSignal): Promise<string[]> {
-    const url = `${baseApiUrl}/${instCode}/commPks?paging=false`;
+    const url = `${getApiBaseUrl()}/${instCode}/commPks?paging=false`;
     const result = await apiFetchJsonToArray<CommPackDb>(url, abortSignal);
     return result.map((i) => i.commPkgNo);
 }
