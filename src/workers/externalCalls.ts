@@ -1,6 +1,7 @@
 import { NotFoundError } from '@equinor/echo-base';
 import { NotImplementedError, result, Result } from '../baseResult';
 import { logger } from '../logger';
+import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
 import { documentsApi } from '../offlineSync/documentsSyncer/documentsApi';
@@ -15,6 +16,7 @@ import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
+import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
@@ -46,7 +48,8 @@ function allSyncSystems() {
         notificationsSyncSystem,
         punchesSyncSystem,
         mcPacksSyncSystem,
-        commPacksSyncSystem
+        commPacksSyncSystem,
+        checklistsSyncSystem
     ];
 }
 
@@ -83,6 +86,7 @@ async function internalInitialize(): Promise<Result> {
     const initDocumentsTasks = externalDocuments.initTask();
     const initPunchesTask = externalPunches.initTask();
     const initNotificationTask = externalNotifications.initTask();
+    const initChecklistsTask = externalChecklists.initTask();
 
     await Promise.all([
         initMcTask,
@@ -90,7 +94,8 @@ async function internalInitialize(): Promise<Result> {
         initPunchesTask,
         initTagsTask,
         initDocumentsTasks,
-        initNotificationTask
+        initNotificationTask,
+        initChecklistsTask
     ]);
     performanceLogger.forceLog('----------- Search module initialize done -----------');
     _initDone = true;
@@ -107,6 +112,8 @@ async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<Result>
         return await runSync(mcPacksSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.CommPack) {
         return await runSync(commPacksSyncSystem);
+    } else if (offlineSystemKey === OfflineSystem.Checklist) {
+        return await runSync(checklistsSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Tags) {
         return await runSync(tagsSyncSystem);
     } else if (offlineSystemKey === OfflineSystem.Documents) {
