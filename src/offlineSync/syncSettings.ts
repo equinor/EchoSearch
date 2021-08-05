@@ -22,7 +22,7 @@ function setApiBaseUrl(baseUrl: string): void {
  * ideally this should be local storage
  */
 class SettingsDexieDB extends Dexie {
-    offlineStatus: Dexie.Table<OfflineSettingItem, OfflineSystem>;
+    offlineStatus: Dexie.Table<OfflineSettingItemDb, OfflineSystem>;
     settings: Dexie.Table<string, string>;
     constructor() {
         super('echoSearchSettings');
@@ -54,15 +54,16 @@ async function getInstCodeOrUndefinedAsync(): Promise<string | undefined> {
     if (_instCode) {
         return _instCode;
     }
-    return await instance().settings.get('instCode');
+    _instCode = await dbInstance().settings.get('instCode');
+    return _instCode;
 }
 
 async function saveInstCode(instCodeArg: string): Promise<void> {
-    await instance()?.settings.put(instCodeArg, 'instCode');
     _instCode = instCodeArg;
+    await dbInstance()?.settings.put(instCodeArg, 'instCode');
 }
 
-function instance(): SettingsDexieDB {
+function dbInstance(): SettingsDexieDB {
     if (_settingsDexieDb !== undefined) {
         return _settingsDexieDb;
     }
@@ -72,7 +73,7 @@ function instance(): SettingsDexieDB {
 }
 
 async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
-    await instance().offlineStatus.put(offlineSettingItem);
+    await dbInstance().offlineStatus.put(offlineSettingItem);
 
     log.create(offlineSettingItem.offlineSystemKey).debug(
         `settings done saving. IsEnabled:`,
@@ -83,7 +84,7 @@ async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise
 }
 
 async function loadOfflineSettings(): Promise<void> {
-    const settings = await instance().offlineStatus.toArray();
+    const settings = await dbInstance().offlineStatus.toArray();
     settings.forEach((setting) => {
         _dictionary[setting.offlineSystemKey] = setting;
     });
@@ -118,11 +119,14 @@ function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
 function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
     const settings = getSettingsOrThrow(offlineSystemKey);
     if (isEnabled && settings.isEnabled === isEnabled) return;
-    settings.isEnabled = isEnabled;
-    settings.lastSyncedAtDate = undefined;
-    settings.newestItemDate = undefined;
+
+    const newSettings: OfflineSettingItemDb = { ...settings };
+    newSettings.isEnabled = isEnabled;
+    newSettings.lastSyncedAtDate = undefined;
+    newSettings.newestItemDate = undefined;
+
     log.create(offlineSystemKey).debug('IsEnabled: ', isEnabled);
-    saveSettings(settings);
+    saveSettings(newSettings);
 }
 
 function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
@@ -133,7 +137,7 @@ function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
 function getSettingsOrThrow(offlineSystemKey: OfflineSystem): OfflineSettingItem {
     const result = _dictionary[offlineSystemKey];
     if (result) {
-        return { ...result };
+        return result;
     }
     throw new NotInitializedError('settings not initialized - bug in code');
 }
@@ -156,13 +160,8 @@ function createDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingI
     };
 }
 
-function allSettings(): Readonly<OfflineSettingItem>[] {
-    const all = Object.values(_dictionary);
-    return all.map((item) => cloneReadOnly(item));
-}
-
-function cloneReadOnly(offlineSettingItem: OfflineSettingItem): Readonly<OfflineSettingItem> {
-    return { ...offlineSettingItem } as const;
+function allSettings(): OfflineSettingItem[] {
+    return Object.values(_dictionary);
 }
 
 export const Settings = {
@@ -186,13 +185,16 @@ export const Settings = {
     setApiBaseUrl
 };
 
-export interface OfflineSettingItem {
+interface OfflineSettingItemDb {
     offlineSystemKey: OfflineSystem;
     isEnabled: boolean;
     newestItemDate?: Date;
     lastSyncedAtDate?: Date;
 }
 
+export type OfflineSettingItem = Readonly<OfflineSettingItemDb>;
+
+//TODO move to file
 export enum OfflineSystem {
     Tags = 'Tags',
     Documents = 'Documents',
