@@ -27,7 +27,10 @@ export async function setChecklistsIsEnabled(isEnabled: boolean): Promise<void> 
 let resumableCommPackNos: string[] = [] as string[]; //TODO clear on syncEnabled is set to false
 let resumableFullSyncStartedAt = new Date();
 
-async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSignal) {
+async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSignal): Promise<string[]> {
+    if (checklistsApi.state.isMockEnabled) {
+        return ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19'];
+    }
     const commPackNos = await commPacksApi.allCommPackNos(instCode, abortSignal);
     return Array.from(new Set(commPackNos.map((commPackNo) => commPackNo.slice(0, 2))));
 }
