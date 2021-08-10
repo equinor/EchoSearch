@@ -48,7 +48,7 @@ async function runSyncTagsClicked() {
 
 async function runSyncAllClicked() {
     const keys = Object.values(OfflineSystem).filter((key) => key !== OfflineSystem.Tags);
-    const syncTasks = keys.map((key) => Syncer.runSyncAsync(key));
+    const syncTasks = keys.filter((item) => item === OfflineSystem.Checklist).map((key) => Syncer.runSyncAsync(key));
 
     const results = await Promise.all(syncTasks);
     for (const result of results) {
@@ -104,7 +104,10 @@ function print<T>(
 
 async function searchBtnClicked() {
     try {
-        const tags = await Search.Tags.searchAsync('a73 pedes cran', 5);
+        const tagSearchText = 'a73 pedes cran';
+        const tags = await Search.Tags.searchAsync(tagSearchText, 5);
+        if (tags.values.length === 0) log.info(tagSearchText, "- didn't find anything'");
+
         print('tags', tags, (item) => [item.tagNo, item.description]);
     } catch (e) {
         console.log('caught in main', JSON.parse(JSON.stringify(e)));
@@ -158,12 +161,7 @@ function authenticate(): void {
 authenticate();
 
 async function handleClick(): Promise<void> {
-    const token = await EchoCore.EchoClient.getAccessToken();
-    //const token = EchoCore.EchoClient.getAccessToken();
-    //const result = authenticatorHelper.getToken();
-    //console.log('echoClientId', echoClientId);
-    //const token = '';
-    log.info('clicked - do nothing ' + token);
+    console.log('click - do nothing');
     // try {
     //     const result2 = await worker.sayHi('double'); //.catch((e) => console.log('hi error:', e));
     //     console.log(result2);

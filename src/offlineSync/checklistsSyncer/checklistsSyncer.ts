@@ -4,6 +4,7 @@ import { SyncSystem } from '../../workers/syncSystem';
 import { commPacksApi } from '../commPacksSyncer/commPacksApi';
 import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc, minusOneDay } from '../Utils/dateUtils';
+import { UnsubscribeFunction } from '../Utils/observableState';
 import { ChecklistDb, checklistsApi } from './checklistsApi';
 import { checklistsAdministrator, checklistsRepository } from './checklistsRepository';
 
@@ -35,10 +36,22 @@ async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSigna
     return Array.from(new Set(commPackNos.map((commPackNo) => commPackNo.slice(0, 2))));
 }
 
+function onIsEnabledChanged(): void {
+    log.trace('is enabled changed, clearing resumableCommPackNos');
+    resumableCommPackNos = [];
+}
+
+let isEnabledUnsubscribe: UnsubscribeFunction | undefined = undefined;
+
 async function syncFullChecklistsWithPagination(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const instCode = getInstCode();
     let checklistCount = 0;
     const performance = log.performance();
+
+    if (!isEnabledUnsubscribe)
+        isEnabledUnsubscribe = Settings.getObservable(OfflineSystem.Checklist).isEnabled.subscribeOnlyChanged(() =>
+            onIsEnabledChanged()
+        );
 
     let commPackNoStartsWith = [...resumableCommPackNos];
     if (resumableCommPackNos.length === 0) {
