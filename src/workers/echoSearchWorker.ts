@@ -10,8 +10,9 @@ import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
-import { DocumentSummaryDto } from './dataTypes';
+import { ChecklistDto, DocumentSummaryDto } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
+import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
@@ -91,6 +92,14 @@ export interface EchoWorker {
     lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
     lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
 
+    searchChecklists(
+        tagNo?: string,
+        commPackNo?: string,
+        mcPackNo?: string,
+        tagProjectName?: string,
+        maxHits?: number
+    ): Promise<SearchResults<ChecklistDto>>;
+
     searchNotifications(
         searchText: string,
         maxHits: number,
@@ -161,6 +170,8 @@ const echoWorker: EchoWorker = {
     searchPunches: (...args) => tryCatchToResult(() => externalPunches.search(...args)),
     lookupPunchAsync: (...args) => tryCatchToResult(() => externalPunches.lookup(...args)),
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
+
+    searchChecklists: (...args) => tryCatchToResult(() => externalChecklists.search(...args)),
 
     searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
     searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),

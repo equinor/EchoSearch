@@ -20,9 +20,23 @@ export function randomNumberId(length: number): number {
     return Number.parseInt(result);
 }
 
+/**
+ * Return date as a api friendly formatted string
+ * @param date The specified date to format
+ * @throws ArgumentDateError if invalid date
+ * @returnsReturns date formatted as: 2021-01-19T07:26:51.000Z
+ */
 export function dateAsApiString(date: Date | string): string {
-    if (!date) {
+    const dateString = dateAsApiStringOrUndefined(date);
+    if (!dateString) {
         throw new ArgumentDateError('dateAsApiString - date is undefined');
+    }
+    return dateString;
+}
+
+export function dateAsApiStringOrUndefined(date: Date | string | undefined): string | undefined {
+    if (!date) {
+        return undefined;
     }
 
     date = typeof date === 'string' ? new Date(date) : date;

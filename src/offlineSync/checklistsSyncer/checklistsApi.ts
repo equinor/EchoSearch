@@ -1,7 +1,8 @@
 import { ApiDataFetcher } from '../apiDataFetcher';
+import { queryParameters } from '../apiHelper';
 import { orEmpty, toDateOrUndefined, toNumber } from '../stringUtils';
 import { getApiBaseUrl } from '../syncSettings';
-import { dateAsApiString } from '../Utils/stringUtils';
+import { dateAsApiString, dateAsApiStringOrUndefined } from '../Utils/stringUtils';
 import { getMockedChecklistsString } from './checklistsMocked';
 
 // keep const log = loggerFactory.checklists('Api');
@@ -10,7 +11,7 @@ const checklistsApiFetcher = new ApiDataFetcher(cleanupChecklist);
 export const checklistsApi = {
     allBy: apiAllChecklistsByCommPackNoStartsWith,
     updated: apiUpdatedChecklists,
-    //search: apiSearchChecklists,
+    search: apiSearchChecklists,
     state: checklistsApiFetcher.state
 };
 
@@ -85,17 +86,31 @@ async function apiUpdatedChecklists(
     return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(50000), abortSignal);
 }
 
-// async function apiSearchChecklists(
-//     searchText: string,
-//     maxHits: number,
-//     instCode?: string,
-//     projectCode?: string,
-//     abortSignal?: AbortSignal
-// ): Promise<ChecklistDb[]> {
-//     instCode = instCode ?? Settings.getInstCode();
-//     let url = `${baseApiUrl}/${instCode}/commPks`;
-//     url += queryParameter('containsText', searchText, '?');
-//     url += queryParameter('projectCodeContains', projectCode);
-//     url += queryParameter('itemsPerPage', maxHits);
-//     return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(100), abortSignal);
-// }
+export interface ChecklistSearchFilter {
+    tagNo?: string;
+    commPackNo?: string;
+    mcPackNo?: string;
+    projectCode?: string;
+}
+
+async function apiSearchChecklists(
+    instCode: string,
+    filter: ChecklistSearchFilter,
+    updatedSince?: Date,
+    maxHits?: number,
+    abortSignal?: AbortSignal
+): Promise<ChecklistDb[]> {
+    let url = `${getApiBaseUrl()}/${instCode}/checkLists`;
+    url += queryParameters([
+        { key: 'tagNo', value: filter.tagNo },
+        { key: 'commPkgNo', value: filter.commPackNo },
+        { key: 'mcPkgNo', value: filter.mcPackNo },
+        { key: 'projectCode', value: filter.projectCode },
+        { key: 'updatedSince', value: dateAsApiStringOrUndefined(updatedSince) },
+
+        { key: 'itemsPerPage', value: maxHits },
+        { key: 'paging', value: false }
+    ]);
+
+    return checklistsApiFetcher.fetchAll(url, () => getMockedChecklistsString(10), abortSignal);
+}

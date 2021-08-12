@@ -17,15 +17,8 @@ export const checklistsSyncSystem = new SyncSystem(
     async (abortSignal) => syncFullChecklistsWithPagination(abortSignal),
     async (lastChangedDate, abortSignal) => syncUpdateChecklists(lastChangedDate, abortSignal)
 );
-export async function setChecklistsIsEnabled(isEnabled: boolean): Promise<void> {
-    Settings.setIsSyncEnabled(OfflineSystem.Checklist, isEnabled);
 
-    if (!isEnabled) {
-        checklistsAdministrator().deleteAndRecreate();
-    }
-}
-
-let resumableCommPackNos: string[] = [] as string[]; //TODO clear on syncEnabled is set to false
+let resumableCommPackNos: string[] = [] as string[];
 let resumableFullSyncStartedAt = new Date();
 
 async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSignal): Promise<string[]> {

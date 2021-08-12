@@ -44,6 +44,10 @@ const searchPunches = {
     getAllAsync: echoSearchWorker.lookupPunchesAsync
 };
 
+const searchCheckLists = {
+    searchAsync: echoSearchWorker.searchChecklists
+};
+
 const searchMcPacks = {
     /**
      * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
@@ -97,6 +101,7 @@ export const Search = {
     Tags: searchTags,
     Documents: searchDocuments,
     Punch: searchPunches,
+    Checklists: searchCheckLists,
     McPacks: searchMcPacks,
     CommPacks: searchCommPacks,
     Notifications: searchNotifications,
