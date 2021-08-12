@@ -167,6 +167,9 @@ async function searchBtnClicked() {
             i.mcPackNo,
             i.tagProjectName
         ]);
+
+        const checklistsLookup = await Search.Checklists.getAllAsync(checklists.values.map((c) => c.id));
+        print('checklists lookup', checklistsLookup, (i) => [i.id, i.formTypeDescription, i.tagNo]);
     }
 
     if (isSelected(OfflineSystem.Notifications)) {
@@ -200,17 +203,17 @@ async function testCommReturnTypesClicked(): Promise<void> {
 
 function print<T>(
     name: string,
-    mcPacks: SearchResults<T>,
+    searchResults: SearchResults<T>,
     valuesToPrint: (item: T) => (string | number | Date | undefined)[]
 ): void {
-    if (mcPacks.isSuccess) {
+    if (searchResults.isSuccess) {
         console.log(
             name,
             'search',
-            mcPacks.values.map((item) => valuesToPrint(item).join(' '))
+            searchResults.values.map((item) => valuesToPrint(item).join(' '))
         );
     } else {
-        console.log(name, 'search error ', mcPacks.error?.message?.toString());
+        console.log(name, 'search error ', searchResults.error?.message?.toString());
     }
 }
 

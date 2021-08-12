@@ -36,7 +36,7 @@ export class OfflineDataDexieBase<T> extends Dexie {
     async tryToGet(key: string): Promise<T | undefined> {
         return await tryOrThrow(() => this.table(this.tableName).get(key));
     }
-    async bulkGet(keys: string[]): Promise<T[]> {
+    async bulkGet(keys: string[] | number[]): Promise<T[]> {
         return await tryOrThrow(async () => {
             const items = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
             const result = items.filter((item) => item) as T[];
@@ -44,8 +44,8 @@ export class OfflineDataDexieBase<T> extends Dexie {
         });
     }
 
-    async get(key: string): Promise<T | undefined> {
-        if (isNullOrEmpty(key)) return undefined;
+    async get(key: string | number): Promise<T | undefined> {
+        if (typeof key === 'string' && isNullOrEmpty(key)) return undefined;
         return await this.table(this.tableName).get(key);
     }
 
@@ -106,12 +106,12 @@ export class Repository<T> {
         await this.database.bulkDeleteData(keys);
     }
 
-    async bulkGet(keys: string[]): Promise<SearchResults<T>> {
+    async bulkGet(keys: string[] | number[]): Promise<SearchResults<T>> {
         const results = await this.database.bulkGet(keys);
         return searchResults.successOrEmpty(results);
     }
 
-    async get(key: string): Promise<SearchResult<T>> {
+    async get(key: string | number): Promise<SearchResult<T>> {
         const result = await this.database.get(key);
         return searchResult.successOrNotFound(result);
     }

@@ -1,11 +1,12 @@
 import Dexie from 'dexie';
+import { chain, Dictionary } from 'lodash';
 import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
 import { OfflineSystem } from '../syncSettings';
 import { ChecklistDb } from './checklistsApi';
 
 const databaseNamePreFix = getDatabaseName(OfflineSystem.Checklist);
 
-let _instance: Dexie.Table<ChecklistDb, string> | undefined = undefined;
+let _tableInstance: Dexie.Table<ChecklistDb, string> | undefined = undefined;
 
 class ChecklistsDatabase extends OfflineDataDexieBase<ChecklistDb> {
     ChecklistsTable: Dexie.Table<ChecklistDb, string>;
@@ -21,7 +22,7 @@ class ChecklistsDatabase extends OfflineDataDexieBase<ChecklistDb> {
             });
         //.upgrade(() => {});
         this.ChecklistsTable = this.table(tableNameCannotBeRenamed);
-        _instance = this.ChecklistsTable;
+        _tableInstance = this.ChecklistsTable;
     }
 }
 
@@ -37,6 +38,13 @@ export function checklistsRepository(): Repository<ChecklistDb> {
     return checklistsAdministrator().repositoryTransaction();
 }
 
+export async function getLocalProCoSysChecklistsGroupedByTagNo(tagNos: string[]): Promise<Dictionary<ChecklistDb[]>> {
+    if (!_tableInstance) return {};
+    return chain(await _tableInstance.where('tagNo').anyOf(tagNos).toArray())
+        .groupBy((checklist) => checklist.tagNo)
+        .value();
+}
+
 export async function checklistsSearchDb(
     tagNo?: string,
     commPackNo?: string,
@@ -44,7 +52,7 @@ export async function checklistsSearchDb(
     tagProjectName?: string,
     take = 500
 ): Promise<ChecklistDb[]> {
-    if (!_instance) return [] as ChecklistDb[];
+    if (!_tableInstance) return [] as ChecklistDb[];
 
     const queryFirstValid = [
         { key: 'tagNo', value: tagNo },
@@ -56,7 +64,7 @@ export async function checklistsSearchDb(
     if (!queryFirstValid) return [] as ChecklistDb[];
     const { key: firstKey, value: firstValue } = queryFirstValid;
 
-    let query = _instance.where(firstKey).equals(firstValue);
+    let query = _tableInstance.where(firstKey).equals(firstValue);
     if (commPackNo && commPackNo !== firstValue) query = query.and((item) => item.commPackNo === commPackNo);
     if (mcPackNo && mcPackNo !== firstValue) query = query.and((item) => item.mcPackNo === mcPackNo);
     if (tagProjectName && tagProjectName !== firstValue)

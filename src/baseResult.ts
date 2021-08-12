@@ -100,16 +100,25 @@ export const result = {
         createError({ type: SyncErrorType.NotImplemented, message: message })
 };
 
+//TODO
+//some errors we only want to log?
+//some we want to display to the user
+//some we want to display to the user only in certain situations
+
 export enum SyncErrorType {
     Unknown = 'Unknown',
     NotFound = 'ApiNotFound',
     Forbidden = 'ApiForbidden',
+    //Api other Error
     SyncFailed = 'SyncFailed',
     SyncCanceled = 'SyncCanceled',
     SyncIsNotEnabled = 'SyncIsNotEnabled',
     NotInitialized = 'NotInitialized',
     BugInCode = 'BugInCode',
     NotImplemented = 'NotImplemented'
+    //InMemoryDataNotReady - waiting for sync
+    //Search Not ready
+    //Search Not Initialized
 }
 
 export interface SearchModuleError {

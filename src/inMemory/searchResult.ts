@@ -1,7 +1,7 @@
 //interface FailureType extends string{}
 
 import { BaseError } from '@equinor/echo-base';
-import { result, Result, SyncErrorType } from '../baseResult';
+import { result, Result, SearchModuleError, SyncErrorType } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
 export interface SearchResults<T> extends Result {
@@ -26,19 +26,32 @@ function createSearchSuccessOrNotFound<T>(value: T | undefined): SearchResult<T>
     return { isSuccess: true, value, isNotFound: value === undefined };
 }
 
+function singleSearchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResult<T> {
+    return {
+        isSuccess: false,
+        isNotFound: false,
+        error: createSyncNotEnabled(offlineSystem)
+    };
+}
+
 function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
     return {
         isSuccess: false,
         values: [],
-        error: {
-            type: SyncErrorType.SyncIsNotEnabled,
-            message: `To search you first have to enable sync for ${offlineSystem}`
-        }
+        error: createSyncNotEnabled(offlineSystem)
+    };
+}
+
+function createSyncNotEnabled(offlineSystem: OfflineSystem): SearchModuleError {
+    return {
+        type: SyncErrorType.SyncIsNotEnabled,
+        message: `To search you first have to enable sync for ${offlineSystem}`
     };
 }
 
 export const searchResult = {
-    successOrNotFound: createSearchSuccessOrNotFound
+    successOrNotFound: createSearchSuccessOrNotFound,
+    syncNotEnabledError: singleSearchErrorNotEnabled
 };
 
 export const searchResults = {

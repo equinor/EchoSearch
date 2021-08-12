@@ -45,7 +45,9 @@ const searchPunches = {
 };
 
 const searchCheckLists = {
-    searchAsync: echoSearchWorker.searchChecklists
+    searchAsync: echoSearchWorker.searchChecklists,
+    getAsync: echoSearchWorker.lookupChecklistAsync,
+    getAllAsync: echoSearchWorker.lookupChecklistsAsync
 };
 
 const searchMcPacks = {

@@ -1,7 +1,12 @@
+import { Dictionary } from 'lodash';
 import { SearchResult, SearchResults } from '..';
 import { searchResult, searchResults } from '../inMemory/searchResult';
 import { ChecklistDb, checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
-import { checklistsSearchDb } from '../offlineSync/checklistsSyncer/checklistsRepository';
+import {
+    checklistsRepository,
+    checklistsSearchDb,
+    getLocalProCoSysChecklistsGroupedByTagNo
+} from '../offlineSync/checklistsSyncer/checklistsRepository';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { getInstCode, OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { ChecklistDto } from './dataTypes';
@@ -19,6 +24,7 @@ async function initTask(): Promise<void> {
 
     return await initChecklistTask;
 }
+
 async function search(
     tagNo?: string,
     commPackNo?: string,
@@ -38,20 +44,30 @@ async function search(
     );
 }
 async function lookup(id: number): Promise<SearchResult<ChecklistDto>> {
-    //return await checklistsRepository().get(id);
-    console.log('id', id);
-    return searchResult.successOrNotFound<ChecklistDto>(undefined); //TODO Ove
+    return Settings.isFullSyncDone(checklistKey)
+        ? await checklistsRepository().get(id)
+        : searchResult.syncNotEnabledError(checklistKey);
 }
 
 async function lookupAll(ids: number[]): Promise<SearchResults<ChecklistDto>> {
-    console.log('ids', ids);
-    //return checklistsRepository().bulkGet(ids);
-    return searchResults.successOrEmpty([]); //TODO Ove
+    return Settings.isFullSyncDone(checklistKey)
+        ? checklistsRepository().bulkGet(ids)
+        : searchResults.syncNotEnabledError(checklistKey);
+}
+
+async function lookupGroupByTagNos(tagNos: string[]): Promise<SearchResult<Dictionary<ChecklistDb[]>>> {
+    if (!Settings.isFullSyncDone(checklistKey)) {
+        return searchResult.syncNotEnabledError(checklistKey);
+    }
+
+    const results = await getLocalProCoSysChecklistsGroupedByTagNo(tagNos);
+    return searchResult.successOrNotFound(results);
 }
 
 export const externalChecklists = {
     initTask,
     search,
     lookup,
-    lookupAll
+    lookupAll,
+    lookupGroupByTagNos
 };

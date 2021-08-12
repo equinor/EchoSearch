@@ -99,6 +99,8 @@ export interface EchoWorker {
         tagProjectName?: string,
         maxHits?: number
     ): Promise<SearchResults<ChecklistDto>>;
+    lookupChecklistAsync(tagNo: number): Promise<SearchResult<ChecklistDto>>;
+    lookupChecklistsAsync(tagNos: number[]): Promise<SearchResults<ChecklistDto>>;
 
     searchNotifications(
         searchText: string,
@@ -172,6 +174,8 @@ const echoWorker: EchoWorker = {
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
 
     searchChecklists: (...args) => tryCatchToResult(() => externalChecklists.search(...args)),
+    lookupChecklistAsync: (...args) => tryCatchToResult(() => externalChecklists.lookup(...args)),
+    lookupChecklistsAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupAll(...args)),
 
     searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
     searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),
