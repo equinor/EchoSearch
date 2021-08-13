@@ -1,5 +1,6 @@
 import { Dictionary } from 'lodash';
-import { SearchResult, SearchResults } from '..';
+import { ResultValues } from '..';
+import { ResultValue } from '../baseResult';
 import { searchResult, searchResults } from '../inMemory/searchResult';
 import { ChecklistDb, checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import {
@@ -31,7 +32,7 @@ async function search(
     mcPackNo?: string,
     tagProjectName?: string,
     maxHits = 500
-): Promise<SearchResults<ChecklistDto>> {
+): Promise<ResultValues<ChecklistDto>> {
     return await _checklistsSearchSystem.search(
         async () => await checklistsSearchDb(tagNo, commPackNo, mcPackNo, tagProjectName, maxHits),
         async () =>
@@ -43,19 +44,19 @@ async function search(
             )
     );
 }
-async function lookup(id: number): Promise<SearchResult<ChecklistDto>> {
+async function lookup(id: number): Promise<ResultValue<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? await checklistsRepository().get(id)
         : searchResult.syncNotEnabledError(checklistKey);
 }
 
-async function lookupAll(ids: number[]): Promise<SearchResults<ChecklistDto>> {
+async function lookupAll(ids: number[]): Promise<ResultValues<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? checklistsRepository().bulkGet(ids)
         : searchResults.syncNotEnabledError(checklistKey);
 }
 
-async function lookupGroupByTagNos(tagNos: string[]): Promise<SearchResult<Dictionary<ChecklistDb[]>>> {
+async function lookupGroupByTagNos(tagNos: string[]): Promise<ResultValue<Dictionary<ChecklistDb[]>>> {
     if (!Settings.isFullSyncDone(checklistKey)) {
         return searchResult.syncNotEnabledError(checklistKey);
     }

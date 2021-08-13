@@ -1,4 +1,5 @@
-import { SearchResult, SearchResults, TagSummaryDto } from '..';
+import { ResultValue, TagSummaryDto } from '..';
+import { ResultValues } from '../baseResult';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
@@ -34,23 +35,23 @@ async function initTagsTask(): Promise<void> {
     return await task;
 }
 
-async function search(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>> {
+async function search(searchText: string, maxHits: number): Promise<ResultValues<TagSummaryDto>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     return await _tagSearchSystem.search(
         async () => inMemory.Tags.search(searchText, maxHits),
         async () => inMemory.Tags.searchOnline(searchText, maxHits)
     );
 }
-async function findClosestTagNo(tagNo: string): Promise<SearchResult<string>> {
+async function findClosestTagNo(tagNo: string): Promise<ResultValue<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
     return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
-async function lookup(tagNo: string): Promise<SearchResult<TagSummaryDto>> {
+async function lookup(tagNo: string): Promise<ResultValue<TagSummaryDto>> {
     return await tagsRepository().get(tagNo);
 }
 
-async function lookupAll(tagNos: string[]): Promise<SearchResults<TagSummaryDto>> {
+async function lookupAll(tagNos: string[]): Promise<ResultValues<TagSummaryDto>> {
     return await tagsRepository().bulkGet(tagNos);
 }
 

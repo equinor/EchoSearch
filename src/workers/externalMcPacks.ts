@@ -1,4 +1,4 @@
-import { McPackDto, SearchResult, SearchResults } from '..';
+import { McPackDto, ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
 import { Filter } from '../inMemory/searchFilter';
@@ -23,17 +23,17 @@ async function search(
     searchText: string,
     maxHits: number,
     tryToApplyFilter?: Filter<McPackDb>
-): Promise<SearchResults<McPackDto>> {
+): Promise<ResultValues<McPackDto>> {
     return await _mcPacksSearchSystem.search(
         async () => inMemory.McPacks.search(searchText, maxHits, tryToApplyFilter),
         () => mcPacksApi.search(searchText, maxHits, undefined, tryToApplyFilter?.projectName)
     );
 }
-async function lookup(id: number): Promise<SearchResult<McPackDto>> {
+async function lookup(id: number): Promise<ResultValue<McPackDto>> {
     return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().get(id) : searchResult.syncNotEnabledError(_key); //TODO Error this is syncNotReady error
 }
 
-async function lookupAll(ids: number[]): Promise<SearchResults<McPackDto>> {
+async function lookupAll(ids: number[]): Promise<ResultValues<McPackDto>> {
     return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().getAll(ids) : searchResults.syncNotEnabledError(_key);
 }
 

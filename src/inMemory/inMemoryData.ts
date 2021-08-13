@@ -1,4 +1,5 @@
-import { searchResult, SearchResult, searchResults, SearchResults } from './searchResult';
+import { ResultValue, ResultValues } from '../baseResult';
+import { searchResult, searchResults } from './searchResult';
 
 export interface InMemoryInterface<T> {
     clearData(): void;
@@ -92,12 +93,12 @@ export class InMemoryData<T, Key> implements InMemoryInterface<T> {
         return -1;
     }
 
-    get(key: Key): SearchResult<T> {
+    get(key: Key): ResultValue<T> {
         const maybeFoundIndex = this.indexOfBinarySearch(key);
         return searchResult.successOrNotFound(maybeFoundIndex >= 0 ? this.inMemoryData[maybeFoundIndex] : undefined);
     }
 
-    getAll(keys: Key[]): SearchResults<T> {
+    getAll(keys: Key[]): ResultValues<T> {
         const foundIndexes = keys.map((key) => this.indexOfBinarySearch(key)).filter((index) => index >= 0);
         return searchResults.successOrEmpty(foundIndexes.map((index) => this.inMemoryData[index]));
     }

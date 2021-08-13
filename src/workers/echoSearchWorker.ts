@@ -1,8 +1,7 @@
 import * as Comlink from 'comlink';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
-import { result, Result, ResultValue } from '../baseResult';
+import { result, Result, ResultValue, ResultValues } from '../baseResult';
 import { Filter } from '../inMemory/searchFilter';
-import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
@@ -49,18 +48,18 @@ export interface EchoWorker {
     initialize(): Promise<Result>;
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
-    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>>;
-    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
-    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
-    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
+    searchTags(searchText: string, maxHits: number): Promise<ResultValues<TagSummaryDto>>;
+    searchForClosestTagNo(tagNo: string): Promise<ResultValue<string>>;
+    lookupTagAsync(tagNo: string): Promise<ResultValue<TagSummaryDto>>;
+    lookupTagsAsync(tagNos: string[]): Promise<ResultValues<TagSummaryDto>>;
 
     searchDocumentsAsync(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<DocumentSummaryDto>
-    ): Promise<SearchResults<DocumentSummaryDto>>;
-    lookupDocumentAsync(id: DocumentSummaryKey): Promise<SearchResult<DocumentSummaryDto>>;
-    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<SearchResults<DocumentSummaryDto>>;
+    ): Promise<ResultValues<DocumentSummaryDto>>;
+    lookupDocumentAsync(id: DocumentSummaryKey): Promise<ResultValue<DocumentSummaryDto>>;
+    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<ResultValues<DocumentSummaryDto>>;
 
     /**
      * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
@@ -72,25 +71,25 @@ export interface EchoWorker {
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<McPackDto>
-    ): Promise<SearchResults<McPackDto>>;
-    lookupMcPackAsync(tagNo: number): Promise<SearchResult<McPackDto>>;
-    lookupMcPacksAsync(tagNos: number[]): Promise<SearchResults<McPackDto>>;
+    ): Promise<ResultValues<McPackDto>>;
+    lookupMcPackAsync(tagNo: number): Promise<ResultValue<McPackDto>>;
+    lookupMcPacksAsync(tagNos: number[]): Promise<ResultValues<McPackDto>>;
 
     searchCommPacks(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<CommPackDto>
-    ): Promise<SearchResults<CommPackDto>>;
-    lookupCommPackAsync(tagNo: number): Promise<SearchResult<CommPackDto>>;
-    lookupCommPacksAsync(tagNos: number[]): Promise<SearchResults<CommPackDto>>;
+    ): Promise<ResultValues<CommPackDto>>;
+    lookupCommPackAsync(tagNo: number): Promise<ResultValue<CommPackDto>>;
+    lookupCommPacksAsync(tagNos: number[]): Promise<ResultValues<CommPackDto>>;
 
     searchPunches(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<SearchResults<PunchDto>>;
-    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
-    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
+    ): Promise<ResultValues<PunchDto>>;
+    lookupPunchAsync(tagNo: string): Promise<ResultValue<PunchDto>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<ResultValues<PunchDto>>;
 
     searchChecklists(
         tagNo?: string,
@@ -98,19 +97,19 @@ export interface EchoWorker {
         mcPackNo?: string,
         tagProjectName?: string,
         maxHits?: number
-    ): Promise<SearchResults<ChecklistDto>>;
-    lookupChecklistAsync(tagNo: number): Promise<SearchResult<ChecklistDto>>;
-    lookupChecklistsAsync(tagNos: number[]): Promise<SearchResults<ChecklistDto>>;
+    ): Promise<ResultValues<ChecklistDto>>;
+    lookupChecklistAsync(tagNo: number): Promise<ResultValue<ChecklistDto>>;
+    lookupChecklistsAsync(tagNos: number[]): Promise<ResultValues<ChecklistDto>>;
 
     searchNotifications(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<SearchResults<NotificationDto>>;
-    searchNotificationsByTagNos(tagNos: string[]): Promise<SearchResults<NotificationDto>>;
+    ): Promise<ResultValues<NotificationDto>>;
+    searchNotificationsByTagNos(tagNos: string[]): Promise<ResultValues<NotificationDto>>;
 
-    lookupNotificationAsync(maintenanceRecordId: string): Promise<SearchResult<NotificationDto>>;
-    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<SearchResults<NotificationDto>>;
+    lookupNotificationAsync(maintenanceRecordId: string): Promise<ResultValue<NotificationDto>>;
+    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<ResultValues<NotificationDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<Result>;
 

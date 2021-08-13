@@ -1,4 +1,4 @@
-import { CommPackDto, SearchResult, SearchResults } from '..';
+import { CommPackDto, ResultValue, ResultValues } from '..';
 import { inMemoryCommPacksInstance } from '../inMemory/inMemoryCommPacks';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
@@ -22,17 +22,17 @@ async function search(
     searchText: string,
     maxHits: number,
     tryToApplyFilter?: Filter<CommPackDto>
-): Promise<SearchResults<CommPackDto>> {
+): Promise<ResultValues<CommPackDto>> {
     return await _commPacksSearchSystem.search(
         async () => inMemory.CommPacks.search(searchText, maxHits, tryToApplyFilter),
         async () => commPacksApi.search(searchText, maxHits, tryToApplyFilter?.projectName)
     );
 }
-async function lookup(id: number): Promise<SearchResult<CommPackDto>> {
+async function lookup(id: number): Promise<ResultValue<CommPackDto>> {
     return inMemoryCommPacksInstance().get(id);
 }
 
-async function lookupAll(ids: number[]): Promise<SearchResults<CommPackDto>> {
+async function lookupAll(ids: number[]): Promise<ResultValues<CommPackDto>> {
     return inMemoryCommPacksInstance().getAll(ids);
 }
 

@@ -1,32 +1,23 @@
 //interface FailureType extends string{}
 
 import { BaseError } from '@equinor/echo-base';
-import { result, Result, SearchModuleError, SyncErrorType } from '../baseResult';
+import { result, ResultValue, ResultValues, SearchModuleError, SyncErrorType } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
-export interface SearchResults<T> extends Result {
-    values: T[];
-}
-
-export interface SearchResult<T> extends Result {
-    value?: T;
-    isNotFound: boolean;
-}
-
-function createFromError<T>(exception: Error | BaseError): SearchResults<T> {
+function createFromError<T>(exception: Error | BaseError): ResultValues<T> {
     const errorResult = result.errorFromException(exception);
     return { isSuccess: false, values: [], error: errorResult.error };
 }
 
-function createSearchArraySuccessOrEmpty<T>(values: T[]): SearchResults<T> {
+function createSearchArraySuccessOrEmpty<T>(values: T[]): ResultValues<T> {
     return { isSuccess: true, values };
 }
 
-function createSearchSuccessOrNotFound<T>(value: T | undefined): SearchResult<T> {
+function createSearchSuccessOrNotFound<T>(value: T | undefined): ResultValue<T> {
     return { isSuccess: true, value, isNotFound: value === undefined };
 }
 
-function singleSearchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResult<T> {
+function singleSearchErrorNotEnabled<T>(offlineSystem: OfflineSystem): ResultValue<T> {
     return {
         isSuccess: false,
         isNotFound: false,
@@ -34,7 +25,7 @@ function singleSearchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchRes
     };
 }
 
-function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): SearchResults<T> {
+function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): ResultValues<T> {
     return {
         isSuccess: false,
         values: [],

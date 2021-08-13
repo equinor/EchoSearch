@@ -13,9 +13,12 @@ export interface Result {
 }
 
 export interface ResultValue<T> extends Result {
-    readonly isSuccess: boolean;
     readonly value?: T;
-    readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
+    isNotFound: boolean;
+}
+
+export interface ResultValues<T> extends Result {
+    readonly values: T[];
 }
 
 export interface InternalSyncResult extends Result {
@@ -52,8 +55,8 @@ const createSuccess = (): Result => {
     return { isSuccess: true };
 };
 
-function createValueSuccess<T>(value: T): ResultValue<T> {
-    return { isSuccess: true, value };
+function createValueSuccess<T>(value?: T): ResultValue<T> {
+    return { isSuccess: true, value, isNotFound: !!value };
 }
 
 const createError = (error: SearchModuleError): Result => {
@@ -100,6 +103,29 @@ export const result = {
         createError({ type: SyncErrorType.NotImplemented, message: message })
 };
 
+/* possible errors   
+
+    ApiError
+        Forbidden
+        Other
+        NotFound
+    
+    NotInitialized
+
+    SyncError
+        SyncIsNotEnabled
+        Dexie
+    
+    SearchError
+        NotFound?
+
+    Canceled
+
+    NotImplemented
+    BugInCode
+
+*/
+
 //TODO
 //some errors we only want to log?
 //some we want to display to the user
@@ -110,7 +136,7 @@ export enum SyncErrorType {
     NotFound = 'ApiNotFound',
     Forbidden = 'ApiForbidden',
     //Api other Error
-    SyncFailed = 'SyncFailed',
+    SyncFailed = 'SyncFailed', //SyncIsNotEnabled
     SyncCanceled = 'SyncCanceled',
     SyncIsNotEnabled = 'SyncIsNotEnabled',
     NotInitialized = 'NotInitialized',

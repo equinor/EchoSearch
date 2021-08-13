@@ -1,7 +1,6 @@
 import * as Comlink from 'comlink';
-import { Result, SyncErrorType } from './baseResult';
+import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
-import { SearchResult, SearchResults } from './inMemory/searchResult';
 import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
@@ -9,7 +8,7 @@ import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
 export type { Result };
-export type { SearchResult, SearchResults };
+export type { ResultValue, ResultValues };
 export type { TagStatus, TagSummaryDto };
 export type { McPackDto, CommPackDto, NotificationDto, PunchDto };
 

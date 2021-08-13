@@ -1,5 +1,5 @@
 import EchoCore from '@equinor/echo-core';
-import { Search, SearchResults, Syncer } from '.';
+import { ResultValues, Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { Filter } from './inMemory/searchFilter';
 import { logger } from './logger';
@@ -203,7 +203,7 @@ async function testCommReturnTypesClicked(): Promise<void> {
 
 function print<T>(
     name: string,
-    searchResults: SearchResults<T>,
+    searchResults: ResultValues<T>,
     valuesToPrint: (item: T) => (string | number | Date | undefined)[]
 ): void {
     if (searchResults.isSuccess) {

@@ -1,6 +1,6 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
-import { DbError, NotInitializedError, SyncCanceledError } from '../baseResult';
-import { SearchResult, searchResult, SearchResults, searchResults } from '../inMemory/searchResult';
+import { DbError, NotInitializedError, ResultValue, ResultValues, SyncCanceledError } from '../baseResult';
+import { searchResult, searchResults } from '../inMemory/searchResult';
 import { logger, LoggerFunctions } from '../logger';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { OfflineSystem } from './syncSettings';
@@ -106,14 +106,14 @@ export class Repository<T> {
         await this.database.bulkDeleteData(keys);
     }
 
-    async bulkGet(keys: string[] | number[]): Promise<SearchResults<T>> {
-        const results = await this.database.bulkGet(keys);
-        return searchResults.successOrEmpty(results);
-    }
-
-    async get(key: string | number): Promise<SearchResult<T>> {
+    async get(key: string | number): Promise<ResultValue<T>> {
         const result = await this.database.get(key);
         return searchResult.successOrNotFound(result);
+    }
+
+    async bulkGet(keys: string[] | number[]): Promise<ResultValues<T>> {
+        const results = await this.database.bulkGet(keys);
+        return searchResults.successOrEmpty(results);
     }
 
     /**
