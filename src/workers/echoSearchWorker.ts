@@ -6,7 +6,9 @@ import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
-import { result, Result, ResultValue, ResultValues } from '../results/baseResult';
+import { Result, ResultValue, ResultValues } from '../results/baseResult';
+import { createResult } from '../results/createResult';
+import { result } from '../results/createResult2';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
 import { ChecklistDto, DocumentSummaryDto } from './dataTypes';
@@ -186,7 +188,7 @@ const echoWorker: EchoWorker = {
     cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
     setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
     isEnabledAsync: async (...args) =>
-        tryCatchToResult(async () => result.valueSuccess(syncContract.isEnabled(...args))),
+        tryCatchToResult(async () => createResult.successOrNotFound(syncContract.isEnabled(...args))),
 
     setFailureRateAsync: (...args) => syncContract.externalSetFailureRate(...args),
 

@@ -2,7 +2,8 @@
 
 import { BaseError } from '@equinor/echo-base';
 import { OfflineSystem } from '../offlineSync/syncSettings';
-import { Result, result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
+import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
+import { result } from './createResult2';
 
 function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
     return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);

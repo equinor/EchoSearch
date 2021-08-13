@@ -1,5 +1,6 @@
 import { loggerFactory, LoggerFunctions } from '../logger';
-import { NotInitializedError, result, Result } from '../results/baseResult';
+import { NotInitializedError, Result } from '../results/baseResult';
+import { result } from '../results/createResult2';
 import { SyncSystem } from '../workers/syncSystem';
 import { OfflineSystem, Settings } from './syncSettings';
 import { getMaxDate, minusOneDay } from './Utils/dateUtils';
