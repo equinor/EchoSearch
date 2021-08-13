@@ -2,7 +2,7 @@ import { McPackDto, ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
 import { Filter } from '../inMemory/searchFilter';
-import { searchResult, searchResults } from '../inMemory/searchResult';
+import { createResult, createResults } from '../inMemory/searchResult';
 import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { OfflineSystem } from '../offlineSync/syncSettings';
@@ -30,11 +30,11 @@ async function search(
     );
 }
 async function lookup(id: number): Promise<ResultValue<McPackDto>> {
-    return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().get(id) : searchResult.syncNotEnabledError(_key); //TODO Error this is syncNotReady error
+    return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().get(id) : createResult.syncNotEnabledError(_key); //TODO Error this is syncNotReady error
 }
 
 async function lookupAll(ids: number[]): Promise<ResultValues<McPackDto>> {
-    return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().getAll(ids) : searchResults.syncNotEnabledError(_key);
+    return inMemory.McPacks.isReady() ? inMemoryMcPacksInstance().getAll(ids) : createResults.syncNotEnabledError(_key);
 }
 
 export const externalMcPacks = {

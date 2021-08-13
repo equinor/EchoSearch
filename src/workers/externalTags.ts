@@ -3,7 +3,7 @@ import { ResultValues } from '../baseResult';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
-import { searchResult } from '../inMemory/searchResult';
+import { createResult } from '../inMemory/searchResult';
 import { loggerFactory } from '../logger';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
@@ -44,7 +44,7 @@ async function search(searchText: string, maxHits: number): Promise<ResultValues
 }
 async function findClosestTagNo(tagNo: string): Promise<ResultValue<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
-    return searchResult.successOrNotFound(possibleTag?.word ?? undefined);
+    return createResult.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
 async function lookup(tagNo: string): Promise<ResultValue<TagSummaryDto>> {

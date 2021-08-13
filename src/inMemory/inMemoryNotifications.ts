@@ -3,7 +3,7 @@ import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';
-import { searchResults } from './searchResult';
+import { createResults } from './searchResult';
 
 //Notifications init
 const inMemoryDbNotifications: InMemoryData<NotificationDto, string> = new InMemoryData<NotificationDto, string>(
@@ -40,5 +40,5 @@ export function searchInMemoryNotificationsWithText(
 }
 
 export function searchInMemoryNotificationsByTagNos(tagNos: string[]): ResultValues<NotificationDto> {
-    return searchResults.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
+    return createResults.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
 }

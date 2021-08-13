@@ -1,55 +1,40 @@
 //interface FailureType extends string{}
 
 import { BaseError } from '@equinor/echo-base';
-import { result, ResultValue, ResultValues, SearchModuleError, SyncErrorType } from '../baseResult';
+import { Result, result, ResultValue, ResultValues, SyncErrorType } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 
-function createFromError<T>(exception: Error | BaseError): ResultValues<T> {
-    const errorResult = result.errorFromException(exception);
-    return { isSuccess: false, values: [], error: errorResult.error };
+function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
+    return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);
 }
 
-function createSearchArraySuccessOrEmpty<T>(values: T[]): ResultValues<T> {
-    return { isSuccess: true, values };
+class SingleValueResult {
+    successOrNotFound<T>(value: T | undefined): ResultValue<T> {
+        return { isSuccess: true, value, isNotFound: value === undefined };
+    }
+    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultValue<T> {
+        return { ...createSyncNotEnabledError(offlineSystem), isNotFound: false };
+    }
 }
 
-function createSearchSuccessOrNotFound<T>(value: T | undefined): ResultValue<T> {
-    return { isSuccess: true, value, isNotFound: value === undefined };
+class ArrayValueResults {
+    error<T>(exception: Error | BaseError): ResultValues<T> {
+        const errorResult = result.errorFromException(exception);
+        return { isSuccess: false, values: [], error: errorResult.error };
+    }
+
+    successOrEmpty<T>(values: T[]): ResultValues<T> {
+        return { isSuccess: true, values };
+    }
+
+    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultValues<T> {
+        return { ...createSyncNotEnabledError(offlineSystem), values: [] };
+    }
 }
 
-function singleSearchErrorNotEnabled<T>(offlineSystem: OfflineSystem): ResultValue<T> {
-    return {
-        isSuccess: false,
-        isNotFound: false,
-        error: createSyncNotEnabled(offlineSystem)
-    };
-}
+export const createResult = new SingleValueResult();
 
-function searchErrorNotEnabled<T>(offlineSystem: OfflineSystem): ResultValues<T> {
-    return {
-        isSuccess: false,
-        values: [],
-        error: createSyncNotEnabled(offlineSystem)
-    };
-}
-
-function createSyncNotEnabled(offlineSystem: OfflineSystem): SearchModuleError {
-    return {
-        type: SyncErrorType.SyncIsNotEnabled,
-        message: `To search you first have to enable sync for ${offlineSystem}`
-    };
-}
-
-export const searchResult = {
-    successOrNotFound: createSearchSuccessOrNotFound,
-    syncNotEnabledError: singleSearchErrorNotEnabled
-};
-
-export const searchResults = {
-    error: createFromError,
-    successOrEmpty: createSearchArraySuccessOrEmpty,
-    syncNotEnabledError: searchErrorNotEnabled
-};
+export const createResults = new ArrayValueResults();
 
 //ErrorType worth considering
 //type Failure = string;

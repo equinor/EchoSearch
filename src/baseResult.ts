@@ -99,6 +99,7 @@ export const result = {
     valueSuccess: createValueSuccess,
     errorFromException: createResultErrorFromException,
     syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
+    error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
     notImplementedError: (message: string): Result =>
         createError({ type: SyncErrorType.NotImplemented, message: message })
 };
