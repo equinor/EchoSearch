@@ -1,8 +1,8 @@
 //interface FailureType extends string{}
 
 import { BaseError } from '@equinor/echo-base';
-import { Result, result, ResultValue, ResultValues, SyncErrorType } from '../baseResult';
 import { OfflineSystem } from '../offlineSync/syncSettings';
+import { Result, result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
 
 function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
     return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);

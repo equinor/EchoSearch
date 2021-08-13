@@ -1,12 +1,12 @@
 import * as Comlink from 'comlink';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
-import { result, Result, ResultValue, ResultValues } from '../baseResult';
 import { Filter } from '../inMemory/searchFilter';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
+import { result, Result, ResultValue, ResultValues } from '../results/baseResult';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
 import { ChecklistDto, DocumentSummaryDto } from './dataTypes';

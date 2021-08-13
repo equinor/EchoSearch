@@ -1,4 +1,4 @@
-import { SyncError } from '../baseResult';
+import { SyncError } from '../results/baseResult';
 import { extractDate } from './Utils/dateUtils';
 import { dateAsApiString } from './Utils/stringUtils';
 

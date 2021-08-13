@@ -1,5 +1,5 @@
-import { InternalSyncResult } from '../../baseResult';
 import { loggerFactory } from '../../logger';
+import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { commPacksApi } from '../commPacksSyncer/commPacksApi';
 import { getInstCode, OfflineSystem, Settings } from '../syncSettings';

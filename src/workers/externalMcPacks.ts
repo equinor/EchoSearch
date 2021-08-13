@@ -2,10 +2,10 @@ import { McPackDto, ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
 import { Filter } from '../inMemory/searchFilter';
-import { createResult, createResults } from '../inMemory/searchResult';
 import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { OfflineSystem } from '../offlineSync/syncSettings';
+import { createResult, createResults } from '../results/createResult';
 import { SearchSystem } from './searchSystem';
 
 let _mcPacksSearchSystem: SearchSystem<McPackDb>;

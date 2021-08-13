@@ -1,5 +1,5 @@
-import { ResultValue, ResultValues } from '../baseResult';
-import { createResult, createResults } from './searchResult';
+import { ResultValue, ResultValues } from '../results/baseResult';
+import { createResult, createResults } from '../results/createResult';
 
 export interface InMemoryInterface<T> {
     clearData(): void;

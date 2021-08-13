@@ -1,7 +1,5 @@
 import { Dictionary } from 'lodash';
 import { ResultValues } from '..';
-import { ResultValue } from '../baseResult';
-import { createResult, createResults } from '../inMemory/searchResult';
 import { ChecklistDb, checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import {
     checklistsRepository,
@@ -10,6 +8,8 @@ import {
 } from '../offlineSync/checklistsSyncer/checklistsRepository';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { getInstCode, OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { ResultValue } from '../results/baseResult';
+import { createResult, createResults } from '../results/createResult';
 import { ChecklistDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 

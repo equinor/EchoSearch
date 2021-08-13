@@ -1,14 +1,14 @@
 import { ResultValue, TagSummaryDto } from '..';
-import { ResultValues } from '../baseResult';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
-import { createResult } from '../inMemory/searchResult';
 import { loggerFactory } from '../logger';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
+import { ResultValues } from '../results/baseResult';
+import { createResult } from '../results/createResult';
 import { SearchSystem } from './searchSystem';
 
 let _tagSearchSystem: SearchSystem<TagSummaryDb>;

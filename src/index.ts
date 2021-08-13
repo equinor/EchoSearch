@@ -1,9 +1,9 @@
 import * as Comlink from 'comlink';
-import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
+import { Result, ResultValue, ResultValues, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 

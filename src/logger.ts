@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NotImplementedError } from './baseResult';
 import { isLogEnabled, LogType } from './loggerOptions';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
+import { NotImplementedError } from './results/baseResult';
 
 const _green = '#008000';
 const _cyan = '#008080';

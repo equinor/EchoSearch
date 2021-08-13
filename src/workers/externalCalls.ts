@@ -1,5 +1,4 @@
 import { NotFoundError } from '@equinor/echo-base';
-import { NotImplementedError, result, Result } from '../baseResult';
 import { logger } from '../logger';
 import { checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
@@ -17,6 +16,7 @@ import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
+import { NotImplementedError, result, Result } from '../results/baseResult';
 import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';

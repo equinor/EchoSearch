@@ -1,4 +1,4 @@
-import { ArgumentDateError } from '../../baseResult';
+import { ArgumentDateError } from '../../results/baseResult';
 
 export function randomId(length: number): string {
     let result = '';

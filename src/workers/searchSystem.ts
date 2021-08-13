@@ -1,7 +1,7 @@
-import { ResultValues } from '../baseResult';
-import { createResults } from '../inMemory/searchResult';
 import { loggerFactory } from '../logger';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { ResultValues } from '../results/baseResult';
+import { createResults } from '../results/createResult';
 
 export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;

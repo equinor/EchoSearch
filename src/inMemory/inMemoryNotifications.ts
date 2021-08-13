@@ -1,9 +1,9 @@
 import { NotificationDto, ResultValues } from '..';
 import { OfflineSystem } from '../offlineSync/syncSettings';
+import { createResults } from '../results/createResult';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';
-import { createResults } from './searchResult';
 
 //Notifications init
 const inMemoryDbNotifications: InMemoryData<NotificationDto, string> = new InMemoryData<NotificationDto, string>(

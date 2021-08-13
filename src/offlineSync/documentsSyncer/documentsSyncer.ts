@@ -1,6 +1,6 @@
-import { InternalSyncResult } from '../../baseResult';
 import { inMemoryDocumentsInstance } from '../../inMemory/inMemoryDocuments';
 import { loggerFactory } from '../../logger';
+import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';

@@ -1,4 +1,3 @@
-import { InternalSyncResult, result } from '../../baseResult';
 import {
     clearAndInitInMemoryTags,
     inMemoryTagsCount as inMemoryTagCount,
@@ -7,6 +6,7 @@ import {
 } from '../../inMemory/inMemoryTags';
 import { tagsLevTrie } from '../../inMemory/inMemoryTagsLevTrie';
 import { loggerFactory } from '../../logger';
+import { InternalSyncResult, result } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';

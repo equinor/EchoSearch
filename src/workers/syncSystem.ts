@@ -1,8 +1,8 @@
-import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { InMemoryInterface } from '../inMemory/inMemoryData';
 import { logger, LoggerFunctions } from '../logger';
 import { DatabaseAdministrator } from '../offlineSync/offlineDataDexieBase';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { ArgumentDateError, InternalSyncResult } from '../results/baseResult';
 
 export class SyncSystem<T> {
     private log: LoggerFunctions;
