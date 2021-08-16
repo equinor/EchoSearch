@@ -17,6 +17,32 @@ export interface InternalSyncResult extends Result {
     itemsSyncedCount: number;
 }
 
+export interface SearchModuleError {
+    type: SyncErrorType;
+    name?: string;
+    message?: string;
+    stack?: string;
+    httpStatusCode?: number;
+    url?: string;
+    properties?: Record<string, unknown>;
+}
+
+export enum SyncErrorType {
+    Unknown = 'Unknown',
+    NotFound = 'ApiNotFound',
+    Forbidden = 'ApiForbidden',
+    //Api other Error
+    SyncFailed = 'SyncFailed', //SyncIsNotEnabled
+    SyncCanceled = 'SyncCanceled',
+    SyncIsNotEnabled = 'SyncIsNotEnabled',
+    NotInitialized = 'NotInitialized',
+    BugInCode = 'BugInCode',
+    NotImplemented = 'NotImplemented'
+    //InMemoryDataNotReady - waiting for sync
+    //Search Not ready
+    //Search Not Initialized
+}
+
 /* possible errors   
 
     ApiError
@@ -44,29 +70,3 @@ export interface InternalSyncResult extends Result {
 //some errors we only want to log?
 //some we want to display to the user
 //some we want to display to the user only in certain situations
-
-export enum SyncErrorType {
-    Unknown = 'Unknown',
-    NotFound = 'ApiNotFound',
-    Forbidden = 'ApiForbidden',
-    //Api other Error
-    SyncFailed = 'SyncFailed', //SyncIsNotEnabled
-    SyncCanceled = 'SyncCanceled',
-    SyncIsNotEnabled = 'SyncIsNotEnabled',
-    NotInitialized = 'NotInitialized',
-    BugInCode = 'BugInCode',
-    NotImplemented = 'NotImplemented'
-    //InMemoryDataNotReady - waiting for sync
-    //Search Not ready
-    //Search Not Initialized
-}
-
-export interface SearchModuleError {
-    type: SyncErrorType;
-    name?: string;
-    message?: string;
-    stack?: string;
-    httpStatusCode?: number;
-    url?: string;
-    properties?: Record<string, unknown>;
-}

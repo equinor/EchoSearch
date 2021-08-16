@@ -7,7 +7,7 @@ import {
 import { tagsLevTrie } from '../../inMemory/inMemoryTagsLevTrie';
 import { loggerFactory } from '../../logger';
 import { InternalSyncResult } from '../../results/baseResult';
-import { result } from '../../results/createResult2';
+import { result } from '../../results/createResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc } from '../Utils/dateUtils';

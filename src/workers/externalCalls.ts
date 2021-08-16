@@ -17,7 +17,7 @@ import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { Result } from '../results/baseResult';
-import { result } from '../results/createResult2';
+import { result } from '../results/createResult';
 import { NotImplementedError } from '../results/errors';
 import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';

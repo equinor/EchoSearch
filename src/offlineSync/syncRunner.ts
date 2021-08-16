@@ -1,6 +1,6 @@
 import { loggerFactory, LoggerFunctions } from '../logger';
 import { Result } from '../results/baseResult';
-import { result } from '../results/createResult2';
+import { result } from '../results/createResult';
 import { NotInitializedError } from '../results/errors';
 import { SyncSystem } from '../workers/syncSystem';
 import { OfflineSystem, Settings } from './syncSettings';

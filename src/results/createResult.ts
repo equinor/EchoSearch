@@ -1,11 +1,23 @@
 import { BaseError } from '@equinor/echo-base';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
-import { result } from './createResult2';
+import { createError, createResultErrorFromException } from './errors';
 
+const createSuccess = (): Result => {
+    return { isSuccess: true };
+};
 function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
     return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);
 }
+
+export const result = {
+    success: createSuccess,
+    errorFromException: createResultErrorFromException,
+    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
+    error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
+    notImplementedError: (message: string): Result =>
+        createError({ type: SyncErrorType.NotImplemented, message: message })
+};
 
 class SingleValueResult {
     successOrNotFound<T>(value: T | undefined): ResultValue<T> {
