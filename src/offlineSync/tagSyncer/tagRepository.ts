@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { loggerFactory } from '../../logger';
 import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
-import { OfflineSystem } from '../syncSettings';
+import { OfflineSystem } from '../offlineSystem';
 import { TagStatus, TagSummaryDb } from './tagSummaryDb';
 
 const databaseNamePreFix = getDatabaseName(OfflineSystem.Tags);

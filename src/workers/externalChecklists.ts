@@ -7,7 +7,8 @@ import {
     getLocalProCoSysChecklistsGroupedByTagNo
 } from '../offlineSync/checklistsSyncer/checklistsRepository';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
-import { getInstCode, OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { getInstCode, Settings } from '../offlineSync/syncSettings';
 import { ResultValue } from '../results/baseResult';
 import { resultArray, resultValue } from '../results/createResult';
 import { ChecklistDto } from './dataTypes';

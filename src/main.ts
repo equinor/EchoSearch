@@ -4,7 +4,7 @@ import { echoSearchWorker } from './echoWorkerInstance';
 import { Filter } from './inMemory/searchFilter';
 import { logger } from './logger';
 import { logging, LogType } from './loggerOptions';
-import { OfflineSystem } from './offlineSync/syncSettings';
+import { OfflineSystem } from './offlineSync/offlineSystem';
 import { McPackDto } from './workers/dataTypes';
 import { ErrorForTesting } from './workers/externalCalls';
 

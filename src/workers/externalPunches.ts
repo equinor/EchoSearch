@@ -1,9 +1,9 @@
 import { ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
 import { punchesSyncSystem } from '../offlineSync/punchSyncer/punchSyncer';
-import { OfflineSystem } from '../offlineSync/syncSettings';
 import { PunchDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 

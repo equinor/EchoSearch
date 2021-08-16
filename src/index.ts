@@ -1,7 +1,7 @@
 import * as Comlink from 'comlink';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { LogType } from './loggerOptions';
-import { OfflineSystem } from './offlineSync/syncSettings';
+import { OfflineSystem } from './offlineSync/offlineSystem';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
 import { Result, ResultArray, ResultValue, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';

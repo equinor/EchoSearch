@@ -1,14 +1,4 @@
 import { uniq } from 'lodash';
-import { OfflineSystem } from '../syncSettings';
-
-export function createErrorMessage(dataKey: OfflineSystem): { status: number; errors: { NotFound: string } } {
-    return {
-        status: 404,
-        errors: {
-            NotFound: `${dataKey} is not found in offline mode`
-        }
-    };
-}
 
 /**
  * Strips away all special characters as: (-" &@) etc, but keeps all letters and numbers.

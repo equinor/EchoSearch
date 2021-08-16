@@ -3,7 +3,8 @@ import { Result } from '../results/baseResult';
 import { result } from '../results/createResult';
 import { NotInitializedError } from '../results/errors';
 import { SyncSystem } from '../workers/syncSystem';
-import { OfflineSystem, Settings } from './syncSettings';
+import { OfflineSystem } from './offlineSystem';
+import { Settings } from './syncSettings';
 import { getMaxDate, minusOneDay } from './Utils/dateUtils';
 import { asyncUsing } from './Utils/usingDisposable';
 

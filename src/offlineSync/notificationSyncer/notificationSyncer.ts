@@ -2,7 +2,8 @@ import { inMemoryNotificationsInstance } from '../../inMemory/inMemoryNotificati
 import { loggerFactory } from '../../logger';
 import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
-import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
+import { OfflineSystem } from '../offlineSystem';
+import { getInstCode, Settings } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
 import { apiAllNotifications, apiUpdatedNotifications, NotificationDb } from './notificationApi';
 import { notificationsAdministrator, notificationsRepositoryTransaction } from './notificationRepository';

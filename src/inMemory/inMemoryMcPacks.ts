@@ -1,5 +1,5 @@
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';

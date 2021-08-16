@@ -1,7 +1,8 @@
 import { InMemoryInterface } from '../inMemory/inMemoryData';
 import { logger, LoggerFunctions } from '../logger';
 import { DatabaseAdministrator } from '../offlineSync/offlineDataDexieBase';
-import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { Settings } from '../offlineSync/syncSettings';
 import { InternalSyncResult } from '../results/baseResult';
 import { ArgumentDateError } from '../results/errors';
 

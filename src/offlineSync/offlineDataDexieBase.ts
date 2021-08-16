@@ -3,8 +3,8 @@ import { logger, LoggerFunctions } from '../logger';
 import { ResultArray, ResultValue } from '../results/baseResult';
 import { resultArray, resultValue } from '../results/createResult';
 import { DbError, NotInitializedError, SyncCanceledError } from '../results/errors';
+import { OfflineSystem } from './offlineSystem';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
-import { OfflineSystem } from './syncSettings';
 import { isNullOrEmpty } from './Utils/stringExtensions';
 import { chunkArray } from './Utils/util';
 

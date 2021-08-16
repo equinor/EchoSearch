@@ -1,5 +1,5 @@
 import { NotificationDto, ResultValues } from '..';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { resultArray } from '../results/createResult';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';

@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { OfflineSystem } from './syncSettings';
+import { OfflineSystem } from './offlineSystem';
 
 const log = logger('Verification');
 export async function verifyCount(

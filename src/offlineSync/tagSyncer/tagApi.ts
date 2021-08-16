@@ -63,8 +63,7 @@ export async function apiUpdatedTags(
     const date = dateAsApiString(fromDate);
     const url = `${getApiBaseUrl()}/${instCode}/tags?updatedSince=${date}&take=5000000`;
 
-    const tags = await _tagsApiFetcher.fetchAll(url, () => getMockedTagsString(50000), abortSignal);
-    return tags;
+    return await _tagsApiFetcher.fetchAll(url, () => getMockedTagsString(50000), abortSignal);
 }
 
 export async function searchTagsOnline(

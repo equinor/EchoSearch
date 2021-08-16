@@ -1,6 +1,6 @@
 import Dexie from 'dexie';
 import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
-import { OfflineSystem } from '../syncSettings';
+import { OfflineSystem } from '../offlineSystem';
 import { NotificationDb } from './notificationApi';
 
 const databaseNamePreFix = getDatabaseName(OfflineSystem.Notifications);

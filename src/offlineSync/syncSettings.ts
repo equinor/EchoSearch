@@ -1,6 +1,7 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
 import { logger } from '../logger';
 import { NotInitializedError } from '../results/errors';
+import { OfflineSystem } from './offlineSystem';
 import { ObservableState, ObservableStateReadonly } from './Utils/observableState';
 import { dateAsApiString } from './Utils/stringUtils';
 
@@ -255,16 +256,4 @@ interface OfflineSettingState {
     readonly isEnabled: boolean;
     readonly newestItemDate?: Date;
     readonly lastSyncedAtDate?: Date;
-}
-
-//TODO move to file
-export enum OfflineSystem {
-    Tags = 'Tags',
-    Documents = 'Documents',
-    Punches = 'Punches',
-    Checklist = 'Checklist',
-    CommPack = 'CommPack',
-    McPack = 'McPack',
-    Notifications = 'Notifications',
-    WorkOrders = 'WorkOrders'
 }

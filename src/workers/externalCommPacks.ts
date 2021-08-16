@@ -4,7 +4,7 @@ import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
 import { CommPackDb, commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { SearchSystem } from './searchSystem';
 
 let _commPacksSearchSystem: SearchSystem<CommPackDb>;

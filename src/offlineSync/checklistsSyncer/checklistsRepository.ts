@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { chain, Dictionary } from 'lodash';
 import { DatabaseAdministrator, getDatabaseName, OfflineDataDexieBase, Repository } from '../offlineDataDexieBase';
-import { OfflineSystem } from '../syncSettings';
+import { OfflineSystem } from '../offlineSystem';
 import { ChecklistDb } from './checklistsApi';
 
 const databaseNamePreFix = getDatabaseName(OfflineSystem.Checklist);

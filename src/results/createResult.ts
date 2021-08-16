@@ -1,5 +1,5 @@
 import { BaseError } from '@equinor/echo-base';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { Result, ResultArray, ResultValue, SyncErrorType } from './baseResult';
 import { createError, createResultErrorFromException } from './errors';
 

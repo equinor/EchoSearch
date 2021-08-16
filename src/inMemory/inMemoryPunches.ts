@@ -1,5 +1,5 @@
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
-import { OfflineSystem } from '../offlineSync/syncSettings';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';

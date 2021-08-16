@@ -1,5 +1,5 @@
 import { getDocumentKey } from '../offlineSync/documentsSyncer/documentDb';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { DocumentSummaryDto } from '../workers/dataTypes';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';

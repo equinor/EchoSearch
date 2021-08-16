@@ -1,5 +1,6 @@
 import { loggerFactory } from '../logger';
-import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { Settings } from '../offlineSync/syncSettings';
 import { getInMemoryTagsSorted } from './inMemoryTags';
 import { tagsLevTrie } from './inMemoryTagsLevTrie';
 

@@ -94,6 +94,5 @@ async function getUpdatedDocumentsFromApi(
     const date = dateAsApiString(fromDate);
     const url = `${getApiBaseUrl()}/${instCode}/documents/diagrams?updatedSince=${date}&take=99000000`;
 
-    const documents = await documentsApiFetcher.fetchAll(url, () => getMockedDocumentString(50000), abortSignal);
-    return documents;
+    return await documentsApiFetcher.fetchAll(url, () => getMockedDocumentString(50000), abortSignal);
 }

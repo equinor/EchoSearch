@@ -3,7 +3,7 @@ import { inMemory } from '../inMemory/inMemoryExports';
 import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { loggerFactory } from '../logger';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';

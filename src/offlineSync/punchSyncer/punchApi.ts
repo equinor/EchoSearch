@@ -2,8 +2,9 @@ import { apiFetch } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { verifyCount } from '../dataVerification';
 import { notificationsApi } from '../notificationSyncer/notificationApi';
+import { OfflineSystem } from '../offlineSystem';
 import { orEmpty, toDateOrThrowError, toDateOrUndefined, toNumber } from '../stringUtils';
-import { getApiBaseUrl, OfflineSystem } from '../syncSettings';
+import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { mockedOpenClosedRejectedAndRandomPunches, mockedOpenClosedRejectedPunches } from './punchesMocked';
 

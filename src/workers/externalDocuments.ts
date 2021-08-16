@@ -4,7 +4,7 @@ import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
 import { DocumentSummaryKey, getDocumentKey } from '../offlineSync/documentsSyncer/documentDb';
 import { documentsSyncSystem } from '../offlineSync/documentsSyncer/documentsSyncer';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { DocumentSummaryDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 

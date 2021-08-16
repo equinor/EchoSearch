@@ -3,7 +3,7 @@ import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryNotificationsInstance, searchInMemoryNotificationsByTagNos } from '../inMemory/inMemoryNotifications';
 import { Filter } from '../inMemory/searchFilter';
 import { notificationsSyncSystem } from '../offlineSync/notificationSyncer/notificationSyncer';
-import { OfflineSystem } from '../offlineSync/syncSettings';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { SearchSystem } from './searchSystem';
 
 let _notificationsSearchSystem: SearchSystem<NotificationDto>;
