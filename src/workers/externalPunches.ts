@@ -1,4 +1,4 @@
-import { SearchResult, SearchResults } from '..';
+import { ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { Filter } from '../inMemory/searchFilter';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
@@ -22,18 +22,18 @@ export async function search(
     searchText: string,
     maxHits: number,
     tryToApplyFilter?: Filter<PunchDto>
-): Promise<SearchResults<PunchDto>> {
+): Promise<ResultValues<PunchDto>> {
     return await _punchSearchSystem.search(
         async () => inMemory.Punches.search(searchText, maxHits, tryToApplyFilter),
         async () => []
     );
 }
 
-export async function lookup(id: string): Promise<SearchResult<PunchDto>> {
+export async function lookup(id: string): Promise<ResultValue<PunchDto>> {
     return await punchesRepository().get(id);
 }
 
-export async function lookupAll(ids: string[]): Promise<SearchResults<PunchDto>> {
+export async function lookupAll(ids: string[]): Promise<ResultValues<PunchDto>> {
     return await punchesRepository().bulkGet(ids);
 }
 

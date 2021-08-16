@@ -1,8 +1,9 @@
-import { ArgumentDateError, InternalSyncResult } from '../baseResult';
 import { InMemoryInterface } from '../inMemory/inMemoryData';
 import { logger, LoggerFunctions } from '../logger';
 import { DatabaseAdministrator } from '../offlineSync/offlineDataDexieBase';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { InternalSyncResult } from '../results/baseResult';
+import { ArgumentDateError } from '../results/errors';
 
 export class SyncSystem<T> {
     private log: LoggerFunctions;
@@ -90,14 +91,13 @@ export class SyncSystem<T> {
     async clearAllData(): Promise<void> {
         this.cancelSync();
         await this._databaseAdministrator.deleteAndRecreate();
-        this.ClearSettings(this._offlineSystemKey);
+        this.clearSettings(this._offlineSystemKey);
         this._inMemoryData?.clearData();
         this.log.trace('Finished clearing data');
     }
 
-    private ClearSettings(offlineSystemKey: OfflineSystem): void {
-        const settings = Settings.createDefaultSettings(offlineSystemKey);
-        Settings.save(settings);
+    private clearSettings(offlineSystemKey: OfflineSystem): void {
+        Settings.resetSetting(offlineSystemKey);
     }
 
     cancelSync(): void {

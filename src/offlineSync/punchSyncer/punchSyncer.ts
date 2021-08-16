@@ -1,6 +1,6 @@
-import { InternalSyncResult } from '../../baseResult';
 import { inMemoryPunchesInstance } from '../../inMemory/inMemoryPunches';
 import { loggerFactory } from '../../logger';
+import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { Repository } from '../offlineDataDexieBase';
 import { getInstCode, OfflineSystem, Settings } from '../syncSettings';

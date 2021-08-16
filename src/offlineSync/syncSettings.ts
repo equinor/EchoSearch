@@ -1,6 +1,8 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
-import { NotInitializedError } from '../baseResult';
 import { logger } from '../logger';
+import { NotInitializedError } from '../results/errors';
+import { ObservableState, ObservableStateReadonly } from './Utils/observableState';
+import { dateAsApiString } from './Utils/stringUtils';
 
 const log = logger('SyncSettings');
 let _baseApiUrl: string | undefined = undefined;
@@ -22,7 +24,7 @@ function setApiBaseUrl(baseUrl: string): void {
  * ideally this should be local storage
  */
 class SettingsDexieDB extends Dexie {
-    offlineStatus: Dexie.Table<OfflineSettingItem, OfflineSystem>;
+    offlineStatus: Dexie.Table<OfflineSettingState, OfflineSystem>;
     settings: Dexie.Table<string, string>;
     constructor() {
         super('echoSearchSettings');
@@ -54,15 +56,16 @@ async function getInstCodeOrUndefinedAsync(): Promise<string | undefined> {
     if (_instCode) {
         return _instCode;
     }
-    return await instance().settings.get('instCode');
+    _instCode = await dbInstance().settings.get('instCode');
+    return _instCode;
 }
 
 async function saveInstCode(instCodeArg: string): Promise<void> {
-    await instance()?.settings.put(instCodeArg, 'instCode');
     _instCode = instCodeArg;
+    await dbInstance()?.settings.put(instCodeArg, 'instCode');
 }
 
-function instance(): SettingsDexieDB {
+function dbInstance(): SettingsDexieDB {
     if (_settingsDexieDb !== undefined) {
         return _settingsDexieDb;
     }
@@ -71,128 +74,190 @@ function instance(): SettingsDexieDB {
     return db;
 }
 
-async function saveToRepository(offlineSettingItem: OfflineSettingItem): Promise<void> {
-    await instance().offlineStatus.put(offlineSettingItem);
+async function saveToRepository(offlineSettingItem: ObservableSetting): Promise<void> {
+    const dbItemToSave = mapToState(offlineSettingItem);
+    await dbInstance().offlineStatus.put(dbItemToSave);
 
-    log.create(offlineSettingItem.offlineSystemKey).debug(
+    log.create(dbItemToSave.offlineSystemKey).debug(
         `settings done saving. IsEnabled:`,
-        offlineSettingItem.isEnabled,
-        offlineSettingItem.lastSyncedAtDate?.toISOString(),
-        offlineSettingItem.newestItemDate?.toISOString()
+        dbItemToSave.isEnabled,
+        dbItemToSave.lastSyncedAtDate ? dateAsApiString(dbItemToSave.lastSyncedAtDate) : undefined,
+        dbItemToSave.newestItemDate ? dateAsApiString(dbItemToSave.newestItemDate) : undefined
     );
 }
 
 async function loadOfflineSettings(): Promise<void> {
-    const settings = await instance().offlineStatus.toArray();
-    settings.forEach((setting) => {
-        _dictionary[setting.offlineSystemKey] = setting;
-    });
+    if (_state) {
+        log.warn('Settings has already been loaded, returning');
+    }
+    const settings = await dbInstance().offlineStatus.toArray();
+    log.trace('Loaded offline settings from db, now saving to state', settings);
+    _state = new SettingsState(settings);
 
     const instCodeArg = await getInstCodeOrUndefinedAsync();
     _instCode = instCodeArg ?? '';
     log.debug('instCode loaded:', _instCode);
+}
 
-    AddMissingSettings();
+function mapToState(from: ObservableSetting): OfflineSettingState {
+    return {
+        isEnabled: from.isEnabled.getValue(),
+        offlineSystemKey: from.offlineSystemKey,
+        lastSyncedAtDate: from.lastSyncedAtDate,
+        newestItemDate: from.newestItemDate
+    };
 }
 
 /**
  * END Settings Repository
  */
 
-const _dictionary: Record<string, OfflineSettingItem> = {};
+class SettingsState {
+    private _stateDictionary: Record<string, ObservableSetting> = {};
+    private _isInitializing: boolean;
 
-function AddMissingSettings() {
-    for (const item in OfflineSystem) {
-        const hasSetting = _dictionary[item];
-        if (!hasSetting) {
-            _dictionary[item] = Settings.createDefaultSettings(item as OfflineSystem);
+    /**
+     *
+     */
+    constructor(loadedState: OfflineSettingState[]) {
+        this._isInitializing = true;
+        for (const loaded of loadedState) {
+            this.updateObservableSetting(loaded);
         }
+        this._isInitializing = false;
     }
+
+    private getObservableSetting(offlineSystemKey: OfflineSystem): ObservableSetting {
+        const item = this._stateDictionary[offlineSystemKey];
+        if (item) return item;
+
+        if (!this._isInitializing) {
+            log.create(offlineSystemKey).trace('Get - does not exist, creating default');
+        }
+
+        const defaultState = this.createDefaultState(offlineSystemKey);
+        this._stateDictionary[offlineSystemKey] = {
+            offlineSystemKey: offlineSystemKey,
+            isEnabled: new ObservableState(defaultState.isEnabled),
+            newestItemDate: defaultState.newestItemDate,
+            lastSyncedAtDate: defaultState.lastSyncedAtDate
+        };
+
+        return this._stateDictionary[offlineSystemKey];
+    }
+
+    private updateObservableSetting(newSettings: OfflineSettingState) {
+        const s = this.getObservableSetting(newSettings.offlineSystemKey);
+        const hasEnabledChanged = !newSettings.isEnabled;
+        s.isEnabled.setValue(newSettings.isEnabled);
+        s.lastSyncedAtDate = hasEnabledChanged ? undefined : newSettings.lastSyncedAtDate;
+        s.newestItemDate = hasEnabledChanged ? undefined : newSettings.newestItemDate;
+        s.offlineSystemKey = newSettings.offlineSystemKey;
+    }
+
+    private createDefaultState(offlineSystemKey: OfflineSystem) {
+        return {
+            offlineSystemKey: offlineSystemKey,
+            isEnabled: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
+            lastSyncedAtDate: undefined,
+            newestItemDate: undefined
+        };
+    }
+
+    get(offlineSystemKey: OfflineSystem): OfflineSettingState {
+        return mapToState(this.getObservableSetting(offlineSystemKey));
+    }
+
+    all(): OfflineSettingState[] {
+        return Object.values(this._stateDictionary).map((item) => mapToState(item));
+    }
+
+    save(settings: OfflineSettingState): void {
+        this.updateObservableSetting(settings);
+        this.fireAndForget(() => saveToRepository(this._stateDictionary[settings.offlineSystemKey]));
+    }
+
+    resetSetting(offlineSystemKey: OfflineSystem): void {
+        const setting = this.createDefaultState(offlineSystemKey);
+        this.save(setting);
+    }
+
+    setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
+        const settings = this.get(offlineSystemKey);
+        if (settings.isEnabled === isEnabled) return;
+        log.create(offlineSystemKey).debug('IsEnabled: ', isEnabled);
+        this.save({ ...this.createDefaultState(offlineSystemKey), isEnabled: isEnabled });
+    }
+
+    getObservable(offlineSystemKey: OfflineSystem): ObservableReadonlySetting {
+        return { isEnabled: this.getObservableSetting(offlineSystemKey).isEnabled };
+    }
+
+    private fireAndForget(asyncFunc: () => Promise<void>): void {
+        asyncFunc();
+    }
+}
+
+let _state: SettingsState | undefined = undefined;
+function stateInstance(): SettingsState {
+    if (!_state) {
+        log.error('Settings has not been loaded yet');
+        throw new NotInitializedError('Settings has not been loaded yet');
+    }
+    return _state;
 }
 
 function isSyncEnabled(offlineSystemKey: OfflineSystem): boolean {
-    const result = _dictionary[offlineSystemKey];
-    return result?.isEnabled === true;
-}
-
-function setIsSyncEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): void {
-    const settings = getSettingsOrThrow(offlineSystemKey);
-    if (isEnabled && settings.isEnabled === isEnabled) return;
-    settings.isEnabled = isEnabled;
-    settings.lastSyncedAtDate = undefined;
-    settings.newestItemDate = undefined;
-    log.create(offlineSystemKey).debug('IsEnabled: ', isEnabled);
-    saveSettings(settings);
+    return stateInstance().get(offlineSystemKey).isEnabled;
 }
 
 function isFullSyncDone(offlineSystemKey: OfflineSystem): boolean {
-    const settings = getSettingsOrThrow(offlineSystemKey);
+    const settings = stateInstance().get(offlineSystemKey);
     return settings.lastSyncedAtDate !== undefined;
 }
 
-function getSettingsOrThrow(offlineSystemKey: OfflineSystem): OfflineSettingItem {
-    const result = _dictionary[offlineSystemKey];
-    if (result) {
-        return { ...result };
-    }
-    throw new NotInitializedError('settings not initialized - bug in code');
-}
-
-function saveSettings(settings: OfflineSettingItem): void {
-    _dictionary[settings.offlineSystemKey] = settings;
-    fireAndForget(() => saveToRepository(settings));
-}
-
-function fireAndForget(asyncFunc: () => Promise<void>): void {
-    asyncFunc();
-}
-
-function createDefaultSettings(offlineSystemKey: OfflineSystem): OfflineSettingItem {
-    return {
-        offlineSystemKey: offlineSystemKey,
-        isEnabled: offlineSystemKey === OfflineSystem.Tags || offlineSystemKey === OfflineSystem.Documents,
-        newestItemDate: undefined,
-        lastSyncedAtDate: undefined
-    };
-}
-
-function allSettings(): Readonly<OfflineSettingItem>[] {
-    const all = Object.values(_dictionary);
-    return all.map((item) => cloneReadOnly(item));
-}
-
-function cloneReadOnly(offlineSettingItem: OfflineSettingItem): Readonly<OfflineSettingItem> {
-    return { ...offlineSettingItem } as const;
-}
-
 export const Settings = {
-    createDefaultSettings,
+    resetSetting: (offlineSystemKey: OfflineSystem): void => stateInstance().resetSetting(offlineSystemKey),
     loadOfflineSettings,
 
-    save: saveSettings,
-    get: getSettingsOrThrow,
-    all: allSettings,
+    save: (settings: OfflineSettingState): void => stateInstance().save(settings),
+    get: (offlineSystemKey: OfflineSystem): OfflineSettingState => stateInstance().get(offlineSystemKey),
+    getObservable: (offlineSystemKey: OfflineSystem): ObservableReadonlySetting =>
+        stateInstance().getObservable(offlineSystemKey),
+    all: (): OfflineSettingState[] => stateInstance().all(),
 
     saveInstCode,
     getInstCode,
-
     getInstCodeOrUndefinedAsync,
 
     isSyncEnabled,
-    setIsSyncEnabled,
+    setIsSyncEnabled: (offlineSystemKey: OfflineSystem, isEnabled: boolean): void =>
+        stateInstance().setIsSyncEnabled(offlineSystemKey, isEnabled),
 
     isFullSyncDone,
 
     setApiBaseUrl
 };
 
-export interface OfflineSettingItem {
+interface ObservableReadonlySetting {
+    isEnabled: ObservableStateReadonly<boolean>;
+}
+
+interface ObservableSetting {
     offlineSystemKey: OfflineSystem;
-    isEnabled: boolean;
+    isEnabled: ObservableState<boolean>;
     newestItemDate?: Date;
     lastSyncedAtDate?: Date;
 }
 
+interface OfflineSettingState {
+    readonly offlineSystemKey: OfflineSystem;
+    readonly isEnabled: boolean;
+    readonly newestItemDate?: Date;
+    readonly lastSyncedAtDate?: Date;
+}
+
+//TODO move to file
 export enum OfflineSystem {
     Tags = 'Tags',
     Documents = 'Documents',

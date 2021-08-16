@@ -1,9 +1,10 @@
-import { InternalSyncResult } from '../../baseResult';
 import { loggerFactory } from '../../logger';
+import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
 import { commPacksApi } from '../commPacksSyncer/commPacksApi';
 import { getInstCode, OfflineSystem, Settings } from '../syncSettings';
 import { getMaxDateFunc, minusOneDay } from '../Utils/dateUtils';
+import { UnsubscribeFunction } from '../Utils/observableState';
 import { ChecklistDb, checklistsApi } from './checklistsApi';
 import { checklistsAdministrator, checklistsRepository } from './checklistsRepository';
 
@@ -16,26 +17,34 @@ export const checklistsSyncSystem = new SyncSystem(
     async (abortSignal) => syncFullChecklistsWithPagination(abortSignal),
     async (lastChangedDate, abortSignal) => syncUpdateChecklists(lastChangedDate, abortSignal)
 );
-export async function setChecklistsIsEnabled(isEnabled: boolean): Promise<void> {
-    Settings.setIsSyncEnabled(OfflineSystem.Checklist, isEnabled);
 
-    if (!isEnabled) {
-        checklistsAdministrator().deleteAndRecreate();
-    }
-}
-
-let resumableCommPackNos: string[] = [] as string[]; //TODO clear on syncEnabled is set to false
+let resumableCommPackNos: string[] = [] as string[];
 let resumableFullSyncStartedAt = new Date();
 
-async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSignal) {
+async function getCommPackNoStartsWith(instCode: string, abortSignal: AbortSignal): Promise<string[]> {
+    if (checklistsApi.state.isMockEnabled) {
+        return ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19'];
+    }
     const commPackNos = await commPacksApi.allCommPackNos(instCode, abortSignal);
     return Array.from(new Set(commPackNos.map((commPackNo) => commPackNo.slice(0, 2))));
 }
+
+function onIsEnabledChanged(): void {
+    log.trace('is enabled changed, clearing resumableCommPackNos');
+    resumableCommPackNos = [];
+}
+
+let isEnabledUnsubscribe: UnsubscribeFunction | undefined = undefined;
 
 async function syncFullChecklistsWithPagination(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const instCode = getInstCode();
     let checklistCount = 0;
     const performance = log.performance();
+
+    if (!isEnabledUnsubscribe)
+        isEnabledUnsubscribe = Settings.getObservable(OfflineSystem.Checklist).isEnabled.subscribeOnlyChanged(() =>
+            onIsEnabledChanged()
+        );
 
     let commPackNoStartsWith = [...resumableCommPackNos];
     if (resumableCommPackNos.length === 0) {

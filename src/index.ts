@@ -1,15 +1,14 @@
 import * as Comlink from 'comlink';
-import { Result, SyncErrorType } from './baseResult';
 import { echoSearchWorker } from './echoWorkerInstance';
-import { SearchResult, SearchResults } from './inMemory/searchResult';
 import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
+import { Result, ResultArray, ResultValue, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
 export type { Result };
-export type { SearchResult, SearchResults };
+export type { ResultValue, ResultArray as ResultValues };
 export type { TagStatus, TagSummaryDto };
 export type { McPackDto, CommPackDto, NotificationDto, PunchDto };
 
@@ -42,6 +41,12 @@ const searchPunches = {
     searchAsync: echoSearchWorker.searchPunches,
     getAsync: echoSearchWorker.lookupPunchAsync,
     getAllAsync: echoSearchWorker.lookupPunchesAsync
+};
+
+const searchCheckLists = {
+    searchAsync: echoSearchWorker.searchChecklists,
+    getAsync: echoSearchWorker.lookupChecklistAsync,
+    getAllAsync: echoSearchWorker.lookupChecklistsAsync
 };
 
 const searchMcPacks = {
@@ -97,6 +102,7 @@ export const Search = {
     Tags: searchTags,
     Documents: searchDocuments,
     Punch: searchPunches,
+    Checklists: searchCheckLists,
     McPacks: searchMcPacks,
     CommPacks: searchCommPacks,
     Notifications: searchNotifications,

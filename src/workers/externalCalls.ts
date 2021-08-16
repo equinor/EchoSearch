@@ -1,6 +1,6 @@
 import { NotFoundError } from '@equinor/echo-base';
-import { NotImplementedError, result, Result } from '../baseResult';
 import { logger } from '../logger';
+import { checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { commPacksSyncSystem } from '../offlineSync/commPacksSyncer/commPacksSyncer';
@@ -16,6 +16,9 @@ import { runSync } from '../offlineSync/syncRunner';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
+import { Result } from '../results/baseResult';
+import { result } from '../results/createResult';
+import { NotImplementedError } from '../results/errors';
 import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';
@@ -153,6 +156,7 @@ function externalToggleMockData(): void {
     mcPacksApi.state.toggleMock();
     commPacksApi.state.toggleMock();
     punchesApi.state.toggleMock();
+    checklistsApi.state.toggleMock();
     tagsApi.state.toggleMock();
     documentsApi.state.toggleMock();
     notificationsApi.state.toggleMock();
@@ -165,6 +169,8 @@ function externalToggleMockData(): void {
         mcPacksApi.state.isMockEnabled,
         'punches',
         punchesApi.state.isMockEnabled,
+        'checklists',
+        checklistsApi.state.isMockEnabled,
         'notifications',
         notificationsApi.state.isMockEnabled,
         'notifications failureRate',

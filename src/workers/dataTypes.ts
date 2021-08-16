@@ -1,3 +1,4 @@
+import { ChecklistDb } from '../offlineSync/checklistsSyncer/checklistsApi';
 import { CommPackDb } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { DocumentSummaryDb } from '../offlineSync/documentsSyncer/documentDb';
 import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
@@ -10,9 +11,13 @@ export type DocumentSummaryDto = DocumentSummaryDb;
 export type McPackDto = McPackDb;
 export type CommPackDto = CommPackDb;
 
+export type ChecklistDto = ChecklistDb;
+
+// export type NotificationDto = Readonly<NotificationDb>; //TODO ask Chris
+
 export interface NotificationDto extends NotificationDb {
     //TODO Ove fix dto
     dummy?: number;
 }
-//export type NotificationDto = NotificationDb;
+
 export type PunchDto = PunchDb;

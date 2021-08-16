@@ -1,17 +1,18 @@
 import * as Comlink from 'comlink';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
-import { result, Result, ResultValue } from '../baseResult';
 import { Filter } from '../inMemory/searchFilter';
-import { SearchResult, SearchResults } from '../inMemory/searchResult';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
+import { Result, ResultArray, ResultValue } from '../results/baseResult';
+import { result, resultValue } from '../results/createResult';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
-import { DocumentSummaryDto } from './dataTypes';
+import { ChecklistDto, DocumentSummaryDto } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
+import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
 import { externalDocuments } from './externalDocuments';
 import { externalMcPacks } from './externalMcPacks';
@@ -48,18 +49,18 @@ export interface EchoWorker {
     initialize(): Promise<Result>;
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
-    searchTags(searchText: string, maxHits: number): Promise<SearchResults<TagSummaryDto>>;
-    searchForClosestTagNo(tagNo: string): Promise<SearchResult<string>>;
-    lookupTagAsync(tagNo: string): Promise<SearchResult<TagSummaryDto>>;
-    lookupTagsAsync(tagNos: string[]): Promise<SearchResults<TagSummaryDto>>;
+    searchTags(searchText: string, maxHits: number): Promise<ResultArray<TagSummaryDto>>;
+    searchForClosestTagNo(tagNo: string): Promise<ResultValue<string>>;
+    lookupTagAsync(tagNo: string): Promise<ResultValue<TagSummaryDto>>;
+    lookupTagsAsync(tagNos: string[]): Promise<ResultArray<TagSummaryDto>>;
 
     searchDocumentsAsync(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<DocumentSummaryDto>
-    ): Promise<SearchResults<DocumentSummaryDto>>;
-    lookupDocumentAsync(id: DocumentSummaryKey): Promise<SearchResult<DocumentSummaryDto>>;
-    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<SearchResults<DocumentSummaryDto>>;
+    ): Promise<ResultArray<DocumentSummaryDto>>;
+    lookupDocumentAsync(id: DocumentSummaryKey): Promise<ResultValue<DocumentSummaryDto>>;
+    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<ResultArray<DocumentSummaryDto>>;
 
     /**
      * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
@@ -71,35 +72,45 @@ export interface EchoWorker {
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<McPackDto>
-    ): Promise<SearchResults<McPackDto>>;
-    lookupMcPackAsync(tagNo: number): Promise<SearchResult<McPackDto>>;
-    lookupMcPacksAsync(tagNos: number[]): Promise<SearchResults<McPackDto>>;
+    ): Promise<ResultArray<McPackDto>>;
+    lookupMcPackAsync(tagNo: number): Promise<ResultValue<McPackDto>>;
+    lookupMcPacksAsync(tagNos: number[]): Promise<ResultArray<McPackDto>>;
 
     searchCommPacks(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<CommPackDto>
-    ): Promise<SearchResults<CommPackDto>>;
-    lookupCommPackAsync(tagNo: number): Promise<SearchResult<CommPackDto>>;
-    lookupCommPacksAsync(tagNos: number[]): Promise<SearchResults<CommPackDto>>;
+    ): Promise<ResultArray<CommPackDto>>;
+    lookupCommPackAsync(tagNo: number): Promise<ResultValue<CommPackDto>>;
+    lookupCommPacksAsync(tagNos: number[]): Promise<ResultArray<CommPackDto>>;
 
     searchPunches(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<SearchResults<PunchDto>>;
-    lookupPunchAsync(tagNo: string): Promise<SearchResult<PunchDto>>;
-    lookupPunchesAsync(tagNos: string[]): Promise<SearchResults<PunchDto>>;
+    ): Promise<ResultArray<PunchDto>>;
+    lookupPunchAsync(tagNo: string): Promise<ResultValue<PunchDto>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<ResultArray<PunchDto>>;
+
+    searchChecklists(
+        tagNo?: string,
+        commPackNo?: string,
+        mcPackNo?: string,
+        tagProjectName?: string,
+        maxHits?: number
+    ): Promise<ResultArray<ChecklistDto>>;
+    lookupChecklistAsync(tagNo: number): Promise<ResultValue<ChecklistDto>>;
+    lookupChecklistsAsync(tagNos: number[]): Promise<ResultArray<ChecklistDto>>;
 
     searchNotifications(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<SearchResults<NotificationDto>>;
-    searchNotificationsByTagNos(tagNos: string[]): Promise<SearchResults<NotificationDto>>;
+    ): Promise<ResultArray<NotificationDto>>;
+    searchNotificationsByTagNos(tagNos: string[]): Promise<ResultArray<NotificationDto>>;
 
-    lookupNotificationAsync(maintenanceRecordId: string): Promise<SearchResult<NotificationDto>>;
-    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<SearchResults<NotificationDto>>;
+    lookupNotificationAsync(maintenanceRecordId: string): Promise<ResultValue<NotificationDto>>;
+    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<ResultArray<NotificationDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<Result>;
 
@@ -162,6 +173,10 @@ const echoWorker: EchoWorker = {
     lookupPunchAsync: (...args) => tryCatchToResult(() => externalPunches.lookup(...args)),
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
 
+    searchChecklists: (...args) => tryCatchToResult(() => externalChecklists.search(...args)),
+    lookupChecklistAsync: (...args) => tryCatchToResult(() => externalChecklists.lookup(...args)),
+    lookupChecklistsAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupAll(...args)),
+
     searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
     searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),
     lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications.lookup(...args)),
@@ -172,7 +187,7 @@ const echoWorker: EchoWorker = {
     cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
     setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
     isEnabledAsync: async (...args) =>
-        tryCatchToResult(async () => result.valueSuccess(syncContract.isEnabled(...args))),
+        tryCatchToResult(async () => resultValue.successOrNotFound(syncContract.isEnabled(...args))),
 
     setFailureRateAsync: (...args) => syncContract.externalSetFailureRate(...args),
 

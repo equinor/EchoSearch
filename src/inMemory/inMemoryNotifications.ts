@@ -1,9 +1,9 @@
-import { NotificationDto } from '..';
+import { NotificationDto, ResultValues } from '..';
 import { OfflineSystem } from '../offlineSync/syncSettings';
+import { resultArray } from '../results/createResult';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';
-import { SearchResults, searchResults } from './searchResult';
 
 //Notifications init
 const inMemoryDbNotifications: InMemoryData<NotificationDto, string> = new InMemoryData<NotificationDto, string>(
@@ -39,6 +39,6 @@ export function searchInMemoryNotificationsWithText(
     );
 }
 
-export function searchInMemoryNotificationsByTagNos(tagNos: string[]): SearchResults<NotificationDto> {
-    return searchResults.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
+export function searchInMemoryNotificationsByTagNos(tagNos: string[]): ResultValues<NotificationDto> {
+    return resultArray.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
 }

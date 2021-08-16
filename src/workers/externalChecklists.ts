@@ -1,45 +1,74 @@
-import { SearchResult, SearchResults } from '..';
-import { searchResult, searchResults } from '../inMemory/searchResult';
+import { Dictionary } from 'lodash';
+import { ResultValues } from '..';
+import { ChecklistDb, checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
+import {
+    checklistsRepository,
+    checklistsSearchDb,
+    getLocalProCoSysChecklistsGroupedByTagNo
+} from '../offlineSync/checklistsSyncer/checklistsRepository';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
+import { getInstCode, OfflineSystem, Settings } from '../offlineSync/syncSettings';
+import { ResultValue } from '../results/baseResult';
+import { resultArray, resultValue } from '../results/createResult';
 import { ChecklistDto } from './dataTypes';
+import { SearchSystem } from './searchSystem';
 
-// let _checklistsSearchSystem: SearchSystem<ChecklistDb>;
+let _checklistsSearchSystem: SearchSystem<ChecklistDb>;
+const checklistKey = OfflineSystem.Checklist;
 
 async function initTask(): Promise<void> {
     const initChecklistTask = checklistsSyncSystem.initTask();
 
-    // _checklistsSearchSystem = new SearchSystem<ChecklistDb>(OfflineSystem.Checklist, initChecklistTask, () =>
-    //     inMemory.Checklists.isReady()
-    // );
+    _checklistsSearchSystem = new SearchSystem<ChecklistDb>(checklistKey, initChecklistTask, () =>
+        Settings.isFullSyncDone(checklistKey)
+    );
 
     return await initChecklistTask;
 }
-// async function search(
-//     searchText: string,
-//     maxHits: number,
-//     tryToApplyFilter?: Filter<ChecklistDto>
-// ): Promise<SearchResults<ChecklistDto>> {
-//     // return await _checklistsSearchSystem.search(
-//     //     async () => [], //inMemory.Checklists.search(searchText, maxHits, tryToApplyFilter),
-//     //     async () => [] //checklistsApi.search(searchText, maxHits, tryToApplyFilter?.projectName)
-//     // );
-//     return searchResults.successOrEmpty([]);
-// }
-async function lookup(id: number): Promise<SearchResult<ChecklistDto>> {
-    //return await checklistsRepository().get(id);
-    console.log('id', id);
-    return searchResult.successOrNotFound<ChecklistDto>(undefined);
+
+async function search(
+    tagNo?: string,
+    commPackNo?: string,
+    mcPackNo?: string,
+    tagProjectName?: string,
+    maxHits = 500
+): Promise<ResultValues<ChecklistDto>> {
+    return await _checklistsSearchSystem.search(
+        async () => await checklistsSearchDb(tagNo, commPackNo, mcPackNo, tagProjectName, maxHits),
+        async () =>
+            checklistsApi.search(
+                getInstCode(),
+                { tagNo, commPackNo, mcPackNo, projectCode: tagProjectName },
+                undefined,
+                maxHits
+            )
+    );
+}
+async function lookup(id: number): Promise<ResultValue<ChecklistDto>> {
+    return Settings.isFullSyncDone(checklistKey)
+        ? await checklistsRepository().get(id)
+        : resultValue.syncNotEnabledError(checklistKey);
 }
 
-async function lookupAll(ids: number[]): Promise<SearchResults<ChecklistDto>> {
-    console.log('ids', ids);
-    //return checklistsRepository().bulkGet(ids);
-    return searchResults.successOrEmpty([]);
+async function lookupAll(ids: number[]): Promise<ResultValues<ChecklistDto>> {
+    return Settings.isFullSyncDone(checklistKey)
+        ? checklistsRepository().bulkGet(ids)
+        : resultArray.syncNotEnabledError(checklistKey);
+}
+
+async function lookupGroupByTagNos(tagNos: string[]): Promise<ResultValue<Dictionary<ChecklistDb[]>>> {
+    if (!Settings.isFullSyncDone(checklistKey)) {
+        return resultValue.syncNotEnabledError(checklistKey);
+    }
+
+    const results = await getLocalProCoSysChecklistsGroupedByTagNo(tagNos);
+    return resultValue.successOrNotFound(results);
 }
 
 export const externalChecklists = {
     initTask,
-    //search,
+    search,
     lookup,
-    lookupAll
+    lookupAll,
+    lookupGroupByTagNos
 };

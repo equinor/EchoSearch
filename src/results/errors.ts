@@ -6,40 +6,23 @@ import {
     NotFoundError,
     UnauthorizedError
 } from '@equinor/echo-base';
-
-export interface Result {
-    readonly isSuccess: boolean;
-    readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
-}
-
-export interface ResultValue<T> extends Result {
-    readonly isSuccess: boolean;
-    readonly value?: T;
-    readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
-}
-
-export interface InternalSyncResult extends Result {
-    newestItemDate?: Date;
-    itemsSyncedCount: number;
-}
+import { Result, SearchModuleError, SyncErrorType } from './baseResult';
 
 export class SyncError extends BaseError {
     constructor(message: string, exception?: Error) {
         super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
     }
 }
-
-export class DbError extends SyncError {}
-
-export class NotImplementedError extends SyncError {}
 export class JsonParseError extends SyncError {}
-
 export class ArgumentError extends SyncError {}
 export class ArgumentDateError extends ArgumentError {}
-
-export class SyncNotEnabledError extends SyncError {}
+export class DbError extends SyncError {}
 
 export class NotInitializedError extends SyncError {}
+
+export class NotImplementedError extends SyncError {}
+
+export class SyncNotEnabledError extends SyncError {}
 
 export class SyncCanceledError extends SyncError {
     constructor(message: string) {
@@ -48,19 +31,11 @@ export class SyncCanceledError extends SyncError {
     }
 }
 
-const createSuccess = (): Result => {
-    return { isSuccess: true };
-};
-
-function createValueSuccess<T>(value: T): ResultValue<T> {
-    return { isSuccess: true, value };
-}
-
-const createError = (error: SearchModuleError): Result => {
+export const createError = (error: SearchModuleError): Result => {
     return { isSuccess: false, error };
 };
 
-function createResultErrorFromException<T extends Result>(error: Error | BaseError): T {
+export function createResultErrorFromException<T extends Result>(error: Error | BaseError): T {
     let errorType = SyncErrorType.Unknown;
 
     if (error instanceof SyncCanceledError) errorType = SyncErrorType.SyncCanceled;
@@ -89,35 +64,4 @@ function createResultErrorFromException<T extends Result>(error: Error | BaseErr
     };
 
     return createError(searchModuleError) as T;
-}
-
-export const result = {
-    success: createSuccess,
-    valueSuccess: createValueSuccess,
-    errorFromException: createResultErrorFromException,
-    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
-    notImplementedError: (message: string): Result =>
-        createError({ type: SyncErrorType.NotImplemented, message: message })
-};
-
-export enum SyncErrorType {
-    Unknown = 'Unknown',
-    NotFound = 'ApiNotFound',
-    Forbidden = 'ApiForbidden',
-    SyncFailed = 'SyncFailed',
-    SyncCanceled = 'SyncCanceled',
-    SyncIsNotEnabled = 'SyncIsNotEnabled',
-    NotInitialized = 'NotInitialized',
-    BugInCode = 'BugInCode',
-    NotImplemented = 'NotImplemented'
-}
-
-export interface SearchModuleError {
-    type: SyncErrorType;
-    name?: string;
-    message?: string;
-    stack?: string;
-    httpStatusCode?: number;
-    url?: string;
-    properties?: Record<string, unknown>;
 }

@@ -1,4 +1,4 @@
-import { ArgumentDateError } from '../baseResult';
+import { ArgumentDateError } from '../results/errors';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values

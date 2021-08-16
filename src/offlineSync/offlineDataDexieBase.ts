@@ -1,7 +1,8 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
-import { DbError, NotInitializedError, SyncCanceledError } from '../baseResult';
-import { SearchResult, searchResult, SearchResults, searchResults } from '../inMemory/searchResult';
 import { logger, LoggerFunctions } from '../logger';
+import { ResultArray, ResultValue } from '../results/baseResult';
+import { resultArray, resultValue } from '../results/createResult';
+import { DbError, NotInitializedError, SyncCanceledError } from '../results/errors';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { OfflineSystem } from './syncSettings';
 import { isNullOrEmpty } from './Utils/stringExtensions';
@@ -36,7 +37,7 @@ export class OfflineDataDexieBase<T> extends Dexie {
     async tryToGet(key: string): Promise<T | undefined> {
         return await tryOrThrow(() => this.table(this.tableName).get(key));
     }
-    async bulkGet(keys: string[]): Promise<T[]> {
+    async bulkGet(keys: string[] | number[]): Promise<T[]> {
         return await tryOrThrow(async () => {
             const items = keys.length > 0 ? await this.table(this.tableName).bulkGet(keys) : [];
             const result = items.filter((item) => item) as T[];
@@ -44,8 +45,8 @@ export class OfflineDataDexieBase<T> extends Dexie {
         });
     }
 
-    async get(key: string): Promise<T | undefined> {
-        if (isNullOrEmpty(key)) return undefined;
+    async get(key: string | number): Promise<T | undefined> {
+        if (typeof key === 'string' && isNullOrEmpty(key)) return undefined;
         return await this.table(this.tableName).get(key);
     }
 
@@ -106,14 +107,14 @@ export class Repository<T> {
         await this.database.bulkDeleteData(keys);
     }
 
-    async bulkGet(keys: string[]): Promise<SearchResults<T>> {
-        const results = await this.database.bulkGet(keys);
-        return searchResults.successOrEmpty(results);
+    async get(key: string | number): Promise<ResultValue<T>> {
+        const result = await this.database.get(key);
+        return resultValue.successOrNotFound(result);
     }
 
-    async get(key: string): Promise<SearchResult<T>> {
-        const result = await this.database.get(key);
-        return searchResult.successOrNotFound(result);
+    async bulkGet(keys: string[] | number[]): Promise<ResultArray<T>> {
+        const results = await this.database.bulkGet(keys);
+        return resultArray.successOrEmpty(results);
     }
 
     /**

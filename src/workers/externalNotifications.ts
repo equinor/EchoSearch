@@ -1,4 +1,4 @@
-import { NotificationDto, SearchResult, SearchResults } from '..';
+import { NotificationDto, ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryNotificationsInstance, searchInMemoryNotificationsByTagNos } from '../inMemory/inMemoryNotifications';
 import { Filter } from '../inMemory/searchFilter';
@@ -23,22 +23,22 @@ async function search(
     searchText: string,
     maxHits: number,
     tryToApplyFilter?: Filter<NotificationDto>
-): Promise<SearchResults<NotificationDto>> {
+): Promise<ResultValues<NotificationDto>> {
     return await _notificationsSearchSystem.search(
         async () => inMemory.Notifications.search(searchText, maxHits, tryToApplyFilter),
         async () => []
     );
 }
 
-async function lookup(id: string): Promise<SearchResult<NotificationDto>> {
+async function lookup(id: string): Promise<ResultValue<NotificationDto>> {
     return inMemoryNotificationsInstance().get(id);
 }
 
-async function lookupAll(ids: string[]): Promise<SearchResults<NotificationDto>> {
+async function lookupAll(ids: string[]): Promise<ResultValues<NotificationDto>> {
     return inMemoryNotificationsInstance().getAll(ids);
 }
 
-async function searchByTagNos(tagNos: string[]): Promise<SearchResults<NotificationDto>> {
+async function searchByTagNos(tagNos: string[]): Promise<ResultValues<NotificationDto>> {
     return searchInMemoryNotificationsByTagNos(tagNos);
 }
 

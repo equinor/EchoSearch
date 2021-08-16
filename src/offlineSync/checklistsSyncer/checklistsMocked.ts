@@ -25,7 +25,7 @@ function createdMocked(): string {
       "formGroupDescription": "Mechanical Completion Check Record",
       "tagNo": "A-7${randomNumberId(1)}MA${randomNumberId(3)}",
       "mcPackNo": "7${randomNumberId(1)}02-R${randomNumberId(3)}",
-      "formTypeDescription": "Check List for Electrical Cables",
+      "formTypeDescription": "Mocked Check List for Electrical Cables",
       "url": "https://www.wikipedia.org/",
       "tagDescription": "CRANE",
       "tagRegisterId": "MAIN_EQUIPMENT",
@@ -53,15 +53,7 @@ export function getMockedChecklistsString(randomItemsToCreateCount: number): str
 }
 
 function getMockedStringInternal(randomItemsToCreateCount: number): string {
-    if (randomItemsToCreateCount === 0) {
-        return `
-        [ ${getRealMockDataString()}
-        ]`;
-    }
-
-    return `
-    [ ${randomMockedChecklistsString(randomItemsToCreateCount)}
-    ]`;
+    return `[ ${getRealMockDataString()}, ${randomMockedChecklistsString(randomItemsToCreateCount)} ]`;
 }
 
 function getRealMockDataString(): string {
@@ -74,8 +66,8 @@ function getRealMockDataString(): string {
       "formUpdatedAt": "2017-01-23T12:06:38",
       "formGroupDescription": "Mechanical Completion Check Record",
       "tagNo": "A-73MA001",
-      "mcPackNo": "7302-R015",
-      "formTypeDescription": "Check List for Electrical Cables",
+      "mcPackNo": "7302-R001",
+      "formTypeDescription": "Mocked Check List for Electrical Cables",
       "url": "https://www.wikipedia.org/",
       "tagDescription": "PEDESTAL CRANE P1 SOUTH",
       "tagRegisterId": "MAIN_EQUIPMENT",
@@ -93,17 +85,17 @@ function getRealMockDataString(): string {
       "id": 12345678,
       "formType": "MEC-60",
       "formStatus": "PB",
-      "commPackNo": "mocked",
+      "commPackNo": "mocked2",
       "formResponsibleId": "bb",
       "formUpdatedAt": "2017-02-04T11:09:56",
       "formGroupDescription": "Commissioning Preparatory Check List",
       "tagNo": "A-73MA001",
-      "mcPackNo": "7302-R015",
-      "formTypeDescription": "Pow. Hoists, Trolleys & Transv. Cranes",
+      "mcPackNo": "7302-R002",
+      "formTypeDescription": "Mocked Pow. Hoists, Trolleys & Transv. Cranes",
       "url": "https://www.wikipedia.org/",
       "tagDescription": "PEDESTAL CRANE P1 SOUTH",
       "tagRegisterId": "MAIN_EQUIPMENT",
-      "tagProjectName": "L.O265C.001",
+      "tagProjectName": "L.O265C.002",
       "signedByFullName": "bb",
       "signedByUserName": "bb@bb.com",
       "signedAt": "2017-03-02T11:09:56",
