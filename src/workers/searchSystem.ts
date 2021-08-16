@@ -1,7 +1,7 @@
 import { loggerFactory } from '../logger';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
-import { ResultValues } from '../results/baseResult';
-import { createResults } from '../results/createResult';
+import { ResultArray } from '../results/baseResult';
+import { resultArray } from '../results/createResult';
 
 export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;
@@ -21,9 +21,9 @@ export class SearchSystem<T> {
         this._isOfflineSearchReady = isOfflineSearchReady;
     }
 
-    async search(offlineSearch: () => Promise<T[]>, onlineSearch: () => Promise<T[]>): Promise<ResultValues<T>> {
+    async search(offlineSearch: () => Promise<T[]>, onlineSearch: () => Promise<T[]>): Promise<ResultArray<T>> {
         if (!Settings.isSyncEnabled(this._offlineSystemKey)) {
-            return createResults.syncNotEnabledError<T>(this._offlineSystemKey);
+            return resultArray.syncNotEnabledError<T>(this._offlineSystemKey);
         }
 
         await this._initTask;
@@ -32,6 +32,6 @@ export class SearchSystem<T> {
         loggerFactory.default(this._offlineSystemKey + '.SearchSystem').debug(isOfflineSearch ? 'Offline' : 'Online');
 
         const data = isOfflineSearch ? await offlineSearch() : await onlineSearch();
-        return createResults.successOrEmpty(data);
+        return resultArray.successOrEmpty(data);
     }
 }

@@ -3,12 +3,12 @@ import { echoSearchWorker } from './echoWorkerInstance';
 import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/syncSettings';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
-import { Result, ResultValue, ResultValues, SyncErrorType } from './results/baseResult';
+import { Result, ResultArray, ResultValue, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
 export type { Result };
-export type { ResultValue, ResultValues };
+export type { ResultValue, ResultArray as ResultValues };
 export type { TagStatus, TagSummaryDto };
 export type { McPackDto, CommPackDto, NotificationDto, PunchDto };
 

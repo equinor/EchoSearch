@@ -7,8 +7,8 @@ import { OfflineSystem } from '../offlineSync/syncSettings';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
-import { ResultValues } from '../results/baseResult';
-import { createResult } from '../results/createResult';
+import { ResultArray } from '../results/baseResult';
+import { resultValue } from '../results/createResult';
 import { SearchSystem } from './searchSystem';
 
 let _tagSearchSystem: SearchSystem<TagSummaryDb>;
@@ -35,7 +35,7 @@ async function initTagsTask(): Promise<void> {
     return await task;
 }
 
-async function search(searchText: string, maxHits: number): Promise<ResultValues<TagSummaryDto>> {
+async function search(searchText: string, maxHits: number): Promise<ResultArray<TagSummaryDto>> {
     //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
     return await _tagSearchSystem.search(
         async () => inMemory.Tags.search(searchText, maxHits),
@@ -44,14 +44,14 @@ async function search(searchText: string, maxHits: number): Promise<ResultValues
 }
 async function findClosestTagNo(tagNo: string): Promise<ResultValue<string>> {
     const possibleTag = searchForClosestTagNo(tagNo);
-    return createResult.successOrNotFound(possibleTag?.word ?? undefined);
+    return resultValue.successOrNotFound(possibleTag?.word ?? undefined);
 }
 
 async function lookup(tagNo: string): Promise<ResultValue<TagSummaryDto>> {
     return await tagsRepository().get(tagNo);
 }
 
-async function lookupAll(tagNos: string[]): Promise<ResultValues<TagSummaryDto>> {
+async function lookupAll(tagNos: string[]): Promise<ResultArray<TagSummaryDto>> {
     return await tagsRepository().bulkGet(tagNos);
 }
 

@@ -6,8 +6,8 @@ import { logging, LogOptions, LogType } from '../loggerOptions';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
-import { Result, ResultValue, ResultValues } from '../results/baseResult';
-import { createResult, result } from '../results/createResult';
+import { Result, ResultArray, ResultValue } from '../results/baseResult';
+import { result, resultValue } from '../results/createResult';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
 import { ChecklistDto, DocumentSummaryDto } from './dataTypes';
@@ -49,18 +49,18 @@ export interface EchoWorker {
     initialize(): Promise<Result>;
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
-    searchTags(searchText: string, maxHits: number): Promise<ResultValues<TagSummaryDto>>;
+    searchTags(searchText: string, maxHits: number): Promise<ResultArray<TagSummaryDto>>;
     searchForClosestTagNo(tagNo: string): Promise<ResultValue<string>>;
     lookupTagAsync(tagNo: string): Promise<ResultValue<TagSummaryDto>>;
-    lookupTagsAsync(tagNos: string[]): Promise<ResultValues<TagSummaryDto>>;
+    lookupTagsAsync(tagNos: string[]): Promise<ResultArray<TagSummaryDto>>;
 
     searchDocumentsAsync(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<DocumentSummaryDto>
-    ): Promise<ResultValues<DocumentSummaryDto>>;
+    ): Promise<ResultArray<DocumentSummaryDto>>;
     lookupDocumentAsync(id: DocumentSummaryKey): Promise<ResultValue<DocumentSummaryDto>>;
-    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<ResultValues<DocumentSummaryDto>>;
+    lookupAllDocumentsAsync(ids: DocumentSummaryKey[]): Promise<ResultArray<DocumentSummaryDto>>;
 
     /**
      * Search for mcPacks. Uses Offline search, except when it's syncing all items the first time.
@@ -72,25 +72,25 @@ export interface EchoWorker {
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<McPackDto>
-    ): Promise<ResultValues<McPackDto>>;
+    ): Promise<ResultArray<McPackDto>>;
     lookupMcPackAsync(tagNo: number): Promise<ResultValue<McPackDto>>;
-    lookupMcPacksAsync(tagNos: number[]): Promise<ResultValues<McPackDto>>;
+    lookupMcPacksAsync(tagNos: number[]): Promise<ResultArray<McPackDto>>;
 
     searchCommPacks(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<CommPackDto>
-    ): Promise<ResultValues<CommPackDto>>;
+    ): Promise<ResultArray<CommPackDto>>;
     lookupCommPackAsync(tagNo: number): Promise<ResultValue<CommPackDto>>;
-    lookupCommPacksAsync(tagNos: number[]): Promise<ResultValues<CommPackDto>>;
+    lookupCommPacksAsync(tagNos: number[]): Promise<ResultArray<CommPackDto>>;
 
     searchPunches(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<ResultValues<PunchDto>>;
+    ): Promise<ResultArray<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<ResultValue<PunchDto>>;
-    lookupPunchesAsync(tagNos: string[]): Promise<ResultValues<PunchDto>>;
+    lookupPunchesAsync(tagNos: string[]): Promise<ResultArray<PunchDto>>;
 
     searchChecklists(
         tagNo?: string,
@@ -98,19 +98,19 @@ export interface EchoWorker {
         mcPackNo?: string,
         tagProjectName?: string,
         maxHits?: number
-    ): Promise<ResultValues<ChecklistDto>>;
+    ): Promise<ResultArray<ChecklistDto>>;
     lookupChecklistAsync(tagNo: number): Promise<ResultValue<ChecklistDto>>;
-    lookupChecklistsAsync(tagNos: number[]): Promise<ResultValues<ChecklistDto>>;
+    lookupChecklistsAsync(tagNos: number[]): Promise<ResultArray<ChecklistDto>>;
 
     searchNotifications(
         searchText: string,
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
-    ): Promise<ResultValues<NotificationDto>>;
-    searchNotificationsByTagNos(tagNos: string[]): Promise<ResultValues<NotificationDto>>;
+    ): Promise<ResultArray<NotificationDto>>;
+    searchNotificationsByTagNos(tagNos: string[]): Promise<ResultArray<NotificationDto>>;
 
     lookupNotificationAsync(maintenanceRecordId: string): Promise<ResultValue<NotificationDto>>;
-    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<ResultValues<NotificationDto>>;
+    lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<ResultArray<NotificationDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<Result>;
 
@@ -187,7 +187,7 @@ const echoWorker: EchoWorker = {
     cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
     setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
     isEnabledAsync: async (...args) =>
-        tryCatchToResult(async () => createResult.successOrNotFound(syncContract.isEnabled(...args))),
+        tryCatchToResult(async () => resultValue.successOrNotFound(syncContract.isEnabled(...args))),
 
     setFailureRateAsync: (...args) => syncContract.externalSetFailureRate(...args),
 

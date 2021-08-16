@@ -1,6 +1,6 @@
 import { BaseError } from '@equinor/echo-base';
 import { OfflineSystem } from '../offlineSync/syncSettings';
-import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
+import { Result, ResultArray, ResultValue, SyncErrorType } from './baseResult';
 import { createError, createResultErrorFromException } from './errors';
 
 const createSuccess = (): Result => {
@@ -9,15 +9,6 @@ const createSuccess = (): Result => {
 function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
     return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);
 }
-
-export const result = {
-    success: createSuccess,
-    errorFromException: createResultErrorFromException,
-    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
-    error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
-    notImplementedError: (message: string): Result =>
-        createError({ type: SyncErrorType.NotImplemented, message: message })
-};
 
 class SingleValueResult {
     successOrNotFound<T>(value: T | undefined): ResultValue<T> {
@@ -29,23 +20,32 @@ class SingleValueResult {
 }
 
 class ArrayValueResults {
-    error<T>(exception: Error | BaseError): ResultValues<T> {
+    error<T>(exception: Error | BaseError): ResultArray<T> {
         const errorResult = result.errorFromException(exception);
         return { isSuccess: false, values: [], error: errorResult.error };
     }
 
-    successOrEmpty<T>(values: T[]): ResultValues<T> {
+    successOrEmpty<T>(values: T[]): ResultArray<T> {
         return { isSuccess: true, values };
     }
 
-    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultValues<T> {
+    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultArray<T> {
         return { ...createSyncNotEnabledError(offlineSystem), values: [] };
     }
 }
 
-export const createResult = new SingleValueResult();
+export const result = {
+    success: createSuccess,
+    errorFromException: createResultErrorFromException,
+    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
+    error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
+    notImplementedError: (message: string): Result =>
+        createError({ type: SyncErrorType.NotImplemented, message: message })
+};
 
-export const createResults = new ArrayValueResults();
+export const resultValue = new SingleValueResult();
+
+export const resultArray = new ArrayValueResults();
 
 //ErrorType worth considering
 //type Failure = string;

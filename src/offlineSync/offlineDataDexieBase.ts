@@ -1,7 +1,7 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { logger, LoggerFunctions } from '../logger';
-import { ResultValue, ResultValues } from '../results/baseResult';
-import { createResult, createResults } from '../results/createResult';
+import { ResultArray, ResultValue } from '../results/baseResult';
+import { resultArray, resultValue } from '../results/createResult';
 import { DbError, NotInitializedError, SyncCanceledError } from '../results/errors';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { OfflineSystem } from './syncSettings';
@@ -109,12 +109,12 @@ export class Repository<T> {
 
     async get(key: string | number): Promise<ResultValue<T>> {
         const result = await this.database.get(key);
-        return createResult.successOrNotFound(result);
+        return resultValue.successOrNotFound(result);
     }
 
-    async bulkGet(keys: string[] | number[]): Promise<ResultValues<T>> {
+    async bulkGet(keys: string[] | number[]): Promise<ResultArray<T>> {
         const results = await this.database.bulkGet(keys);
-        return createResults.successOrEmpty(results);
+        return resultArray.successOrEmpty(results);
     }
 
     /**

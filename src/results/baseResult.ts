@@ -8,7 +8,7 @@ export interface ResultValue<T> extends Result {
     isNotFound: boolean;
 }
 
-export interface ResultValues<T> extends Result {
+export interface ResultArray<T> extends Result {
     readonly values: T[];
 }
 

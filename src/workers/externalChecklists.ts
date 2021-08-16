@@ -9,7 +9,7 @@ import {
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { getInstCode, OfflineSystem, Settings } from '../offlineSync/syncSettings';
 import { ResultValue } from '../results/baseResult';
-import { createResult, createResults } from '../results/createResult';
+import { resultArray, resultValue } from '../results/createResult';
 import { ChecklistDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 
@@ -47,22 +47,22 @@ async function search(
 async function lookup(id: number): Promise<ResultValue<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? await checklistsRepository().get(id)
-        : createResult.syncNotEnabledError(checklistKey);
+        : resultValue.syncNotEnabledError(checklistKey);
 }
 
 async function lookupAll(ids: number[]): Promise<ResultValues<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? checklistsRepository().bulkGet(ids)
-        : createResults.syncNotEnabledError(checklistKey);
+        : resultArray.syncNotEnabledError(checklistKey);
 }
 
 async function lookupGroupByTagNos(tagNos: string[]): Promise<ResultValue<Dictionary<ChecklistDb[]>>> {
     if (!Settings.isFullSyncDone(checklistKey)) {
-        return createResult.syncNotEnabledError(checklistKey);
+        return resultValue.syncNotEnabledError(checklistKey);
     }
 
     const results = await getLocalProCoSysChecklistsGroupedByTagNo(tagNos);
-    return createResult.successOrNotFound(results);
+    return resultValue.successOrNotFound(results);
 }
 
 export const externalChecklists = {
