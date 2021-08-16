@@ -45,7 +45,7 @@ export class SyncSystem<T> {
     }
 
     async runFullSync(): Promise<InternalSyncResult> {
-        this._abortController.abort(); //in case we have an ongoing sync //TODO maybe we shouldn't abort, but wait for this one to finish?
+        this._abortController.abort();
         this._abortController = new AbortController();
         return await this._fullSync(this._abortController.signal);
     }
@@ -54,7 +54,7 @@ export class SyncSystem<T> {
         if (!lastChangedDate)
             throw new ArgumentDateError('lastChangedDate is undefined in update sync for ' + this._offlineSystemKey);
 
-        this._abortController.abort(); //in case we have an ongoing sync
+        this._abortController.abort();
         this._abortController = new AbortController();
         return await this._updateSync(lastChangedDate, this._abortController.signal);
     }

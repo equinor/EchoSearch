@@ -11,6 +11,7 @@ import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { getInstCode, Settings } from '../offlineSync/syncSettings';
 import { ResultValue } from '../results/baseResult';
 import { resultArray, resultValue } from '../results/createResult';
+import { errorMessage } from '../results/errors';
 import { ChecklistDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 
@@ -48,18 +49,18 @@ async function search(
 async function lookup(id: number): Promise<ResultValue<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? await checklistsRepository().get(id)
-        : resultValue.syncNotEnabledError(checklistKey);
+        : resultValue.error(errorMessage.sync.syncNeededBeforeSearch(checklistKey));
 }
 
 async function lookupAll(ids: number[]): Promise<ResultValues<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? checklistsRepository().bulkGet(ids)
-        : resultArray.syncNotEnabledError(checklistKey);
+        : resultArray.error(errorMessage.sync.syncNeededBeforeSearch(checklistKey));
 }
 
 async function lookupGroupByTagNos(tagNos: string[]): Promise<ResultValue<Dictionary<ChecklistDb[]>>> {
     if (!Settings.isFullSyncDone(checklistKey)) {
-        return resultValue.syncNotEnabledError(checklistKey);
+        return resultValue.error(errorMessage.sync.syncNeededBeforeSearch(checklistKey));
     }
 
     const results = await getLocalProCoSysChecklistsGroupedByTagNo(tagNos);

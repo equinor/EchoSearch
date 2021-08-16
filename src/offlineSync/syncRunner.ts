@@ -1,7 +1,7 @@
 import { loggerFactory, LoggerFunctions } from '../logger';
 import { Result } from '../results/baseResult';
 import { result } from '../results/createResult';
-import { NotInitializedError } from '../results/errors';
+import { errorMessage, NotInitializedError } from '../results/errors';
 import { SyncSystem } from '../workers/syncSystem';
 import { OfflineSystem } from './offlineSystem';
 import { Settings } from './syncSettings';
@@ -15,13 +15,13 @@ const currentlySyncing: OfflineSystem[] = [];
 
 export async function runSync<T>(searchSystem: SyncSystem<T>): Promise<Result> {
     if (!Settings.isSyncEnabled(searchSystem.offlineSystemKey)) {
-        const message = 'sync is not enabled for ' + searchSystem.offlineSystemKey;
+        const message = errorMessage.sync.notEnabled(searchSystem.offlineSystemKey);
         logCreate(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }
 
     if (isSyncing(searchSystem.offlineSystemKey)) {
-        const message = 'Sync is already in progress ' + searchSystem.offlineSystemKey;
+        const message = errorMessage.sync.notEnabled(searchSystem.offlineSystemKey);
         logCreate(searchSystem.offlineSystemKey).warn(message);
         return result.syncError(message);
     }

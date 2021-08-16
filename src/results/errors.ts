@@ -6,6 +6,8 @@ import {
     NotFoundError,
     UnauthorizedError
 } from '@equinor/echo-base';
+import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { Opaque } from '../utils/opague';
 import { Result, SearchModuleError, SyncErrorType } from './baseResult';
 
 export class SyncError extends BaseError {
@@ -65,3 +67,17 @@ export function createResultErrorFromException<T extends Result>(error: Error | 
 
     return createError(searchModuleError) as T;
 }
+
+export type ErrorMessage = Opaque<string, 'ErrorMessage'>;
+
+const syncErrorMessages = {
+    notEnabled: (key: OfflineSystem): ErrorMessage => `Sync is not enabled for ${key}` as ErrorMessage,
+    syncNeededBeforeSearch: (key: OfflineSystem): ErrorMessage =>
+        `Search error, sync is needed for ${key}` as ErrorMessage
+};
+
+export const errorMessage = {
+    sync: syncErrorMessages,
+    inMemoryDataNotReady: (): ErrorMessage =>
+        `Search error, in memory data is not ready, init/sync needed` as ErrorMessage
+};

@@ -1,44 +1,39 @@
-import { BaseError } from '@equinor/echo-base';
-import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { Result, ResultArray, ResultValue, SyncErrorType } from './baseResult';
-import { createError, createResultErrorFromException } from './errors';
+import { createError, createResultErrorFromException, ErrorMessage } from './errors';
 
 const createSuccess = (): Result => {
     return { isSuccess: true };
 };
-function createSyncNotEnabledError(offlineSystem: OfflineSystem): Result {
-    return result.error(SyncErrorType.SyncIsNotEnabled, `To search you first have to enable sync for ${offlineSystem}`);
-}
 
 class SingleValueResult {
     successOrNotFound<T>(value: T | undefined): ResultValue<T> {
         return { isSuccess: true, value, isNotFound: value === undefined };
     }
-    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultValue<T> {
-        return { ...createSyncNotEnabledError(offlineSystem), isNotFound: false };
+    error<T>(errorMessage: ErrorMessage): ResultValue<T> {
+        return { ...result.syncError(errorMessage), isNotFound: false };
     }
 }
 
 class ArrayValueResults {
-    error<T>(exception: Error | BaseError): ResultArray<T> {
-        const errorResult = result.errorFromException(exception);
-        return { isSuccess: false, values: [], error: errorResult.error };
-    }
+    // error<T>(exception: Error | BaseError): ResultArray<T> {
+    //     const errorResult = result.errorFromException(exception);
+    //     return { isSuccess: false, values: [], error: errorResult.error };
+    // }
 
     successOrEmpty<T>(values: T[]): ResultArray<T> {
         return { isSuccess: true, values };
     }
 
-    syncNotEnabledError<T>(offlineSystem: OfflineSystem): ResultArray<T> {
-        return { ...createSyncNotEnabledError(offlineSystem), values: [] };
+    error<T>(errorMessage: ErrorMessage): ResultArray<T> {
+        return { ...result.syncError(errorMessage), values: [] };
     }
 }
 
 export const result = {
     success: createSuccess,
     errorFromException: createResultErrorFromException,
-    syncError: (message: string): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
-    error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
+    syncError: (message: ErrorMessage): Result => createError({ type: SyncErrorType.SyncFailed, message: message }),
+    //error: (type: SyncErrorType, message: string): Result => createError({ type, message }),
     notImplementedError: (message: string): Result =>
         createError({ type: SyncErrorType.NotImplemented, message: message })
 };

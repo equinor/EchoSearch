@@ -66,7 +66,6 @@ export enum SyncErrorType {
 
 */
 
-//TODO
 //some errors we only want to log?
 //some we want to display to the user
 //some we want to display to the user only in certain situations

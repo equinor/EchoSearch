@@ -3,6 +3,7 @@ import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { Settings } from '../offlineSync/syncSettings';
 import { ResultArray } from '../results/baseResult';
 import { resultArray } from '../results/createResult';
+import { errorMessage } from '../results/errors';
 
 export class SearchSystem<T> {
     private _offlineSystemKey: OfflineSystem;
@@ -24,7 +25,7 @@ export class SearchSystem<T> {
 
     async search(offlineSearch: () => Promise<T[]>, onlineSearch: () => Promise<T[]>): Promise<ResultArray<T>> {
         if (!Settings.isSyncEnabled(this._offlineSystemKey)) {
-            return resultArray.syncNotEnabledError<T>(this._offlineSystemKey);
+            return resultArray.error(errorMessage.sync.notEnabled(this._offlineSystemKey));
         }
 
         await this._initTask;

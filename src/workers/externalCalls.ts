@@ -27,14 +27,16 @@ import { externalMcPacks } from './externalMcPacks';
 import { externalNotifications } from './externalNotifications';
 import { externalPunches } from './externalPunches';
 import { externalTags } from './externalTags';
+import { SyncSystem } from './syncSystem';
 
 const log = logger('externalCalls');
-
-//let _counter = 0;
-// function functionShouldOnlyBeCalledOnce(): void {
-//     log.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
-// }
-// functionShouldOnlyBeCalledOnce();
+/**
+let _counter = 0;
+function functionShouldOnlyBeCalledOnce(): void {
+    log.error('--called once only?? no :( counter should increase if its same instance of file..', _counter++);
+}
+functionShouldOnlyBeCalledOnce();
+*/
 
 let _initDone = false;
 let _initTaskInstance: Promise<Result> | undefined = undefined;
@@ -68,11 +70,6 @@ export async function externalInitializeTask(): Promise<Result> {
 }
 
 async function internalInitialize(): Promise<Result> {
-    // const logOptions = {
-    //     '': LogType.Trace
-    // };
-    // logging.setLogLevels(logOptions); //will be overwritten by external setLogOptions
-
     if (_initDone) {
         log.warn('internalInitialize already done, returning');
         return result.success();
@@ -109,24 +106,9 @@ async function internalInitialize(): Promise<Result> {
 async function externalRunSync(offlineSystemKey: OfflineSystem): Promise<Result> {
     await loadOfflineSettingsTask(); //in case init is not done yet
 
-    //const system = getSyncSystem(offlineSystemKey); //TODO Ask Chris - why is this not working?
-    //if (system) return await runSync(system);
+    const system: SyncSystem<unknown> | undefined = getSyncSystem(offlineSystemKey);
+    if (system) return await runSync(system);
 
-    if (offlineSystemKey === OfflineSystem.McPack) {
-        return await runSync(mcPacksSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.CommPack) {
-        return await runSync(commPacksSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.Checklist) {
-        return await runSync(checklistsSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.Tags) {
-        return await runSync(tagsSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.Documents) {
-        return await runSync(documentsSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.Punches) {
-        return await runSync(punchesSyncSystem);
-    } else if (offlineSystemKey === OfflineSystem.Notifications) {
-        return await runSync(notificationsSyncSystem);
-    }
     return result.notImplementedError('externalRunSync not implemented for ' + offlineSystemKey);
 }
 

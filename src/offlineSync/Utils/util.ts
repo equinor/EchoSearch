@@ -5,7 +5,6 @@ import { uniq } from 'lodash';
  * [Markdown](https://regex101.com/r/U2LJE0/7/)
  */
 export function asAlphaNumeric(item?: string): string {
-    //return item ? item : '';
     if (!item) return '';
     // //return item.replace(/[\W_]/gi, ''); //inField, no support for norwegian characters
     return item.replace(/[-_;:'",. §|!"#¤%&/()=?`]/gi, ''); //support norwegian letters and strip away many special characters

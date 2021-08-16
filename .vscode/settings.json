@@ -5,6 +5,7 @@
         "Dont",
         "Identificator",
         "equinor",
+        "opague",
         "syncer"
     ],
     "editor.codeActionsOnSave": {
