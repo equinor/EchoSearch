@@ -1,6 +1,6 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
 import { logger } from '../logger';
-import { NotInitializedError } from '../results/baseResult';
+import { NotInitializedError } from '../results/errors';
 import { ObservableState, ObservableStateReadonly } from './Utils/observableState';
 import { dateAsApiString } from './Utils/stringUtils';
 

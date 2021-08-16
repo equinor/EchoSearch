@@ -1,4 +1,4 @@
-import { ArgumentDateError } from '../results/baseResult';
+import { ArgumentDateError } from '../results/errors';
 import {
     extractPositiveFirstNumbers,
     getMaxNumberInCollectionOrOne,

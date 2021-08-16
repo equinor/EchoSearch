@@ -1,5 +1,3 @@
-import { BaseError, BaseErrorArgs } from '@equinor/echo-base';
-
 export interface Result {
     readonly isSuccess: boolean;
     readonly error?: SearchModuleError; //TODO Ove, convert to error enum type?
@@ -17,31 +15,6 @@ export interface ResultValues<T> extends Result {
 export interface InternalSyncResult extends Result {
     newestItemDate?: Date;
     itemsSyncedCount: number;
-}
-
-export class SyncError extends BaseError {
-    constructor(message: string, exception?: Error) {
-        super({ message, exception: { ...exception } } as BaseErrorArgs); //TODO Ove Test if this works
-    }
-}
-
-export class DbError extends SyncError {}
-
-export class NotImplementedError extends SyncError {}
-export class JsonParseError extends SyncError {}
-
-export class ArgumentError extends SyncError {}
-export class ArgumentDateError extends ArgumentError {}
-
-export class SyncNotEnabledError extends SyncError {}
-
-export class NotInitializedError extends SyncError {}
-
-export class SyncCanceledError extends SyncError {
-    constructor(message: string) {
-        super(message);
-        this.hasBeenLogged = true; //expected - should not be logged
-    }
 }
 
 /* possible errors   

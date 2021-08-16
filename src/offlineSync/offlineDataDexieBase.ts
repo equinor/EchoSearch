@@ -1,7 +1,8 @@
 import Dexie, { IndexableTypeArrayReadonly } from 'dexie';
 import { logger, LoggerFunctions } from '../logger';
-import { DbError, NotInitializedError, ResultValue, ResultValues, SyncCanceledError } from '../results/baseResult';
+import { ResultValue, ResultValues } from '../results/baseResult';
 import { createResult, createResults } from '../results/createResult';
+import { DbError, NotInitializedError, SyncCanceledError } from '../results/errors';
 import { getMaxNumberInCollectionOrOne } from './stringUtils';
 import { OfflineSystem } from './syncSettings';
 import { isNullOrEmpty } from './Utils/stringExtensions';

@@ -1,5 +1,5 @@
 import { loggerFactory } from './logger';
-import { NotInitializedError } from './results/baseResult';
+import { NotInitializedError } from './results/errors';
 const log = loggerFactory.default('Worker.Token');
 
 let getToken: () => Promise<string>;

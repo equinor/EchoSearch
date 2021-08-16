@@ -2,7 +2,7 @@ import { loggerFactory } from '../logger';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { asAlphaNumeric, getAllWordsAsAlphaNumericUpperCase } from '../offlineSync/Utils/util';
-import { NotInitializedError } from '../results/baseResult';
+import { NotInitializedError } from '../results/errors';
 import { getInMemoryTagsSorted } from './inMemoryTags';
 import { tagsLevTrie } from './inMemoryTagsLevTrie';
 import { TrieResult } from './trie/levTrie';

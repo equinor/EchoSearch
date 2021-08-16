@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isLogEnabled, LogType } from './loggerOptions';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
-import { NotImplementedError } from './results/baseResult';
+import { NotImplementedError } from './results/errors';
 
 const _green = '#008000';
 const _cyan = '#008080';

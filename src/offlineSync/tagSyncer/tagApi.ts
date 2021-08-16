@@ -1,5 +1,5 @@
 import { loggerFactory } from '../../logger';
-import { JsonParseError, SyncError } from '../../results/baseResult';
+import { JsonParseError, SyncError } from '../../results/errors';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { extractDateFromHeader, queryParameter } from '../apiHelper';

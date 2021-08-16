@@ -1,5 +1,3 @@
-//interface FailureType extends string{}
-
 import { BaseError } from '@equinor/echo-base';
 import { OfflineSystem } from '../offlineSync/syncSettings';
 import { Result, ResultValue, ResultValues, SyncErrorType } from './baseResult';
@@ -44,3 +42,4 @@ export const createResults = new ArrayValueResults();
 //     type: FailureType;
 //     reason: string;
 // }
+//interface FailureType extends string{}
