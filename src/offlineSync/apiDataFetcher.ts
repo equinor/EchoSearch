@@ -1,13 +1,25 @@
 import { apiFetchJsonToArray, apiFetchToType } from '../service/workerFetch';
 import { getApiBaseUrl } from './syncSettings';
 
+export interface FailureRate {
+    percentage: number;
+    httpStatusErrorCode: number;
+    httpErrorMessage: string;
+}
+
+export const defaultFailureRate: FailureRate = {
+    percentage: 0,
+    httpStatusErrorCode: 500,
+    httpErrorMessage: 'oh no, something went wrong'
+};
+
 export class ApiFetchState {
     private _isMockEnabled: boolean;
-    private _failureRate: number;
+    private _failureRate: FailureRate;
 
     constructor() {
         this._isMockEnabled = false;
-        this._failureRate = 0;
+        this._failureRate = defaultFailureRate;
     }
 
     set isMockEnabled(isEnabled: boolean) {
@@ -17,15 +29,12 @@ export class ApiFetchState {
         return this._isMockEnabled;
     }
 
-    get failureRate(): number {
+    get failureRate(): FailureRate {
         return this._failureRate;
     }
 
-    /**
-     * Sets the failure rate percentage when getting data from api/url. Used for debugging
-     */
-    set failureRate(value: number) {
-        this._failureRate = value;
+    set failureRate(failureRate: FailureRate) {
+        this._failureRate = failureRate;
     }
 
     toggleMock(): void {
@@ -91,14 +100,16 @@ export class ApiDataFetcher<T> {
         return cleanup(item);
     }
 
-    private urlOrFakeError(url: string, httpStatusCode = 403, errorMessage = 'errorMessage'): string {
+    private urlOrFakeError(url: string): string {
         if (!this.isRandomFailure()) return url;
-        return `${getApiBaseUrl()}/TroubleShooting/FakeError?httpStatusCode=${httpStatusCode}&message=${errorMessage}`;
+        return `${getApiBaseUrl()}/TroubleShooting/FakeError?httpStatusCode=${
+            this.state.failureRate.httpStatusErrorCode
+        }&message=${this.state.failureRate.httpErrorMessage}`;
     }
 
     private isRandomFailure(): boolean {
         const chanceValue = this.randomInt(0, 100);
-        return chanceValue < this._state.failureRate;
+        return chanceValue < this._state.failureRate.percentage;
     }
 
     private randomInt(minIncluded: number, maxIncluded: number): number {

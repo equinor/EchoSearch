@@ -1,5 +1,6 @@
 import { NotFoundError } from '@equinor/echo-base';
 import { logger } from '../logger';
+import { ApiFetchState, defaultFailureRate, FailureRate } from '../offlineSync/apiDataFetcher';
 import { checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { commPacksApi } from '../offlineSync/commPacksSyncer/commPacksApi';
@@ -143,7 +144,7 @@ function externalToggleMockData(): void {
     tagsApi.state.toggleMock();
     documentsApi.state.toggleMock();
     notificationsApi.state.toggleMock();
-    notificationsApi.state.failureRate = 30;
+    notificationsApi.state.failureRate.percentage = 30;
 
     log.info(
         'use mock tags:',
@@ -157,17 +158,70 @@ function externalToggleMockData(): void {
         'notifications',
         notificationsApi.state.isMockEnabled,
         'notifications failureRate',
-        notificationsApi.state.failureRate
+        notificationsApi.state.failureRate.percentage
     );
 }
 
-async function externalSetFailureRate(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void> {
-    if (offlineSystemKey === OfflineSystem.Documents) documentsApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.McPack) mcPacksApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.CommPack) commPacksApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Punches) punchesApi.state.failureRate = failPercentage;
-    if (offlineSystemKey === OfflineSystem.Notifications) notificationsApi.state.failureRate = failPercentage;
-    else log.warn(`externalSetFailureRateAsync not implemented for ${offlineSystemKey}`);
+function getApiState(key: OfflineSystem): ApiFetchState | undefined {
+    switch (key) {
+        case OfflineSystem.Tags:
+            return tagsApi.state;
+        case OfflineSystem.Documents:
+            return documentsApi.state;
+        case OfflineSystem.CommPack:
+            return commPacksApi.state;
+        case OfflineSystem.McPack:
+            return mcPacksApi.state;
+        case OfflineSystem.Punches:
+            return punchesApi.state;
+        case OfflineSystem.Checklist:
+            return checklistsApi.state;
+        case OfflineSystem.Notifications:
+            return notificationsApi.state;
+        //case OfflineSystem.WorkOrders: return workOrdersApi.state;
+    }
+    return undefined;
+}
+
+async function resetDebugOptions(): Promise<void> {
+    const all = Object.values(OfflineSystem);
+
+    for (const key of all) {
+        const state = getApiState(key);
+        if (state) {
+            state.failureRate.percentage = 0;
+            state.isMockEnabled = false;
+        }
+    }
+}
+
+async function setMockEnabled(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void> {
+    const apiState = getApiState(offlineSystemKey);
+    if (apiState) apiState.isMockEnabled = isEnabled;
+    else log.warn(`Set mock data not implemented for ${offlineSystemKey}`);
+}
+
+async function isMockEnabled(offlineSystemKey: OfflineSystem): Promise<boolean> {
+    const apiState = getApiState(offlineSystemKey);
+    if (apiState) return apiState.isMockEnabled;
+    else log.warn(`Is mock data enabled not implemented for ${offlineSystemKey}`);
+    return false;
+}
+
+async function setFailureRate(offlineSystemKey: OfflineSystem, failureRate: FailureRate): Promise<void> {
+    const apiState = getApiState(offlineSystemKey);
+    if (!apiState) {
+        log.warn(`Set failure rate not implemented for ${offlineSystemKey}`);
+        return;
+    }
+    apiState.failureRate = failureRate;
+}
+
+async function getFailureRate(offlineSystemKey: OfflineSystem): Promise<FailureRate> {
+    const apiState = getApiState(offlineSystemKey);
+    if (apiState) return apiState.failureRate;
+    else log.warn(`Set failure rate not implemented for ${offlineSystemKey}`);
+    return defaultFailureRate;
 }
 
 async function externalChangePlant(instCode: string, forceDeleteIfSameAlreadySelected = false): Promise<Result> {
@@ -202,9 +256,14 @@ export const syncContract = {
     isEnabled: (offlineSystemKey: OfflineSystem): boolean => Settings.isSyncEnabled(offlineSystemKey),
     externalSetEnabled,
     externalRunSync,
-    externalToggleMockData,
     externalChangePlant,
-    externalSetFailureRate
+
+    externalToggleMockData,
+    isMockEnabled,
+    setMockEnabled,
+    setFailureRate,
+    getFailureRate,
+    resetDebugOptions
 };
 
 export function externalTestCommReturnTypes(): ErrorForTesting {

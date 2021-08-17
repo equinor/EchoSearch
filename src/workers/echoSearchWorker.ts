@@ -3,6 +3,7 @@ import { Dictionary } from 'lodash';
 import { Filter } from '../inMemory/searchFilter';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
+import { FailureRate } from '../offlineSync/apiDataFetcher';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { Settings } from '../offlineSync/syncSettings';
@@ -127,7 +128,11 @@ export interface EchoWorker {
     setEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<Result>;
     isEnabledAsync(offlineSystemKey: OfflineSystem): Promise<ResultValue<boolean>>;
 
-    setFailureRateAsync(offlineSystemKey: OfflineSystem, failPercentage: number): Promise<void>;
+    setFailureRateAsync(offlineSystemKey: OfflineSystem, failureRate: FailureRate): Promise<void>;
+    getFailureRateAsync(offlineSystemKey: OfflineSystem): Promise<FailureRate>;
+    setMockEnabledAsync(offlineSystemKey: OfflineSystem, isEnabled: boolean): Promise<void>;
+    isMockEnabledAsync(offlineSystemKey: OfflineSystem): Promise<boolean>;
+    resetDebugOptionsAsync(): Promise<void>;
 
     cancelSync(offlineSystemKey: OfflineSystem): void;
     runExpensive: () => string;
@@ -200,7 +205,11 @@ const echoWorker: EchoWorker = {
     isEnabledAsync: async (...args) =>
         tryCatchToResult(async () => resultValue.successOrNotFound(syncContract.isEnabled(...args))),
 
-    setFailureRateAsync: (...args) => syncContract.externalSetFailureRate(...args),
+    setFailureRateAsync: (...args) => syncContract.setFailureRate(...args), //Ask Chris nested sub types here??
+    getFailureRateAsync: (...args) => syncContract.getFailureRate(...args),
+    setMockEnabledAsync: (...args) => syncContract.setMockEnabled(...args),
+    isMockEnabledAsync: (...args) => syncContract.isMockEnabled(...args),
+    resetDebugOptionsAsync: (...args) => syncContract.resetDebugOptions(...args),
 
     runExpensive(): string {
         expensive(2000);
