@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from '..';
+import { Dictionary } from 'lodash';
 import { Filter } from '../inMemory/searchFilter';
 import { logger } from '../logger';
 import { logging, LogOptions, LogType } from '../loggerOptions';
@@ -11,7 +11,15 @@ import { Result, ResultArray, ResultValue } from '../results/baseResult';
 import { result, resultValue } from '../results/createResult';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
-import { ChecklistDto, DocumentSummaryDto } from './dataTypes';
+import {
+    ChecklistDto,
+    CommPackDto,
+    DocumentSummaryDto,
+    McPackDto,
+    NotificationDto,
+    PunchDto,
+    TagSummaryDto
+} from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
 import { externalChecklists } from './externalChecklists';
 import { externalCommPacks } from './externalCommPacks';
@@ -100,8 +108,9 @@ export interface EchoWorker {
         tagProjectName?: string,
         maxHits?: number
     ): Promise<ResultArray<ChecklistDto>>;
-    lookupChecklistAsync(tagNo: number): Promise<ResultValue<ChecklistDto>>;
-    lookupChecklistsAsync(tagNos: number[]): Promise<ResultArray<ChecklistDto>>;
+    lookupChecklistAsync(id: number): Promise<ResultValue<ChecklistDto>>;
+    lookupChecklistsAsync(ids: number[]): Promise<ResultArray<ChecklistDto>>;
+    lookupGroupByTagNosAsync(tagNos: string[]): Promise<ResultValue<Dictionary<ChecklistDto[]>>>;
 
     searchNotifications(
         searchText: string,
@@ -177,6 +186,7 @@ const echoWorker: EchoWorker = {
     searchChecklists: (...args) => tryCatchToResult(() => externalChecklists.search(...args)),
     lookupChecklistAsync: (...args) => tryCatchToResult(() => externalChecklists.lookup(...args)),
     lookupChecklistsAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupAll(...args)),
+    lookupGroupByTagNosAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupGroupByTagNos(...args)),
 
     searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
     searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),

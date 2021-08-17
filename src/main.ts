@@ -1,10 +1,11 @@
 import EchoCore from '@equinor/echo-core';
-import { ResultValues, Search, Syncer } from '.';
+import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { Filter } from './inMemory/searchFilter';
 import { logger } from './logger';
 import { logging, LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/offlineSystem';
+import { ResultArray } from './results/baseResult';
 import { McPackDto } from './workers/dataTypes';
 import { ErrorForTesting } from './workers/externalCalls';
 
@@ -203,7 +204,7 @@ async function testCommReturnTypesClicked(): Promise<void> {
 
 function print<T>(
     name: string,
-    searchResults: ResultValues<T>,
+    searchResults: ResultArray<T>,
     valuesToPrint: (item: T) => (string | number | Date | undefined)[]
 ): void {
     if (searchResults.isSuccess) {

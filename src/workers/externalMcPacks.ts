@@ -1,10 +1,11 @@
-import { McPackDto, ResultValue, ResultValues } from '..';
 import { inMemory } from '../inMemory/inMemoryExports';
 import { inMemoryMcPacksInstance } from '../inMemory/inMemoryMcPacks';
 import { Filter } from '../inMemory/searchFilter';
 import { McPackDb, mcPacksApi } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { mcPacksSyncSystem } from '../offlineSync/mcPacksSyncer/mcPacksSyncer';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { ResultArray, ResultValue } from '../results/baseResult';
+import { McPackDto } from './dataTypes';
 import { SearchSystem } from './searchSystem';
 
 let _mcPacksSearchSystem: SearchSystem<McPackDb>;
@@ -22,7 +23,7 @@ async function search(
     searchText: string,
     maxHits: number,
     tryToApplyFilter?: Filter<McPackDb>
-): Promise<ResultValues<McPackDto>> {
+): Promise<ResultArray<McPackDto>> {
     return await _mcPacksSearchSystem.search(
         async () => inMemory.McPacks.search(searchText, maxHits, tryToApplyFilter),
         () => mcPacksApi.search(searchText, maxHits, undefined, tryToApplyFilter?.projectName)
@@ -32,7 +33,7 @@ async function lookup(id: number): Promise<ResultValue<McPackDto>> {
     return inMemoryMcPacksInstance().get(id);
 }
 
-async function lookupAll(ids: number[]): Promise<ResultValues<McPackDto>> {
+async function lookupAll(ids: number[]): Promise<ResultArray<McPackDto>> {
     return inMemoryMcPacksInstance().getAll(ids);
 }
 

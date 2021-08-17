@@ -3,14 +3,14 @@ import { echoSearchWorker } from './echoWorkerInstance';
 import { LogType } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/offlineSystem';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
-import { Result, ResultArray, ResultValue, SyncErrorType } from './results/baseResult';
+import { Result, ResultArray, ResultValue, SearchModuleError, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
-import { CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
+import { ChecklistDto, CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
-export type { Result };
-export type { ResultValue, ResultArray as ResultValues };
+export type { OfflineSystem };
+export type { Result, ResultValue, ResultArray, SearchModuleError };
 export type { TagStatus, TagSummaryDto };
-export type { McPackDto, CommPackDto, NotificationDto, PunchDto };
+export type { McPackDto, CommPackDto, NotificationDto, PunchDto, ChecklistDto };
 
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
     let value = 0;
@@ -46,7 +46,8 @@ const searchPunches = {
 const searchCheckLists = {
     searchAsync: echoSearchWorker.searchChecklists,
     getAsync: echoSearchWorker.lookupChecklistAsync,
-    getAllAsync: echoSearchWorker.lookupChecklistsAsync
+    getAllAsync: echoSearchWorker.lookupChecklistsAsync,
+    getGroupByTagNos: echoSearchWorker.lookupGroupByTagNosAsync
 };
 
 const searchMcPacks = {

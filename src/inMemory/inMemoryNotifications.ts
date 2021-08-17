@@ -1,6 +1,7 @@
-import { NotificationDto, ResultValues } from '..';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { ResultArray } from '../results/baseResult';
 import { resultArray } from '../results/createResult';
+import { NotificationDto } from '../workers/dataTypes';
 import { InMemoryData } from './inMemoryData';
 import { searchOrderedByBestMatch } from './inMemorySearch';
 import { Filter } from './searchFilter';
@@ -39,6 +40,6 @@ export function searchInMemoryNotificationsWithText(
     );
 }
 
-export function searchInMemoryNotificationsByTagNos(tagNos: string[]): ResultValues<NotificationDto> {
+export function searchInMemoryNotificationsByTagNos(tagNos: string[]): ResultArray<NotificationDto> {
     return resultArray.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
 }

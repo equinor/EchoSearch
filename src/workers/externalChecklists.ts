@@ -1,5 +1,4 @@
 import { Dictionary } from 'lodash';
-import { ResultValues } from '..';
 import { ChecklistDb, checklistsApi } from '../offlineSync/checklistsSyncer/checklistsApi';
 import {
     checklistsRepository,
@@ -9,7 +8,7 @@ import {
 import { checklistsSyncSystem } from '../offlineSync/checklistsSyncer/checklistsSyncer';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { getInstCode, Settings } from '../offlineSync/syncSettings';
-import { ResultValue } from '../results/baseResult';
+import { ResultArray, ResultValue } from '../results/baseResult';
 import { resultArray, resultValue } from '../results/createResult';
 import { errorMessage } from '../results/errors';
 import { ChecklistDto } from './dataTypes';
@@ -34,7 +33,7 @@ async function search(
     mcPackNo?: string,
     tagProjectName?: string,
     maxHits = 500
-): Promise<ResultValues<ChecklistDto>> {
+): Promise<ResultArray<ChecklistDto>> {
     return await _checklistsSearchSystem.search(
         async () => await checklistsSearchDb(tagNo, commPackNo, mcPackNo, tagProjectName, maxHits),
         async () =>
@@ -52,7 +51,7 @@ async function lookup(id: number): Promise<ResultValue<ChecklistDto>> {
         : resultValue.error(errorMessage.sync.syncNeededBeforeSearch(checklistKey));
 }
 
-async function lookupAll(ids: number[]): Promise<ResultValues<ChecklistDto>> {
+async function lookupAll(ids: number[]): Promise<ResultArray<ChecklistDto>> {
     return Settings.isFullSyncDone(checklistKey)
         ? checklistsRepository().bulkGet(ids)
         : resultArray.error(errorMessage.sync.syncNeededBeforeSearch(checklistKey));
