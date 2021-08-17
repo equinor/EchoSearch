@@ -29,6 +29,7 @@ export function searchInMemoryNotificationsWithText(
             item.maintenanceRecordId.toString(),
             item.functionalLocation,
             item.title,
+            item.tagId ?? '',
             item.mainWorkCenterId,
             item.equipmentId
         ],
