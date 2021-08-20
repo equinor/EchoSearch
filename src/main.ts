@@ -3,7 +3,7 @@ import { Search, Syncer } from '.';
 import { echoSearchWorker } from './echoWorkerInstance';
 import { Filter } from './inMemory/searchFilter';
 import { logger } from './logger';
-import { logging, LogType } from './loggerOptions';
+import { logging, LogLevel } from './loggerOptions';
 import { OfflineSystem } from './offlineSync/offlineSystem';
 import { ResultArray } from './results/baseResult';
 import { McPackDto } from './workers/dataTypes';
@@ -46,7 +46,7 @@ function authenticate(): void {
 authenticate();
 
 const logOptions = {
-    '': LogType.Trace
+    '': LogLevel.Trace
 };
 
 Syncer.configuration.setApiBaseUrl('https://dt-echopedia-api-dev.azurewebsites.net/');

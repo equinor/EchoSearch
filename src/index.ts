@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { echoSearchWorker } from './echoWorkerInstance';
-import { LogType } from './loggerOptions';
+import { LogLevel } from './loggerOptions';
 import { defaultFailureRate, FailureRate } from './offlineSync/apiDataFetcher';
 import { OfflineSystem } from './offlineSync/offlineSystem';
 import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
@@ -8,6 +8,7 @@ import { Result, ResultArray, ResultValue, SearchModuleError, SyncErrorType } fr
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { ChecklistDto, CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
 
+export type { LogLevel };
 export type { FailureRate };
 export type { OfflineSystem };
 export type { Result, ResultValue, ResultArray, SearchModuleError };
@@ -83,7 +84,7 @@ const logConfiguration = {
     setDefaultLevel: echoSearchWorker.setDefaultLogLevel,
     getDefaultLevel: echoSearchWorker.getDefaultLogLevel,
     getLevel: echoSearchWorker.getLogLevel,
-    LogType: LogType
+    LogLevel: LogLevel
 };
 
 const debugOptions = {

@@ -2,7 +2,7 @@ import * as Comlink from 'comlink';
 import { Dictionary } from 'lodash';
 import { Filter } from '../inMemory/searchFilter';
 import { logger } from '../logger';
-import { logging, LogOptions, LogType } from '../loggerOptions';
+import { logging, LogLevel, LogOptions } from '../loggerOptions';
 import { FailureRate } from '../offlineSync/apiDataFetcher';
 import { DocumentSummaryKey } from '../offlineSync/documentsSyncer/documentDb';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
@@ -141,11 +141,11 @@ export interface EchoWorker {
     toggleMockDataClicked(): void;
     testCommReturnTypes(): unknown;
 
-    setLogLevel: (context: string, logTypeLevel: LogType) => void;
+    setLogLevel: (context: string, logLevelLevel: LogLevel) => void;
     setLogLevels: (logLevels: LogOptions) => void;
-    setDefaultLogLevel: (defaultLogLevel: LogType) => void;
-    getDefaultLogLevel: () => LogType;
-    getLogLevel: (context: string) => LogType;
+    setDefaultLogLevel: (defaultLogLevel: LogLevel) => void;
+    getDefaultLogLevel: () => LogLevel;
+    getLogLevel: (context: string) => LogLevel;
     setApiBaseUrl(baseUrl: string): void;
 
     setTokenCallback(getToken: () => Promise<string>): void;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isLogEnabled, LogType } from './loggerOptions';
+import { isLogEnabled, LogLevel } from './loggerOptions';
 import { ElapsedTimeInSeconds } from './offlineSync/Utils/timeUtils';
 import { NotImplementedError } from './results/errors';
 
@@ -8,16 +8,16 @@ const _green = '#008000';
 const _cyan = '#008080';
 const _gray = '#808080';
 
-function logWithType(logType: LogType, context: string, ...args: any[]): void {
-    if (!isLogEnabled(context, logType)) return;
+function logWithType(logLevel: LogLevel, context: string, ...args: any[]): void {
+    if (!isLogEnabled(context, logLevel)) return;
 
-    if (logType === LogType.Trace) logWithColor(_gray, '[Trace]', context, ...args);
-    else if (logType === LogType.Debug) logWithColor(_cyan, '[Debug]', context, ...args);
-    else if (logType === LogType.Info) logWithColor(_green, '[Info]', context, ...args);
-    else if (logType === LogType.Warn) console.warn(context, ...args);
-    else if (logType === LogType.Error) console.error(context, ...args);
-    else if (logType === LogType.Critical) console.error(context, ...args);
-    else throw new NotImplementedError(`${logType} logging has not been implemented`);
+    if (logLevel === LogLevel.Trace) logWithColor(_gray, '[Trace]', context, ...args);
+    else if (logLevel === LogLevel.Debug) logWithColor(_cyan, '[Debug]', context, ...args);
+    else if (logLevel === LogLevel.Info) logWithColor(_green, '[Info]', context, ...args);
+    else if (logLevel === LogLevel.Warn) console.warn(context, ...args);
+    else if (logLevel === LogLevel.Error) console.error(context, ...args);
+    else if (logLevel === LogLevel.Critical) console.error(context, ...args);
+    else throw new NotImplementedError(`${logLevel} logging has not been implemented`);
 }
 
 function logWithColor(color: string, ...args: any[]) {
@@ -43,7 +43,7 @@ function logPerformanceToConsole(
     startTime: number,
     forcePrintToConsole = false
 ): void {
-    if (!isLogEnabled(context, LogType.Performance)) return;
+    if (!isLogEnabled(context, LogLevel.Performance)) return;
     const timeInSeconds = ElapsedTimeInSeconds(startTime);
     if (!forcePrintToConsole && timeInSeconds < 0.8) return;
 
@@ -122,12 +122,12 @@ export function createLogger(context: string): LoggerFunctions {
     }
 
     return {
-        trace: (...args: any[]) => logWithType(LogType.Trace, getContext(), ...args),
-        debug: (...args: any[]) => logWithType(LogType.Debug, getContext(), ...args),
-        info: (...args: any[]) => logWithType(LogType.Info, getContext(), ...args),
-        warn: (...args: any[]) => logWithType(LogType.Warn, getContext(), ...args),
-        error: (...args: any[]) => logWithType(LogType.Error, getContext(), ...args),
-        critical: (...args: any[]) => logWithType(LogType.Critical, getContext(), ...args),
+        trace: (...args: any[]) => logWithType(LogLevel.Trace, getContext(), ...args),
+        debug: (...args: any[]) => logWithType(LogLevel.Debug, getContext(), ...args),
+        info: (...args: any[]) => logWithType(LogLevel.Info, getContext(), ...args),
+        warn: (...args: any[]) => logWithType(LogLevel.Warn, getContext(), ...args),
+        error: (...args: any[]) => logWithType(LogLevel.Error, getContext(), ...args),
+        critical: (...args: any[]) => logWithType(LogLevel.Critical, getContext(), ...args),
         create: (childContext: string) => createLogger(`${context}.${childContext}`),
         performance: (preText?: string) => logPerformance(getContext(), `${preText ?? ''}`.trim())
     };

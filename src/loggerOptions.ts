@@ -2,7 +2,7 @@
  * Log levels, from least to most important. Log if level is equal or higher than the specified log level for current context.
  * @link https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0
  */
-export enum LogType {
+export enum LogLevel {
     /**
      * Not used for writing log messages. Specifies that a logging category should not write any messages.
      */
@@ -41,7 +41,7 @@ export enum LogType {
     Critical
 }
 
-const logOptions: LogOptions = { '': LogType.Warn }; //Default
+const logOptions: LogOptions = { '': LogLevel.Warn }; //Default
 
 function formatContext(context: string) {
     const stripChars = '[]';
@@ -49,11 +49,11 @@ function formatContext(context: string) {
     return context;
 }
 
-function setLogLevel(context: string, logTypeLevel: LogType): void {
-    logOptions[formatContext(context)] = logTypeLevel;
+function setLogLevel(context: string, logLevelLevel: LogLevel): void {
+    logOptions[formatContext(context)] = logLevelLevel;
 }
 
-function getLogLevel(context: string): LogType {
+function getLogLevel(context: string): LogLevel {
     return logOptions[formatContext(context)] ?? getDefaultLogLevel();
 }
 
@@ -63,12 +63,12 @@ function setLogLevels(logLevels: LogOptions): void {
     }
 }
 
-function setDefaultLogLevel(defaultLogLevel: LogType): void {
+function setDefaultLogLevel(defaultLogLevel: LogLevel): void {
     setLogLevel('', defaultLogLevel);
 }
 
-function getDefaultLogLevel(): LogType {
-    return logOptions[''] ?? LogType.Disabled;
+function getDefaultLogLevel(): LogLevel {
+    return logOptions[''] ?? LogLevel.Disabled;
 }
 
 function strip(value: string, charsToStrip: string, replaceWithChar = ''): string {
@@ -87,11 +87,11 @@ export const logging = {
 };
 
 export interface LogOptions {
-    [context: string]: LogType;
+    [context: string]: LogLevel;
 }
 
-export function isLogEnabled(context: string, logType: LogType): boolean {
-    if (logType === LogType.Disabled) return false;
+export function isLogEnabled(context: string, logLevel: LogLevel): boolean {
+    if (logLevel === LogLevel.Disabled) return false;
     context = formatContext(context);
     let minLevel = getDefaultLogLevel();
 
@@ -103,7 +103,7 @@ export function isLogEnabled(context: string, logType: LogType): boolean {
         }
     }
 
-    if (minLevel === LogType.Disabled) return false;
+    if (minLevel === LogLevel.Disabled) return false;
 
-    return logType >= minLevel;
+    return logLevel >= minLevel;
 }
