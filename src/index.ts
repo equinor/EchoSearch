@@ -3,16 +3,16 @@ import { echoSearchWorker } from './echoWorkerInstance';
 import { LogLevel } from './loggerOptions';
 import { defaultFailureRate, FailureRate } from './offlineSync/apiDataFetcher';
 import { OfflineSystem } from './offlineSync/offlineSystem';
-import { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
+import { packageVersion } from './packageVersion';
 import { Result, ResultArray, ResultValue, SearchModuleError, SyncErrorType } from './results/baseResult';
 import { getApiTokenInMainThread } from './tokenHelperMainThread';
 import { ChecklistDto, CommPackDto, McPackDto, NotificationDto, PunchDto, TagSummaryDto } from './workers/dataTypes';
-
-export type { LogLevel };
+export { LogLevel } from './loggerOptions';
+export { OfflineSystem } from './offlineSync/offlineSystem';
+export { TagStatus } from './offlineSync/tagSyncer/tagSummaryDb';
 export type { FailureRate };
-export type { OfflineSystem };
 export type { Result, ResultValue, ResultArray, SearchModuleError };
-export type { TagStatus, TagSummaryDto };
+export type { TagSummaryDto };
 export type { McPackDto, CommPackDto, NotificationDto, PunchDto, ChecklistDto };
 
 export async function SearchDummyTest(sleepCount: number): Promise<string> {
@@ -82,8 +82,8 @@ const logConfiguration = {
     setLevel: echoSearchWorker.setLogLevel,
     setLevels: echoSearchWorker.setLogLevels,
     setDefaultLevel: echoSearchWorker.setDefaultLogLevel,
-    getDefaultLevel: echoSearchWorker.getDefaultLogLevel,
-    getLevel: echoSearchWorker.getLogLevel,
+    getDefaultLevel: (): Promise<LogLevel> => echoSearchWorker.getDefaultLogLevel(),
+    getLevel: (context: string): Promise<LogLevel> => echoSearchWorker.getLogLevel(context),
     LogLevel: LogLevel
 };
 
@@ -106,6 +106,9 @@ const syncConfiguration = {
 
     log: logConfiguration,
 
+    getPackageVersion: (): string => {
+        return packageVersion;
+    },
     debugOptions
 };
 

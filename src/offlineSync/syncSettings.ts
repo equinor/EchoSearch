@@ -1,5 +1,6 @@
 import Dexie from 'dexie'; //If dexie compile error - remove this line and re-import it
 import { logger } from '../logger';
+import { packageVersion } from '../packageVersion';
 import { NotInitializedError } from '../results/errors';
 import { OfflineSystem } from './offlineSystem';
 import { ObservableState, ObservableStateReadonly } from './Utils/observableState';
@@ -18,6 +19,7 @@ export function getApiBaseUrl(): string {
 function setApiBaseUrl(baseUrl: string): void {
     _baseApiUrl = baseUrl;
     if (_baseApiUrl.endsWith('/')) _baseApiUrl = _baseApiUrl.slice(0, -1);
+    log.debug('v', packageVersion, 'Base url: ', _baseApiUrl);
 }
 
 /**

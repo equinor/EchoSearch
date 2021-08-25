@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { ChecklistDb } from '../offlineSync/checklistsSyncer/checklistsApi';
 import { CommPackDb } from '../offlineSync/commPacksSyncer/commPacksApi';
 import { DocumentSummaryDb } from '../offlineSync/documentsSyncer/documentDb';
@@ -6,18 +7,15 @@ import { NotificationDb } from '../offlineSync/notificationSyncer/notificationAp
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 
-export type TagSummaryDto = TagSummaryDb;
-export type DocumentSummaryDto = DocumentSummaryDb;
-export type McPackDto = McPackDb;
-export type CommPackDto = CommPackDb;
+//Export as Dto in case we want to change the internal dexie db interface
 
-export type ChecklistDto = ChecklistDb;
+export interface TagSummaryDto extends TagSummaryDb {}
+export interface DocumentSummaryDto extends DocumentSummaryDb {}
+export interface McPackDto extends McPackDb {}
+export interface CommPackDto extends CommPackDb {}
 
-// export type NotificationDto = Readonly<NotificationDb>; //TODO ask Chris
+export interface ChecklistDto extends ChecklistDb {}
 
-export interface NotificationDto extends NotificationDb {
-    //TODO Ove fix dto
-    dummy?: number;
-}
+export interface NotificationDto extends NotificationDb {}
 
-export type PunchDto = PunchDb;
+export interface PunchDto extends PunchDb {}

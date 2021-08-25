@@ -116,7 +116,7 @@ export interface EchoWorker {
     searchNotifications(
         searchText: string,
         maxHits: number,
-        tryToApplyFilter?: Filter<PunchDto>
+        tryToApplyFilter?: Filter<NotificationDto>
     ): Promise<ResultArray<NotificationDto>>;
     searchNotificationsByTagNos(tagNos: string[]): Promise<ResultArray<NotificationDto>>;
 
