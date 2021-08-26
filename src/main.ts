@@ -180,9 +180,9 @@ async function searchBtnClicked() {
         console.log('Record lookup', recordLookup);
     }
     if (isSelected(OfflineSystem.WorkOrders)) {
-        const workOrders = await Search.Notifications.searchAsync(getSearchInput() ?? 'A-73MA001', 2);
+        const workOrders = await Search.WorkOrders.searchAsync(getSearchInput() ?? 'A-73MA001', 2);
         print('workOrders', workOrders, (i) => [i.workOrderId, i.title, i.tagId]);
-        const recordLookup = await Search.Notifications.getAsync(workOrders.values[0]?.maintenanceRecordId ?? '123');
+        const recordLookup = await Search.WorkOrders.getAsync(workOrders.values[0]?.workOrderId ?? '123');
         console.log('WorkOrders lookup', recordLookup);
     }
 }
