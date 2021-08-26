@@ -19,6 +19,7 @@ import { Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
 import { workOrdersApi } from '../offlineSync/workOrdersSyncer/workOrdersApi';
+import { workOrdersSyncSystem } from '../offlineSync/workOrdersSyncer/workOrdersSyncer';
 import { Result } from '../results/baseResult';
 import { result } from '../results/createResult';
 import { NotImplementedError } from '../results/errors';
@@ -58,7 +59,8 @@ function allSyncSystems() {
         punchesSyncSystem,
         mcPacksSyncSystem,
         commPacksSyncSystem,
-        checklistsSyncSystem
+        checklistsSyncSystem,
+        workOrdersSyncSystem
     ];
 }
 
@@ -187,10 +189,10 @@ function getApiState(key: OfflineSystem): ApiFetchState | undefined {
             return notificationsApi.state;
         case OfflineSystem.WorkOrders:
             return workOrdersApi.state;
-        default:
-            break;
+        // default:
+        //     break;
     }
-    return undefined;
+    // return undefined;
 }
 
 async function resetDebugOptions(): Promise<void> {
