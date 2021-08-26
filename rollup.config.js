@@ -1,5 +1,6 @@
 import commonJs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import fs from 'fs';
 import babel from 'rollup-plugin-babel';
 import copy from 'rollup-plugin-copy';
 import del from 'rollup-plugin-delete';
@@ -20,8 +21,18 @@ const isDevelopment = environment === 'development';
 const isProduction = !isDevelopment;
 
 function print() {
-    console.log('isDevelopment', isDevelopment, 'process.env.NODE_ENV', process.env.NODE_ENV);
+    console.log('isDevelopment', isDevelopment, 'process.env.NODE_ENV', process.env.NODE_ENV, pkg.version);
 }
+
+function updatePackageVersionFromPackageJson() {
+    let data = '/* eslint-disable */\n';
+    data +=
+        '// auto-generated from rollup.config.js, will be overwritten next production build. Version taken from package.json\n';
+    data += `export const packageVersion = '${pkg.version}';`;
+    fs.writeFileSync('./src/packageVersion.ts', data);
+    console.log(data);
+}
+updatePackageVersionFromPackageJson();
 
 setTimeout(() => print(), 1000);
 

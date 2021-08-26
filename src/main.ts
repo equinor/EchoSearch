@@ -58,7 +58,7 @@ let _selectedOfflineSystem: OfflineSystem | undefined = undefined;
 _selectedOfflineSystem = localStorage.getItem('selectedOfflineSystem') as OfflineSystem;
 UpdateHtmlSelectedLabel();
 
-function selectNextOfflineSystem() {
+async function selectNextOfflineSystem() {
     const all = Object.values(OfflineSystem);
     if (_selectedOfflineSystem === undefined) _selectedOfflineSystem = all[0];
     else if (_selectedOfflineSystem === all[all.length - 1]) _selectedOfflineSystem = undefined;

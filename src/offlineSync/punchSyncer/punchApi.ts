@@ -73,7 +73,7 @@ export async function apiUpdatedPunches(
 ): Promise<PunchDb[]> {
     const date = dateAsApiString(fromDate);
     const url = `${getApiBaseUrl()}/${instCode}/tag/punches?updatedSince=${date}&paging=false`;
-    return punchesApi.fetchAll(url, () => mockedOpenClosedRejectedAndRandomPunches(50000), abortSignal);
+    return await punchesApi.fetchAll(url, () => mockedOpenClosedRejectedAndRandomPunches(50000), abortSignal);
 }
 
 async function apiEstimatedPunchCount(instCode: string, abortSignal: AbortSignal): Promise<number> {
