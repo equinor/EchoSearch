@@ -19,7 +19,8 @@ import {
     McPackDto,
     NotificationDto,
     PunchDto,
-    TagSummaryDto
+    TagSummaryDto,
+    WorkOrderDto
 } from './dataTypes';
 import { externalInitializeTask, externalTestCommReturnTypes, syncContract } from './externalCalls';
 import { externalChecklists } from './externalChecklists';
@@ -29,6 +30,7 @@ import { externalMcPacks } from './externalMcPacks';
 import { externalNotifications } from './externalNotifications';
 import { externalPunches } from './externalPunches';
 import { externalTags } from './externalTags';
+import { externalWorkOrders } from './externalWorkOrders';
 
 function expensive(time: number): number {
     const start = Date.now();
@@ -116,12 +118,22 @@ export interface EchoWorker {
     searchNotifications(
         searchText: string,
         maxHits: number,
-        tryToApplyFilter?: Filter<PunchDto>
+        tryToApplyFilter?: Filter<NotificationDto>
     ): Promise<ResultArray<NotificationDto>>;
     searchNotificationsByTagNos(tagNos: string[]): Promise<ResultArray<NotificationDto>>;
 
     lookupNotificationAsync(maintenanceRecordId: string): Promise<ResultValue<NotificationDto>>;
     lookupNotificationsAsync(maintenanceRecordIds: string[]): Promise<ResultArray<NotificationDto>>;
+
+    searchWorkOrders(
+        searchText: string,
+        maxHits: number,
+        tryToApplyFilter?: Filter<WorkOrderDto>
+    ): Promise<ResultArray<WorkOrderDto>>;
+    searchWorkOrdersByTagNos(tagNos: string[]): Promise<ResultArray<WorkOrderDto>>;
+
+    lookupWorkOrderAsync(workOrderId: string): Promise<ResultValue<WorkOrderDto>>;
+    lookupWorkOrdersAsync(workOrderIds: string[]): Promise<ResultArray<WorkOrderDto>>;
 
     runSyncWorkerAsync(offlineSystemKey: OfflineSystem): Promise<Result>;
 
@@ -197,6 +209,11 @@ const echoWorker: EchoWorker = {
     searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),
     lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications.lookup(...args)),
     lookupNotificationsAsync: (...args) => tryCatchToResult(() => externalNotifications.lookupAll(...args)),
+
+    searchWorkOrders: (...args) => tryCatchToResult(() => externalWorkOrders.search(...args)),
+    searchWorkOrdersByTagNos: (...args) => tryCatchToResult(() => externalWorkOrders.searchByTagNos(...args)),
+    lookupWorkOrderAsync: (...args) => tryCatchToResult(() => externalWorkOrders.lookup(...args)),
+    lookupWorkOrdersAsync: (...args) => tryCatchToResult(() => externalWorkOrders.lookupAll(...args)),
 
     changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
     runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),
