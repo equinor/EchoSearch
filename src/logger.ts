@@ -145,5 +145,6 @@ export const loggerFactory = {
     mcPacks: (context: string) => logger('McPacks').create(context),
     checklists: (context: string) => logger('Checklists').create(context),
     punches: (context: string) => logger('Punch').create(context),
-    notifications: (context: string) => logger('Notifications').create(context)
+    notifications: (context: string) => logger('Notifications').create(context),
+    workOrders: (context: string) => logger('WorkOrders').create(context)
 };

@@ -5,6 +5,7 @@ import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
+import { WorkOrderDb } from '../offlineSync/workOrdersSyncer/workOrdersApi';
 
 export type TagSummaryDto = TagSummaryDb;
 export type DocumentSummaryDto = DocumentSummaryDb;
@@ -21,3 +22,4 @@ export interface NotificationDto extends NotificationDb {
 }
 
 export type PunchDto = PunchDb;
+export type WorkOrderDto = WorkOrderDb;
