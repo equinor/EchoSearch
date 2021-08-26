@@ -64,7 +64,7 @@ export class OfflineDataDexieBase<T> extends Dexie {
                 throw new SyncCanceledError('Sync was canceled');
             }
 
-            if (index % 20 === 0) this.log.info(`adding data.. ${index}/${chunks.length}`);
+            if (index % 20 === 0) this.log.info(`adding data.. ${index + 1}/${chunks.length}`);
             index++;
 
             await database.bulkPut(chunk); //bulkAdd doesn't make any speed difference with 500k items with id as number.

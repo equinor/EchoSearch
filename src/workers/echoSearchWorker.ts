@@ -159,7 +159,7 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
         if (!funcResult.isSuccess) log.debug('Error:', funcResult.error);
         return funcResult;
     } catch (error) {
-        log.warn(error);
+        log.warn('we caught an error: ', error);
         return result.errorFromException(error) as T;
     }
 }
