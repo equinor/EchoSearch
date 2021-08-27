@@ -145,7 +145,7 @@ export interface EchoWorker {
     setLogLevels: (logLevels: LogOptions) => void;
     setDefaultLogLevel: (defaultLogLevel: LogLevel) => void;
     getDefaultLogLevel: () => LogLevel;
-    getLogLevel: (context: string) => LogLevel;
+    getLogLevel: (context: string) => LogLevel | undefined;
     setApiBaseUrl(baseUrl: string): void;
 
     setTokenCallback(getToken: () => Promise<string>): void;
