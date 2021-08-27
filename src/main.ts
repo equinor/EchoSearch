@@ -182,8 +182,8 @@ async function searchBtnClicked() {
     if (isSelected(OfflineSystem.WorkOrders)) {
         const workOrders = await Search.WorkOrders.searchAsync(getSearchInput() ?? 'A-73MA001', 2);
         print('workOrders', workOrders, (i) => [i.workOrderId, i.title, i.tagId]);
-        const recordLookup = await Search.WorkOrders.getAsync(workOrders.values[0]?.workOrderId ?? '123');
-        console.log('WorkOrders lookup', recordLookup);
+        const workOrdersLookup = await Search.WorkOrders.getAsync(workOrders.values[0]?.workOrderId ?? '123');
+        console.log('WorkOrders lookup', workOrdersLookup);
     }
 }
 

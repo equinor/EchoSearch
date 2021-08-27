@@ -5,7 +5,7 @@ import { SyncSystem } from '../../workers/syncSystem';
 import { OfflineSystem } from '../offlineSystem';
 import { getInstCode, Settings } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
-import { getOpenWorkOrdersFromApi, WorkOrderDb } from './workOrdersApi';
+import { getAllOpenWorkOrdersFromApi, getOpenAndClosedWorkOrdersApi, WorkOrderDb } from './workOrdersApi';
 import { workOrdersAdministrator, workOrdersRepositoryTransaction } from './workOrdersRepository';
 
 const log = loggerFactory.workOrders('Syncer');
@@ -15,12 +15,12 @@ export const workOrdersSyncSystem = new SyncSystem(
     inMemoryWorkOrdersInstance(),
     workOrdersAdministrator(),
     async (abortSignal) => syncOpenWorkOrders(abortSignal),
-    async (lastChangedDate, abortSignal) => syncUpdateOpenWorkOrders(lastChangedDate, abortSignal)
+    async (lastChangedDate, abortSignal) => syncUpdatedWorkOrders(lastChangedDate, abortSignal)
 );
 
 async function syncOpenWorkOrders(abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const performanceLogger = log.performance();
-    const data = await getOpenWorkOrdersFromApi(getInstCode(), abortSignal);
+    const data = await getAllOpenWorkOrdersFromApi(getInstCode(), abortSignal);
     performanceLogger.forceLogDelta(' Api ' + data.length);
 
     inMemoryWorkOrdersInstance().clearAndInit(data);
@@ -35,7 +35,7 @@ async function syncOpenWorkOrders(abortSignal: AbortSignal): Promise<InternalSyn
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
 
-async function syncUpdateOpenWorkOrders(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
+async function syncUpdatedWorkOrders(lastChangedDate: Date, abortSignal: AbortSignal): Promise<InternalSyncResult> {
     const lastSyncedAtDate = Settings.get(OfflineSystem.WorkOrders).lastSyncedAtDate;
     const daysSinceLastUpdate = dateDifferenceInDays(new Date(), lastSyncedAtDate);
     const daysBackInTime = 30;
@@ -48,26 +48,36 @@ async function syncUpdateOpenWorkOrders(lastChangedDate: Date, abortSignal: Abor
     }
 
     const performanceLogger = log.performance();
-    // updated && closed work orders (status)
+    const data = await getOpenAndClosedWorkOrdersApi(getInstCode(), lastChangedDate, abortSignal);
+    performanceLogger.forceLogDelta('Api ' + data.length);
 
-    // inMemoryWorkOrdersInstance().updateItems(data);
-    // if (closedWorkOrderNos.length > 0) {
-    //     log.debug('Delete closed inMemory workOrders', closedWorkOrderNos.length);
-    //     inMemoryWorkOrdersInstance().removeItems(closedWorkOrderNos);
-    // }
-    // performanceLogger.forceLogDelta('Updated inMemory, total: ' + inMemoryWorkOrdersInstance().length());
+    const closedWorkOrderNos = data.filter((workOrder) => isDoneWorkOrder(workOrder.activeStatusIds));
+    console.log(closedWorkOrderNos, 'closed/done work orders');
 
-    // const transaction = workOrdersRepositoryTransaction();
-    // await transaction.addDataBulks(data, abortSignal);
-    // if (closedWorkOrderNos.length > 0) {
-    //     await transaction.bulkDeleteData(closedWorkOrderNos.map((item) => item.workOrderId));
-    // }
-    // performanceLogger.forceLogDelta('Add/Delete to Dexie');
+    inMemoryWorkOrdersInstance().updateItems(data);
+    if (closedWorkOrderNos.length > 0) {
+        log.debug('Delete closed inMemory workOrders', closedWorkOrderNos.length);
+        inMemoryWorkOrdersInstance().removeItems(closedWorkOrderNos);
+    }
+    performanceLogger.forceLogDelta('Updated inMemory, total: ' + inMemoryWorkOrdersInstance().length());
 
-    // const newestItemDate = getNewestItemDate(data);
+    const transaction = workOrdersRepositoryTransaction();
+    await transaction.addDataBulks(data, abortSignal);
+    if (closedWorkOrderNos.length > 0) {
+        await transaction.bulkDeleteData(closedWorkOrderNos.map((item) => item.workOrderId));
+    }
 
-    return { isSuccess: true, itemsSyncedCount: 2 };
+    performanceLogger.forceLogDelta('Add/Delete to Dexie');
+
+    const newestItemDate = getNewestItemDate(data);
+
+    return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
 }
+
+const isDoneWorkOrder = (activeStatusIds?: string[]): boolean => {
+    if (!activeStatusIds) return false;
+    return activeStatusIds.includes('CLSD') || activeStatusIds.includes('TECO');
+};
 
 function getNewestItemDate(data: WorkOrderDb[]) {
     return getMaxDateFunc(data, (workOrder) => [workOrder.changedDateTime]);

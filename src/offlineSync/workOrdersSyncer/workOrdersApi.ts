@@ -2,6 +2,7 @@ import { loggerFactory } from '../../logger';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { toDateOrUndefined } from '../stringUtils';
 import { getApiBaseUrl } from '../syncSettings';
+import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedWorkOrdersString } from './workOrdersMocked';
 
 export const workOrdersApi = new ApiDataFetcher(cleanupWorkOrder);
@@ -36,17 +37,19 @@ export interface WorkOrderDetails extends WorkOrderDb {
 }
 
 const log = loggerFactory.workOrders('Api');
+console.log(log);
 const workOrdersFetcher = new ApiDataFetcher(cleanupWorkOrder);
 
 export const workOrderApi = {
-    getOpenAndClosedWorkOrdersForTagNo: getOpenAndClosedWorkOrdersApi,
-    getOpen: getOpenWorkOrdersFromApi,
-    getWorkOrder: getWorkOrderApi,
+    getAllOpen: getAllOpenWorkOrdersFromApi,
+    getOpenAndClosed: getOpenAndClosedWorkOrdersApi,
+    getOpenAndClosedWorkOrdersForTag: getOpenAndClosedWorkOrdersApi,
+    workOrderDetail: getWorkOrderDetailsApi,
 
     state: workOrdersFetcher.state
 };
 
-// does validations
+// do validations
 function cleanupWorkOrder(workOrder: WorkOrderDb): WorkOrderDb {
     return {
         activeStatusIds: workOrder.activeStatusIds ?? [],
@@ -65,24 +68,34 @@ function cleanupWorkOrder(workOrder: WorkOrderDb): WorkOrderDb {
     };
 }
 
+export async function getAllOpenWorkOrdersFromApi(instCode: string, abortSignal: AbortSignal): Promise<WorkOrderDb[]> {
+    const url = `${getApiBaseUrl()}/${instCode}/work-orders/open?top=500000`;
+    return workOrdersApi.fetchAll(url, () => getMockedWorkOrdersString(50000), abortSignal);
+}
+
 export async function getOpenAndClosedWorkOrdersApi(
+    instCode: string,
+    fromDate: Date,
+    abortSignal: AbortSignal
+): Promise<WorkOrderDb[]> {
+    const date = dateAsApiString(fromDate);
+    const url = `${getApiBaseUrl()}/${instCode}/work-orders/open-and-closed?changedDateFrom=${date}&top=500000`;
+    return workOrdersApi.fetchAll(url, () => getMockedWorkOrdersString(50000), abortSignal);
+}
+
+export async function getOpenAndClosedWorkOrdersForTagApi(
     instCode: string,
     tagNo: string,
     abortSignal: AbortSignal
 ): Promise<WorkOrderDb[]> {
-    const url = `${getApiBaseUrl}/${instCode}/tag/work-orders?tagNo=${encodeURIComponent(
+    const url = `${getApiBaseUrl()}/${instCode}/tag/work-orders?tagNo=${encodeURIComponent(
         tagNo
     )}&top=500000&api-version=2.0`;
     return workOrdersApi.fetchAll(url, () => getMockedWorkOrdersString(50000), abortSignal);
 }
 
-export async function getOpenWorkOrdersFromApi(instCode: string, abortSignal: AbortSignal): Promise<WorkOrderDb[]> {
-    const url = `${getApiBaseUrl}/${instCode}/work-orders/open?top=500000`;
-    return workOrdersApi.fetchAll(url, () => getMockedWorkOrdersString(50000), abortSignal);
-}
-
-export async function getWorkOrderApi(workOrderId: string, abortSignal: AbortSignal): Promise<WorkOrderDetails> {
-    const url = `${getApiBaseUrl}/work-orders/work-order-id?workOrderId=${encodeURIComponent(
+export async function getWorkOrderDetailsApi(workOrderId: string, abortSignal: AbortSignal): Promise<WorkOrderDetails> {
+    const url = `${getApiBaseUrl()}/work-orders/work-order-id?workOrderId=${encodeURIComponent(
         workOrderId
     )}&includeLongText=true`;
 
