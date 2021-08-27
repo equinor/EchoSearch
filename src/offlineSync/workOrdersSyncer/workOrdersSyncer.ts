@@ -2,10 +2,16 @@ import { inMemoryWorkOrdersInstance } from '../../inMemory/inMemoryWorkOrders';
 import { loggerFactory } from '../../logger';
 import { InternalSyncResult } from '../../results/baseResult';
 import { SyncSystem } from '../../workers/syncSystem';
+import { Repository } from '../offlineDataDexieBase';
 import { OfflineSystem } from '../offlineSystem';
 import { getInstCode, Settings } from '../syncSettings';
 import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
-import { getAllOpenWorkOrdersFromApi, getOpenAndClosedWorkOrdersApi, WorkOrderDb } from './workOrdersApi';
+import {
+    getAllOpenWorkOrdersFromApi,
+    getOpenAndClosedWorkOrdersApi,
+    verifyWorkOrderCount,
+    WorkOrderDb
+} from './workOrdersApi';
 import { workOrdersAdministrator, workOrdersRepositoryTransaction } from './workOrdersRepository';
 
 const log = loggerFactory.workOrders('Syncer');
@@ -42,7 +48,7 @@ async function syncUpdatedWorkOrders(lastChangedDate: Date, abortSignal: AbortSi
     const fullSyncNeeded = daysSinceLastUpdate > daysBackInTime;
     if (fullSyncNeeded) {
         log.debug(`Run full sync instead of update, days since last sync:`, daysSinceLastUpdate);
-        return await syncOpenWorkOrders(abortSignal);
+        return syncOpenWorkOrders(abortSignal);
     } else {
         log.trace('daysSinceLastUpdate', daysSinceLastUpdate);
     }
@@ -51,27 +57,27 @@ async function syncUpdatedWorkOrders(lastChangedDate: Date, abortSignal: AbortSi
     const data = await getOpenAndClosedWorkOrdersApi(getInstCode(), lastChangedDate, abortSignal);
     performanceLogger.forceLogDelta('Api ' + data.length);
 
-    const closedWorkOrderNos = data.filter((workOrder) => isDoneWorkOrder(workOrder.activeStatusIds));
-    console.log(closedWorkOrderNos, 'closed/done work orders');
+    const repository = workOrdersRepositoryTransaction();
+    await repository.addDataBulks(data, abortSignal);
+    await deleteClosedWorkOrders(data, repository);
 
-    inMemoryWorkOrdersInstance().updateItems(data);
-    if (closedWorkOrderNos.length > 0) {
-        log.debug('Delete closed inMemory workOrders', closedWorkOrderNos.length);
-        inMemoryWorkOrdersInstance().removeItems(closedWorkOrderNos);
-    }
-    performanceLogger.forceLogDelta('Updated inMemory, total: ' + inMemoryWorkOrdersInstance().length());
-
-    const transaction = workOrdersRepositoryTransaction();
-    await transaction.addDataBulks(data, abortSignal);
-    if (closedWorkOrderNos.length > 0) {
-        await transaction.bulkDeleteData(closedWorkOrderNos.map((item) => item.workOrderId));
+    if (!(await verifyWorkOrderCount(getInstCode(), inMemoryWorkOrdersInstance().length(), abortSignal))) {
+        return syncOpenWorkOrders(abortSignal);
     }
 
     performanceLogger.forceLogDelta('Add/Delete to Dexie');
 
     const newestItemDate = getNewestItemDate(data);
-
     return { isSuccess: true, itemsSyncedCount: data.length, newestItemDate };
+}
+
+async function deleteClosedWorkOrders(workOrders: WorkOrderDb[], repository: Repository<WorkOrderDb>): Promise<void> {
+    const closedWorkOrderNos = workOrders.filter((workOrder) => isDoneWorkOrder(workOrder.activeStatusIds));
+    if (closedWorkOrderNos.length > 0) {
+        log.debug('Delete closed inMemory workOrders', closedWorkOrderNos.length);
+        inMemoryWorkOrdersInstance().removeItems(closedWorkOrderNos);
+        await repository.bulkDeleteData(closedWorkOrderNos.map((item) => item.workOrderId));
+    }
 }
 
 const isDoneWorkOrder = (activeStatusIds?: string[]): boolean => {
