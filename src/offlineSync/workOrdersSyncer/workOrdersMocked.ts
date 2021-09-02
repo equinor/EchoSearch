@@ -1,5 +1,5 @@
 import { loggerFactory } from '../../logger';
-import { randomNumberId } from '../Utils/stringUtils';
+import { randomNumberId, randomNumberIdFromListOfChars } from '../Utils/stringUtils';
 
 const log = loggerFactory.workOrders('Mock');
 
@@ -18,7 +18,7 @@ function createdMocked(): string {
     const year = randomNumberId(1);
     return `  {
       "workOrderId": "0000${randomNumberId(1)}",
-      "orderTypeId": "PM0${randomNumberId(1)}",
+      "orderTypeId": "PM0${randomNumberIdFromListOfChars(1)}",
       "planningPlantId": "1901",
       "title": "01M FV-LOG PEDESTAL CRANE",
       "phaseId": "3",
@@ -76,7 +76,7 @@ function getMockedStringInternal(randomItemsToCreateCount: number): string {
 
 function getRealMockDataString(): string {
     return `  {
-      "workOrderId": "000024737588",
+      "workOrderId": "0000123456789",
       "orderTypeId": "PM02",
       "planningPlantId": "1901",
       "title": "01M FV-LOG PEDESTAL CRANE",
