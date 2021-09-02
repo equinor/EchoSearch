@@ -90,7 +90,10 @@ const logConfiguration = {
     setLevels: echoSearchWorker.setLogLevels,
     setDefaultLevel: echoSearchWorker.setDefaultLogLevel,
     getDefaultLevel: (): Promise<LogLevel> => echoSearchWorker.getDefaultLogLevel(),
-    getLevel: (context: string): Promise<LogLevel> => echoSearchWorker.getLogLevel(context),
+    getLevel: (context: string): Promise<LogLevel | undefined> => echoSearchWorker.getLogLevel(context),
+    async getLevelOrDefault(context: string): Promise<LogLevel | undefined> {
+        return (await echoSearchWorker.getLogLevel(context)) ?? (await echoSearchWorker.getDefaultLogLevel());
+    },
     LogLevel: LogLevel
 };
 

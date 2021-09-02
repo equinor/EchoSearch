@@ -53,8 +53,8 @@ function setLogLevel(context: string, logLevelLevel: LogLevel): void {
     logOptions[formatContext(context)] = logLevelLevel;
 }
 
-function getLogLevel(context: string): LogLevel {
-    return logOptions[formatContext(context)] ?? getDefaultLogLevel();
+function getLogLevel(context: string): LogLevel | undefined {
+    return logOptions[formatContext(context)];
 }
 
 function setLogLevels(logLevels: LogOptions): void {

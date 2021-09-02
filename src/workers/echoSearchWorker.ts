@@ -157,7 +157,7 @@ export interface EchoWorker {
     setLogLevels: (logLevels: LogOptions) => void;
     setDefaultLogLevel: (defaultLogLevel: LogLevel) => void;
     getDefaultLogLevel: () => LogLevel;
-    getLogLevel: (context: string) => LogLevel;
+    getLogLevel: (context: string) => LogLevel | undefined;
     setApiBaseUrl(baseUrl: string): void;
 
     setTokenCallback(getToken: () => Promise<string>): void;
@@ -171,7 +171,7 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
         if (!funcResult.isSuccess) log.debug('Error:', funcResult.error);
         return funcResult;
     } catch (error) {
-        log.warn(error);
+        log.warn('we caught an error: ', error);
         return result.errorFromException(error) as T;
     }
 }
