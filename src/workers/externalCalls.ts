@@ -18,6 +18,8 @@ import { runSync } from '../offlineSync/syncRunner';
 import { Settings } from '../offlineSync/syncSettings';
 import { tagsApi } from '../offlineSync/tagSyncer/tagApi';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
+import { workOrdersApi } from '../offlineSync/workOrdersSyncer/workOrdersApi';
+import { workOrdersSyncSystem } from '../offlineSync/workOrdersSyncer/workOrdersSyncer';
 import { Result } from '../results/baseResult';
 import { result } from '../results/createResult';
 import { NotImplementedError } from '../results/errors';
@@ -28,6 +30,7 @@ import { externalMcPacks } from './externalMcPacks';
 import { externalNotifications } from './externalNotifications';
 import { externalPunches } from './externalPunches';
 import { externalTags } from './externalTags';
+import { externalWorkOrders } from './externalWorkOrders';
 import { SyncSystem } from './syncSystem';
 
 const log = logger('externalCalls');
@@ -56,7 +59,8 @@ function allSyncSystems() {
         punchesSyncSystem,
         mcPacksSyncSystem,
         commPacksSyncSystem,
-        checklistsSyncSystem
+        checklistsSyncSystem,
+        workOrdersSyncSystem
     ];
 }
 
@@ -89,6 +93,7 @@ async function internalInitialize(): Promise<Result> {
     const initPunchesTask = externalPunches.initTask();
     const initNotificationTask = externalNotifications.initTask();
     const initChecklistsTask = externalChecklists.initTask();
+    const initWorkOrdersTask = externalWorkOrders.initTask();
 
     await Promise.all([
         initMcTask,
@@ -97,7 +102,8 @@ async function internalInitialize(): Promise<Result> {
         initTagsTask,
         initDocumentsTasks,
         initNotificationTask,
-        initChecklistsTask
+        initChecklistsTask,
+        initWorkOrdersTask
     ]);
     performanceLogger.forceLog('----------- Search module initialize done -----------');
     _initDone = true;
@@ -145,6 +151,7 @@ function externalToggleMockData(): void {
     documentsApi.state.toggleMock();
     notificationsApi.state.toggleMock();
     notificationsApi.state.failureRate.percentage = 30;
+    workOrdersApi.state.toggleMock();
 
     log.info(
         'use mock tags:',
@@ -158,11 +165,13 @@ function externalToggleMockData(): void {
         'notifications',
         notificationsApi.state.isMockEnabled,
         'notifications failureRate',
-        notificationsApi.state.failureRate.percentage
+        notificationsApi.state.failureRate.percentage,
+        'workOrders',
+        workOrdersApi.state.isMockEnabled
     );
 }
 
-function getApiState(key: OfflineSystem): ApiFetchState | undefined {
+function getApiState(key: OfflineSystem): ApiFetchState {
     switch (key) {
         case OfflineSystem.Tags:
             return tagsApi.state;
@@ -178,9 +187,9 @@ function getApiState(key: OfflineSystem): ApiFetchState | undefined {
             return checklistsApi.state;
         case OfflineSystem.Notifications:
             return notificationsApi.state;
-        //case OfflineSystem.WorkOrders: return workOrdersApi.state;
+        case OfflineSystem.WorkOrders:
+            return workOrdersApi.state;
     }
-    return undefined;
 }
 
 async function resetDebugOptions(): Promise<void> {

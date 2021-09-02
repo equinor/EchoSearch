@@ -6,6 +6,7 @@ import { McPackDb } from '../offlineSync/mcPacksSyncer/mcPacksApi';
 import { NotificationDb } from '../offlineSync/notificationSyncer/notificationApi';
 import { PunchDb } from '../offlineSync/punchSyncer/punchApi';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
+import { WorkOrderDb } from '../offlineSync/workOrdersSyncer/workOrdersApi';
 
 //Export as Dto in case we want to change the internal dexie db interface
 
@@ -19,3 +20,4 @@ export interface ChecklistDto extends ChecklistDb {}
 export interface NotificationDto extends NotificationDb {}
 
 export interface PunchDto extends PunchDb {}
+export interface WorkOrderDto extends WorkOrderDb {}

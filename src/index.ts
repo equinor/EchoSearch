@@ -78,6 +78,13 @@ const searchNotifications = {
     getAllAsync: echoSearchWorker.lookupNotificationsAsync
 };
 
+const searchWorkOrders = {
+    searchAsync: echoSearchWorker.searchWorkOrders,
+    searchByTagNosAsync: echoSearchWorker.searchWorkOrdersByTagNos,
+    getAsync: echoSearchWorker.lookupWorkOrderAsync,
+    getAllAsync: echoSearchWorker.lookupWorkOrdersAsync
+};
+
 const logConfiguration = {
     setLevel: echoSearchWorker.setLogLevel,
     setLevels: echoSearchWorker.setLogLevels,
@@ -123,6 +130,7 @@ export const Search = {
     McPacks: searchMcPacks,
     CommPacks: searchCommPacks,
     Notifications: searchNotifications,
+    WorkOrders: searchWorkOrders,
     OfflineSystem,
     ErrorType: SyncErrorType //TODO Ove - should this be the same as syncError?
 };

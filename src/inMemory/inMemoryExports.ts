@@ -7,6 +7,7 @@ import { inMemoryNotificationsInstance, searchInMemoryNotificationsWithText } fr
 import { inMemoryPunchesInstance, searchInMemoryPunchesWithText } from './inMemoryPunches';
 import { isInMemoryTagsReady } from './inMemoryTags';
 import { searchTags } from './inMemoryTagSearch';
+import { inMemoryWorkOrdersInstance, searchInMemoryWorkOrdersWithText } from './inMemoryWorkOrders';
 
 const Notifications = {
     isReady: (): boolean => inMemoryNotificationsInstance().isReady(),
@@ -40,11 +41,17 @@ const Documents = {
     searchOnline: async (): Promise<DocumentSummaryDto[]> => [] //TODO
 };
 
+const WorkOrders = {
+    isReady: (): boolean => inMemoryWorkOrdersInstance().isReady(),
+    search: searchInMemoryWorkOrdersWithText
+};
+
 export const inMemory = {
     McPacks,
     CommPacks,
     Notifications,
     Punches,
     Tags,
-    Documents
+    Documents,
+    WorkOrders
 };
