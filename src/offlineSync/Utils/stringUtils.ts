@@ -20,16 +20,6 @@ export function randomNumberId(length: number): number {
     return Number.parseInt(result);
 }
 
-export function randomNumberIdFromListOfChars(length: number): number {
-    let result = '';
-    const characters = '12';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return Number.parseInt(result);
-}
-
 /**
  * Return date as a api friendly formatted string
  * @param date The specified date to format
