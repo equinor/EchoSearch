@@ -30,7 +30,7 @@ npm install @equinor/echo-search --save
 
 ## Run
 
-For development we have provided a test playground to be able to test searchs. This can be run by using.
+For development we have provided a test playground to be able to test searches. This can be run by using.
 
 ```sh-session
 npm start

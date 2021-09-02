@@ -18,7 +18,7 @@ function createdMocked(): string {
     const year = randomNumberId(1);
     return `  {
       "workOrderId": "0000${randomNumberId(1)}",
-      "orderTypeId": "PM0${randomNumberId(2)}",
+      "orderTypeId": "PM0${randomNumberId(1)}",
       "planningPlantId": "1901",
       "title": "01M FV-LOG PEDESTAL CRANE",
       "phaseId": "3",

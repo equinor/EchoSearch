@@ -3,7 +3,7 @@ import { apiFetch } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
 import { verifyCount } from '../dataVerification';
 import { OfflineSystem } from '../offlineSystem';
-import { orEmpty, toDateOrThrowError } from '../stringUtils';
+import { orEmpty, toDateOrThrowError, toDateOrUndefined } from '../stringUtils';
 import { getApiBaseUrl } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedWorkOrdersString } from './workOrdersMocked';
@@ -56,9 +56,9 @@ function cleanupWorkOrder(workOrder: WorkOrderDb): WorkOrderDb {
         orderTypeId: orEmpty(workOrder.workOrderId),
         title: orEmpty(workOrder.title),
         activeStatusIds: workOrder.activeStatusIds ?? [],
-        basicStartDateTime: workOrder.basicStartDateTime,
-        basicFinishDateTime: workOrder.basicFinishDateTime,
-        changedDateTime: workOrder.changedDateTime,
+        basicStartDateTime: toDateOrUndefined(workOrder.basicStartDateTime),
+        basicFinishDateTime: toDateOrUndefined(workOrder.basicFinishDateTime),
+        changedDateTime: toDateOrUndefined(workOrder.changedDateTime),
         createdDateTime: toDateOrThrowError(workOrder.createdDateTime),
         functionalLocationId: orEmpty(workOrder.functionalLocationId),
         phaseId: orEmpty(workOrder.phaseId),

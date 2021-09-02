@@ -5,7 +5,7 @@ import { SyncSystem } from '../../workers/syncSystem';
 import { Repository } from '../offlineDataDexieBase';
 import { OfflineSystem } from '../offlineSystem';
 import { getInstCode, Settings } from '../syncSettings';
-import { dateDifferenceInDays, getMaxDateFunc } from '../Utils/dateUtils';
+import { dateDifferenceInDays, getMaxDateFunc, minusOneDay } from '../Utils/dateUtils';
 import {
     getAllOpenWorkOrdersFromApi,
     getOpenAndClosedWorkOrdersApi,
@@ -86,5 +86,6 @@ const isDoneWorkOrder = (activeStatusIds?: string[]): boolean => {
 };
 
 function getNewestItemDate(data: WorkOrderDb[]) {
-    return getMaxDateFunc(data, (workOrder) => [workOrder.changedDateTime]);
+    const date = getMaxDateFunc(data, (workOrder) => [workOrder.changedDateTime]);
+    return date ?? minusOneDay(date);
 }

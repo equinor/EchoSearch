@@ -171,7 +171,7 @@ function externalToggleMockData(): void {
     );
 }
 
-function getApiState(key: OfflineSystem): ApiFetchState | undefined {
+function getApiState(key: OfflineSystem): ApiFetchState {
     switch (key) {
         case OfflineSystem.Tags:
             return tagsApi.state;
@@ -189,10 +189,7 @@ function getApiState(key: OfflineSystem): ApiFetchState | undefined {
             return notificationsApi.state;
         case OfflineSystem.WorkOrders:
             return workOrdersApi.state;
-        // default:
-        //     break;
     }
-    // return undefined;
 }
 
 async function resetDebugOptions(): Promise<void> {
