@@ -17,7 +17,6 @@ export function inMemoryWorkOrdersInstance(): InMemoryData<WorkOrderDto, string>
 
 const all = () => inMemoryWorkOrdersInstance().all();
 
-// fix this
 export function searchInMemoryWorkOrdersWithText(
     searchText: string,
     maxHits: number,
@@ -41,7 +40,6 @@ export function searchInMemoryWorkOrdersWithText(
     );
 }
 
-// check
 export function searchInMemoryWorkOrdersByTagNos(tagNos: string[]): ResultArray<WorkOrderDto> {
     return resultArray.successOrEmpty(all().filter((n) => n.tagId && tagNos.indexOf(n.tagId) >= 0));
 }
