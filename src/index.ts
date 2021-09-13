@@ -42,6 +42,7 @@ const searchDocuments = {
 
 const searchPunches = {
     searchAsync: echoSearchWorker.searchPunches,
+    searchByTagNoAsync: echoSearchWorker.searchPunchesByTagNo,
     getAsync: echoSearchWorker.lookupPunchAsync,
     getAllAsync: echoSearchWorker.lookupPunchesAsync
 };
