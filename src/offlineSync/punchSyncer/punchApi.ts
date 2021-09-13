@@ -34,6 +34,7 @@ export interface PunchDb {
     typeDescription: string;
     priorityId: string;
     plantIdentificator: string;
+    projectName: string;
 }
 
 function cleanupPunch(punch: PunchDb): PunchDb {
@@ -57,7 +58,8 @@ function cleanupPunch(punch: PunchDb): PunchDb {
         raisedByOrg: orEmpty(punch.raisedByOrg),
         typeDescription: orEmpty(punch.typeDescription),
         priorityId: orEmpty(punch.priorityId),
-        plantIdentificator: orEmpty(punch.plantIdentificator)
+        plantIdentificator: orEmpty(punch.plantIdentificator),
+        projectName: orEmpty(punch.projectName)
     };
 }
 
