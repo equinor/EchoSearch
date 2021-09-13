@@ -105,13 +105,13 @@ async function apiEstimatedWorkOrderCount(instCode: string, abortSignal: AbortSi
 
 export async function verifyWorkOrderCount(
     instCode: string,
-    punchesCount: number,
+    workOrdersCount: number,
     abortSignal: AbortSignal
 ): Promise<boolean> {
     if (workOrdersApi.state.isMockEnabled) return true;
     return await verifyCount(
-        punchesCount,
+        workOrdersCount,
         () => apiEstimatedWorkOrderCount(instCode, abortSignal),
-        OfflineSystem.Punches
+        OfflineSystem.WorkOrders
     );
 }

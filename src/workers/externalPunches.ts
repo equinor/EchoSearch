@@ -1,4 +1,5 @@
 import { inMemory } from '../inMemory/inMemoryExports';
+import { searchInMemoryPunchesByTagNo } from '../inMemory/inMemoryPunches';
 import { Filter } from '../inMemory/searchFilter';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { punchesRepository } from '../offlineSync/punchSyncer/punchRepository';
@@ -29,6 +30,10 @@ export async function search(
     );
 }
 
+async function searchByTagNo(tagNo: string): Promise<ResultArray<PunchDto>> {
+    return searchInMemoryPunchesByTagNo(tagNo);
+}
+
 export async function lookup(id: string): Promise<ResultValue<PunchDto>> {
     return await punchesRepository().get(id);
 }
@@ -39,7 +44,7 @@ export async function lookupAll(ids: string[]): Promise<ResultArray<PunchDto>> {
 
 export const externalPunches = {
     initTask,
-    //searchByTagNos,
+    searchByTagNo,
     search,
     lookup,
     lookupAll

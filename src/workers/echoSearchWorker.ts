@@ -101,6 +101,7 @@ export interface EchoWorker {
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
     ): Promise<ResultArray<PunchDto>>;
+    searchPunchesByTagNo(tagNos: string): Promise<ResultArray<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<ResultValue<PunchDto>>;
     lookupPunchesAsync(tagNos: string[]): Promise<ResultArray<PunchDto>>;
 
@@ -197,6 +198,7 @@ const echoWorker: EchoWorker = {
     lookupCommPacksAsync: (...args) => tryCatchToResult(() => externalCommPacks.lookupAll(...args)),
 
     searchPunches: (...args) => tryCatchToResult(() => externalPunches.search(...args)),
+    searchPunchesByTagNo: (...args) => tryCatchToResult(() => externalPunches.searchByTagNo(...args)),
     lookupPunchAsync: (...args) => tryCatchToResult(() => externalPunches.lookup(...args)),
     lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
 
