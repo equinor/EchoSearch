@@ -101,7 +101,7 @@ export interface EchoWorker {
         maxHits: number,
         tryToApplyFilter?: Filter<PunchDto>
     ): Promise<ResultArray<PunchDto>>;
-    searchPunchesByTagNo(tagNos: string): Promise<ResultArray<PunchDto>>;
+    searchPunchesByTagNo(tagNos: string, tryToApplyFilter?: Filter<PunchDto>): Promise<ResultArray<PunchDto>>;
     lookupPunchAsync(tagNo: string): Promise<ResultValue<PunchDto>>;
     lookupPunchesAsync(tagNos: string[]): Promise<ResultArray<PunchDto>>;
 
