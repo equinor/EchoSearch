@@ -30,8 +30,8 @@ export async function search(
     );
 }
 
-async function searchByTagNo(tagNo: string): Promise<ResultArray<PunchDto>> {
-    return searchInMemoryPunchesByTagNo(tagNo);
+async function searchByTagNo(tagNo: string, tryToApplyFilter?: Filter<PunchDto>): Promise<ResultArray<PunchDto>> {
+    return searchInMemoryPunchesByTagNo(tagNo, tryToApplyFilter);
 }
 
 export async function lookup(id: string): Promise<ResultValue<PunchDto>> {
