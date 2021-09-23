@@ -132,7 +132,8 @@ async function searchBtnClicked() {
 
             print('tags', tags, (item) => [item.tagNo, item.description, item.projectCode]);
         } catch (e) {
-            console.log('caught in main', JSON.parse(JSON.stringify(e)));
+            console.log('caught in main raw', e);
+            console.log('with properties parsed:', JSON.parse(JSON.stringify(e)));
         }
     }
 
@@ -220,7 +221,7 @@ function print<T>(
             searchResults.values.map((item) => valuesToPrint(item).join(' '))
         );
     } else {
-        console.log(name, 'search error ', searchResults.error?.message?.toString());
+        console.log(name, 'search error ', searchResults.error?.name, searchResults.error?.message?.toString());
     }
 }
 

@@ -37,7 +37,7 @@ export const createError = (error: SearchModuleError): Result => {
     return { isSuccess: false, error };
 };
 
-export function createResultErrorFromException<T extends Result>(error: Error | BaseError): T {
+export function createResultErrorFromException(error: Error | BaseError): Result {
     let errorType = SyncErrorType.Unknown;
 
     if (error instanceof SyncCanceledError) errorType = SyncErrorType.SyncCanceled;
@@ -65,7 +65,7 @@ export function createResultErrorFromException<T extends Result>(error: Error | 
         properties: { ...allProperties }
     };
 
-    return createError(searchModuleError) as T;
+    return createError(searchModuleError);
 }
 
 export type ErrorMessage = Opaque<string, 'ErrorMessage'>;

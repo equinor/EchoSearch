@@ -1,4 +1,3 @@
-import { BaseError } from '@equinor/echo-base';
 import * as Comlink from 'comlink';
 import { Dictionary } from 'lodash';
 import { Filter } from '../inMemory/searchFilter';
@@ -10,7 +9,8 @@ import { OfflineSystem } from '../offlineSync/offlineSystem';
 import { Settings } from '../offlineSync/syncSettings';
 import { createFakeDatabases } from '../offlineSync/tagSyncer/tagRepository';
 import { Result, ResultArray, ResultValue } from '../results/baseResult';
-import { result, resultValue } from '../results/createResult';
+import { resultValue } from '../results/createResult';
+import { tryCatchTo } from '../results/tryCatchToResult';
 import ctx from '../setup/setup';
 import { setTokenGetterInWorker } from '../workerTokenHelper';
 import {
@@ -172,63 +172,52 @@ export interface EchoWorker {
     anotherHelloNotWorking: AnotherI;
 }
 
-async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promise<T> {
-    try {
-        const funcResult = await func();
-        if (!funcResult.isSuccess) log.debug('Error:', funcResult.error);
-        return funcResult;
-    } catch (error) {
-        log.warn('we caught an error: ', error);
-        return result.errorFromException(error as BaseError | Error) as T; //TODO Ove Test
-    }
-}
-
 const echoWorker: EchoWorker = {
-    initialize: (...args) => tryCatchToResult(() => externalInitializeTask(...args)),
+    initialize: (...args) => tryCatchTo.result(() => externalInitializeTask(...args)),
 
-    searchTags: (...args) => tryCatchToResult(() => externalTags.search(...args)),
-    searchForClosestTagNo: (...args) => tryCatchToResult(() => externalTags.searchForClosestTagNo(...args)),
-    lookupTagAsync: (...args) => tryCatchToResult(() => externalTags.lookup(...args)),
-    lookupTagsAsync: (...args) => tryCatchToResult(() => externalTags.lookupAll(...args)),
+    searchTags: (...args) => tryCatchTo.array(() => externalTags.search(...args)),
+    searchForClosestTagNo: (...args) => tryCatchTo.value(() => externalTags.searchForClosestTagNo(...args)),
+    lookupTagAsync: (...args) => tryCatchTo.value(() => externalTags.lookup(...args)),
+    lookupTagsAsync: (...args) => tryCatchTo.array(() => externalTags.lookupAll(...args)),
 
-    searchDocumentsAsync: (...args) => tryCatchToResult(() => externalDocuments.search(...args)),
-    lookupDocumentAsync: (...args) => tryCatchToResult(() => externalDocuments.lookup(...args)),
-    lookupAllDocumentsAsync: (...args) => tryCatchToResult(() => externalDocuments.lookupAll(...args)),
+    searchDocumentsAsync: (...args) => tryCatchTo.array(() => externalDocuments.search(...args)),
+    lookupDocumentAsync: (...args) => tryCatchTo.value(() => externalDocuments.lookup(...args)),
+    lookupAllDocumentsAsync: (...args) => tryCatchTo.array(() => externalDocuments.lookupAll(...args)),
 
-    searchMcPacks: (...args) => tryCatchToResult(() => externalMcPacks.search(...args)),
-    lookupMcPackAsync: (...args) => tryCatchToResult(() => externalMcPacks.lookup(...args)),
-    lookupMcPacksAsync: (...args) => tryCatchToResult(() => externalMcPacks.lookupAll(...args)),
+    searchMcPacks: (...args) => tryCatchTo.array(() => externalMcPacks.search(...args)),
+    lookupMcPackAsync: (...args) => tryCatchTo.value(() => externalMcPacks.lookup(...args)),
+    lookupMcPacksAsync: (...args) => tryCatchTo.array(() => externalMcPacks.lookupAll(...args)),
 
-    searchCommPacks: (...args) => tryCatchToResult(() => externalCommPacks.search(...args)),
-    lookupCommPackAsync: (...args) => tryCatchToResult(() => externalCommPacks.lookup(...args)),
-    lookupCommPacksAsync: (...args) => tryCatchToResult(() => externalCommPacks.lookupAll(...args)),
+    searchCommPacks: (...args) => tryCatchTo.array(() => externalCommPacks.search(...args)),
+    lookupCommPackAsync: (...args) => tryCatchTo.value(() => externalCommPacks.lookup(...args)),
+    lookupCommPacksAsync: (...args) => tryCatchTo.array(() => externalCommPacks.lookupAll(...args)),
 
-    searchPunches: (...args) => tryCatchToResult(() => externalPunches.search(...args)),
-    searchPunchesByTagNo: (...args) => tryCatchToResult(() => externalPunches.searchByTagNo(...args)),
-    lookupPunchAsync: (...args) => tryCatchToResult(() => externalPunches.lookup(...args)),
-    lookupPunchesAsync: (...args) => tryCatchToResult(() => externalPunches.lookupAll(...args)),
+    searchPunches: (...args) => tryCatchTo.array(() => externalPunches.search(...args)),
+    searchPunchesByTagNo: (...args) => tryCatchTo.array(() => externalPunches.searchByTagNo(...args)),
+    lookupPunchAsync: (...args) => tryCatchTo.value(() => externalPunches.lookup(...args)),
+    lookupPunchesAsync: (...args) => tryCatchTo.array(() => externalPunches.lookupAll(...args)),
 
-    searchChecklists: (...args) => tryCatchToResult(() => externalChecklists.search(...args)),
-    lookupChecklistAsync: (...args) => tryCatchToResult(() => externalChecklists.lookup(...args)),
-    lookupChecklistsAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupAll(...args)),
-    lookupGroupByTagNosAsync: (...args) => tryCatchToResult(() => externalChecklists.lookupGroupByTagNos(...args)),
+    searchChecklists: (...args) => tryCatchTo.array(() => externalChecklists.search(...args)),
+    lookupChecklistAsync: (...args) => tryCatchTo.value(() => externalChecklists.lookup(...args)),
+    lookupChecklistsAsync: (...args) => tryCatchTo.array(() => externalChecklists.lookupAll(...args)),
+    lookupGroupByTagNosAsync: (...args) => tryCatchTo.value(() => externalChecklists.lookupGroupByTagNos(...args)),
 
-    searchNotifications: (...args) => tryCatchToResult(() => externalNotifications.search(...args)),
-    searchNotificationsByTagNos: (...args) => tryCatchToResult(() => externalNotifications.searchByTagNos(...args)),
-    lookupNotificationAsync: (...args) => tryCatchToResult(() => externalNotifications.lookup(...args)),
-    lookupNotificationsAsync: (...args) => tryCatchToResult(() => externalNotifications.lookupAll(...args)),
+    searchNotifications: (...args) => tryCatchTo.array(() => externalNotifications.search(...args)),
+    searchNotificationsByTagNos: (...args) => tryCatchTo.array(() => externalNotifications.searchByTagNos(...args)),
+    lookupNotificationAsync: (...args) => tryCatchTo.value(() => externalNotifications.lookup(...args)),
+    lookupNotificationsAsync: (...args) => tryCatchTo.array(() => externalNotifications.lookupAll(...args)),
 
-    searchWorkOrders: (...args) => tryCatchToResult(() => externalWorkOrders.search(...args)),
-    searchWorkOrdersByTagNos: (...args) => tryCatchToResult(() => externalWorkOrders.searchByTagNos(...args)),
-    lookupWorkOrderAsync: (...args) => tryCatchToResult(() => externalWorkOrders.lookup(...args)),
-    lookupWorkOrdersAsync: (...args) => tryCatchToResult(() => externalWorkOrders.lookupAll(...args)),
+    searchWorkOrders: (...args) => tryCatchTo.array(() => externalWorkOrders.search(...args)),
+    searchWorkOrdersByTagNos: (...args) => tryCatchTo.array(() => externalWorkOrders.searchByTagNos(...args)),
+    lookupWorkOrderAsync: (...args) => tryCatchTo.value(() => externalWorkOrders.lookup(...args)),
+    lookupWorkOrdersAsync: (...args) => tryCatchTo.array(() => externalWorkOrders.lookupAll(...args)),
 
-    changePlantAsync: (...args) => tryCatchToResult(() => syncContract.externalChangePlant(...args)),
-    runSyncWorkerAsync: (...args) => tryCatchToResult(() => syncContract.externalRunSync(...args)),
-    cancelSync: (...args) => tryCatchToResult(() => syncContract.externalCancelSync(...args)),
-    setEnabledAsync: (...args) => tryCatchToResult(() => syncContract.externalSetEnabled(...args)),
+    changePlantAsync: (...args) => tryCatchTo.result(() => syncContract.externalChangePlant(...args)),
+    runSyncWorkerAsync: (...args) => tryCatchTo.result(() => syncContract.externalRunSync(...args)),
+    cancelSync: (...args) => tryCatchTo.result(() => syncContract.externalCancelSync(...args)),
+    setEnabledAsync: (...args) => tryCatchTo.result(() => syncContract.externalSetEnabled(...args)),
     isEnabledAsync: async (...args) =>
-        tryCatchToResult(async () => resultValue.successOrNotFound(syncContract.isEnabled(...args))),
+        tryCatchTo.value(async () => resultValue.successOrNotFound(syncContract.isEnabled(...args))),
 
     setFailureRateAsync: (...args) => syncContract.setFailureRate(...args), //Ask Chris nested sub types here??
     getFailureRateAsync: (...args) => syncContract.getFailureRate(...args),
