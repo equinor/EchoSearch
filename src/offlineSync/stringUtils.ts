@@ -1,4 +1,4 @@
-import { ArgumentDateError } from '../results/errors';
+import { ArgumentDateError, ArgumentError } from '../results/errors';
 
 export function extractPositiveFirstNumbers(values: string[]): number[] {
     return values
@@ -13,6 +13,21 @@ export function getMaxNumberInCollectionOrOne(databaseNames: string[]): number {
 
 export function orEmpty(value?: string): string {
     return value || '';
+}
+
+export function orThrow<T>(value?: T): T {
+    if (typeof value === 'number') {
+        const num = value as number;
+        if (Number.isNaN(num) || !Number.isFinite(num)) {
+            throw new ArgumentError("Argument can't be null/undefined");
+        }
+        return value;
+    }
+
+    if (!value) {
+        throw new ArgumentError("Argument can't be null/undefined");
+    }
+    return value;
 }
 
 export function toNumber(value?: string | number): number {

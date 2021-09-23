@@ -1,3 +1,4 @@
+import { BaseError } from '@equinor/echo-base';
 import * as Comlink from 'comlink';
 import { Dictionary } from 'lodash';
 import { Filter } from '../inMemory/searchFilter';
@@ -61,7 +62,12 @@ export interface EchoWorker {
     initialize(): Promise<Result>;
     changePlantAsync(instCode: string, forceDeleteIfSameAlreadySelected: boolean): Promise<Result>;
 
-    searchTags(searchText: string, maxHits: number): Promise<ResultArray<TagSummaryDto>>;
+    searchTags(
+        searchText: string,
+        maxHits: number,
+        instCode?: string,
+        projectCode?: string
+    ): Promise<ResultArray<TagSummaryDto>>;
     searchForClosestTagNo(tagNo: string): Promise<ResultValue<string>>;
     lookupTagAsync(tagNo: string): Promise<ResultValue<TagSummaryDto>>;
     lookupTagsAsync(tagNos: string[]): Promise<ResultArray<TagSummaryDto>>;
@@ -173,7 +179,7 @@ async function tryCatchToResult<T extends Result>(func: () => Promise<T>): Promi
         return funcResult;
     } catch (error) {
         log.warn('we caught an error: ', error);
-        return result.errorFromException(error) as T;
+        return result.errorFromException(error as BaseError | Error) as T; //TODO Ove Test
     }
 }
 

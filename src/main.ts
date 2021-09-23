@@ -127,10 +127,10 @@ async function searchBtnClicked() {
     if (isSelected(OfflineSystem.Tags)) {
         try {
             const tagSearchText = getSearchInput() ?? 'a73 pedes cran';
-            const tags = await Search.Tags.searchAsync(tagSearchText, 5);
+            const tags = await Search.Tags.searchAsync(tagSearchText, 5, undefined, 'L.O265C.001');
             if (tags.values.length === 0) log.info(tagSearchText, "- didn't find anything'");
 
-            print('tags', tags, (item) => [item.tagNo, item.description]);
+            print('tags', tags, (item) => [item.tagNo, item.description, item.projectCode]);
         } catch (e) {
             console.log('caught in main', JSON.parse(JSON.stringify(e)));
         }

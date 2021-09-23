@@ -12,6 +12,7 @@ interface TagNoAlphaNumeric {
     tagNo: string;
     tagNoAlphaNumericUpperCase: string;
     descriptionAlphaNumericUpperCase: string;
+    projectCode: string;
 }
 
 export function isInMemoryTagsReady(): boolean {
@@ -28,15 +29,7 @@ export function clearAndInitInMemoryTags(tags: TagSummaryDb[]): void {
     _isInMemoryTagsInitialized = false;
     const performanceLogger = log.performance();
 
-    const tags2 = tags
-        ? tags.map((item) => {
-              return {
-                  tagNo: item.tagNo,
-                  tagNoAlphaNumericUpperCase: asAlphaNumericUpperCase(item.tagNo),
-                  descriptionAlphaNumericUpperCase: asAlphaNumericUpperCase(item.description)
-              } as TagNoAlphaNumeric;
-          })
-        : ([] as TagNoAlphaNumeric[]);
+    const tags2 = tags ? tags.map((item) => mapTo(item)) : ([] as TagNoAlphaNumeric[]);
     performanceLogger.log(`InMemoryTags Map all tags to alphaNumeric(${tags.length})`);
 
     tags2.sort((a, b) => a.tagNo.localeCompare(b.tagNo));
@@ -91,7 +84,8 @@ function mapTo(tag: TagSummaryDb): TagNoAlphaNumeric {
     return {
         tagNo: tag.tagNo,
         tagNoAlphaNumericUpperCase: asAlphaNumericUpperCase(tag.tagNo),
-        descriptionAlphaNumericUpperCase: asAlphaNumericUpperCase(tag.description)
+        descriptionAlphaNumericUpperCase: asAlphaNumericUpperCase(tag.description),
+        projectCode: tag.projectCode
     } as TagNoAlphaNumeric;
 }
 

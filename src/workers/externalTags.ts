@@ -3,6 +3,7 @@ import { searchForClosestTagNo } from '../inMemory/inMemoryTagSearch';
 import { initLevTrieFromInMemoryTags } from '../inMemory/inMemoryTagsInitializer';
 import { loggerFactory } from '../logger';
 import { OfflineSystem } from '../offlineSync/offlineSystem';
+import { Settings } from '../offlineSync/syncSettings';
 import { tagsRepository } from '../offlineSync/tagSyncer/tagRepository';
 import { TagSummaryDb } from '../offlineSync/tagSyncer/tagSummaryDb';
 import { tagsSyncSystem } from '../offlineSync/tagSyncer/tagSyncer';
@@ -35,11 +36,19 @@ async function initTagsTask(): Promise<void> {
     return await task;
 }
 
-async function search(searchText: string, maxHits: number): Promise<ResultArray<TagSummaryDto>> {
-    //test error throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
+async function search(
+    searchText: string,
+    maxHits: number,
+    instCode?: string,
+    projectCode?: string
+): Promise<ResultArray<TagSummaryDto>> {
+    //test error    throw new NetworkError({ message: 'test message', httpStatusCode: 500, url: 'https://', exception: {} });
+
+    const forceOnlineSearch = !!instCode && instCode.toUpperCase() !== Settings.getInstCode().toUpperCase();
     return await _tagSearchSystem.search(
-        async () => inMemory.Tags.search(searchText, maxHits),
-        async () => inMemory.Tags.searchOnline(searchText, maxHits)
+        async () => inMemory.Tags.search(searchText, maxHits, projectCode),
+        async () => inMemory.Tags.searchOnline(searchText, instCode ?? Settings.getInstCode(), maxHits, projectCode),
+        forceOnlineSearch
     );
 }
 async function findClosestTagNo(tagNo: string): Promise<ResultValue<string>> {

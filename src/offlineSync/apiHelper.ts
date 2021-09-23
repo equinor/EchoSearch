@@ -12,7 +12,7 @@ interface ValidQueryArgument {
     value: string | number | boolean | Date;
 }
 
-export function queryParameter(
+export function queryParameterOrEmpty(
     parameterName: string,
     parameterValue?: string | number,
     queryParameterSeparator = '&'

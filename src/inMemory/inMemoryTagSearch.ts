@@ -33,21 +33,22 @@ export function searchForClosestTagNo(tagNo: string): TrieResult | undefined {
     return { word: fullTagNo.tagNo, cost: maybeTagAlphaNumeric.cost } as TrieResult;
 }
 
-export async function searchTags(searchText: string, maxHits: number): Promise<TagSummaryDb[]> {
+export async function searchTags(searchText: string, maxHits: number, projectCode?: string): Promise<TagSummaryDb[]> {
     const allSearchWords = getAllWordsAsAlphaNumericUpperCase(searchText);
     if (allSearchWords.length === 0) {
         return [] as TagSummaryDb[];
     }
 
     const performance = log.performance();
-    const tags = await searchInMemoryTagNosIncludesAllInDescription(allSearchWords, maxHits);
+    const tags = await searchInMemoryTagNosIncludesAllInDescription(allSearchWords, maxHits, projectCode);
     performance.forceLog(`Full Tag Search (${searchText}) found(${tags.length})`);
     return tags;
 }
 
 async function searchInMemoryTagNosIncludesAllInDescription(
     allSearchWords: string[],
-    maxHits: number
+    maxHits: number,
+    projectCode?: string
 ): Promise<TagSummaryDb[]> {
     const performance = log.performance();
     const allTags = getInMemoryTagsSorted();
@@ -58,6 +59,10 @@ async function searchInMemoryTagNosIncludesAllInDescription(
 
     for (let index = 0; perfectHits.length < maxHits && index < allTags.length; index++) {
         const tag = allTags[index];
+        if (projectCode && projectCode !== tag.projectCode) {
+            continue;
+        }
+
         if (
             allSearchWords.every(
                 (searchItemText) =>

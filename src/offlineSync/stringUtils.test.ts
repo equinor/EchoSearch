@@ -1,8 +1,9 @@
-import { ArgumentDateError } from '../results/errors';
+import { ArgumentDateError, ArgumentError } from '../results/errors';
 import {
     extractPositiveFirstNumbers,
     getMaxNumberInCollectionOrOne,
     orEmpty,
+    orThrow,
     toDateOrThrowError,
     toDateOrUndefined,
     toNumber
@@ -39,6 +40,38 @@ describe('orEmpty', () => {
 
     it('should return same string if proper string', () => {
         expect(orEmpty('a proper string')).toEqual('a proper string');
+    });
+});
+
+describe('orThrow', () => {
+    it('should throw ArgumentError if string is undefined', () => {
+        const undefinedAsUnknown = undefined as unknown;
+        const undefinedString: string = undefinedAsUnknown as string;
+        expect(() => orThrow(undefinedString)).toThrowError(ArgumentError);
+    });
+
+    it('should throw ArgumentError if string is empty', () => {
+        expect(() => orThrow('')).toThrowError(ArgumentError);
+    });
+
+    it('should return same string value if non empty', () => {
+        expect(orThrow('a proper string')).toEqual('a proper string');
+    });
+    it('should return same number value if defined with valid number value 0', () => {
+        expect(orThrow(0)).toEqual(0);
+    });
+
+    it('should return same number value if defined with valid number value -1', () => {
+        expect(orThrow(-1)).toEqual(-1);
+    });
+
+    it('should throw ArgumentError if number is NaN', () => {
+        expect(() => orThrow(Number.NaN)).toThrowError(ArgumentError);
+    });
+
+    it('should throw ArgumentError if number is infinite', () => {
+        expect(() => orThrow(Number.POSITIVE_INFINITY)).toThrowError(ArgumentError);
+        expect(() => orThrow(Number.NEGATIVE_INFINITY)).toThrowError(ArgumentError);
     });
 });
 
