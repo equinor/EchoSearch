@@ -132,7 +132,8 @@ async function searchBtnClicked() {
 
             print('tags', tags, (item) => [item.tagNo, item.description, item.projectCode]);
         } catch (e) {
-            console.log('caught in main', JSON.parse(JSON.stringify(e)));
+            console.log('caught in main raw', e);
+            console.log('with properties parsed:', JSON.parse(JSON.stringify(e)));
         }
     }
 
