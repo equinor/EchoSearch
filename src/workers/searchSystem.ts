@@ -23,14 +23,18 @@ export class SearchSystem<T> {
         this._isOfflineSearchReady = isOfflineSearchReady;
     }
 
-    async search(offlineSearch: () => Promise<T[]>, onlineSearch: () => Promise<T[]>): Promise<ResultArray<T>> {
+    async search(
+        offlineSearch: () => Promise<T[]>,
+        onlineSearch: () => Promise<T[]>,
+        forceOnlineSearch = false
+    ): Promise<ResultArray<T>> {
         if (!Settings.isSyncEnabled(this._offlineSystemKey)) {
             return resultArray.error(errorMessage.sync.notEnabled(this._offlineSystemKey));
         }
 
         await this._initTask;
 
-        const isOfflineSearch = this._isOfflineSearchReady();
+        const isOfflineSearch = !forceOnlineSearch && this._isOfflineSearchReady();
         loggerFactory.default(this._offlineSystemKey + '.SearchSystem').debug(isOfflineSearch ? 'Offline' : 'Online');
 
         const data = isOfflineSearch ? await offlineSearch() : await onlineSearch();

@@ -17,7 +17,8 @@ const logging = logger('Db');
 async function tryOrThrow<Tr>(runMainFunc: () => Promise<Tr>): Promise<Tr> {
     try {
         return await runMainFunc();
-    } catch (exception) {
+    } catch (error) {
+        const exception = error as Error; //TODO Ove - will this work?
         throw new DbError((exception?.name + ' ' + exception?.message).trim(), exception);
     }
 }

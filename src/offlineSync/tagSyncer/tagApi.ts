@@ -2,13 +2,12 @@ import { loggerFactory } from '../../logger';
 import { JsonParseError, SyncError } from '../../results/errors';
 import { apiFetch, apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
-import { extractDateFromHeader, queryParameter } from '../apiHelper';
-import { orEmpty, toDateOrThrowError } from '../stringUtils';
-import { getApiBaseUrl, Settings } from '../syncSettings';
+import { extractDateFromHeader, queryParameterOrEmpty } from '../apiHelper';
+import { getApiBaseUrl } from '../syncSettings';
 import { distinct } from '../Utils/distinct';
 import { dateAsApiString } from '../Utils/stringUtils';
 import { getMockedTagsString } from './tagMocked';
-import { TagSummaryDb } from './tagSummaryDb';
+import { cleanupTag, TagSummaryDb } from './tagSummaryDb';
 
 const log = loggerFactory.tags('Api');
 
@@ -24,18 +23,6 @@ export const tagsApi = {
 export interface TagsData {
     tags: TagSummaryDb[];
     dataSyncedAt: Date;
-}
-
-function cleanupTag(tag: TagSummaryDb): TagSummaryDb {
-    return {
-        tagNo: tag.tagNo,
-        description: orEmpty(tag.description),
-        tagCategoryDescription: orEmpty(tag.tagCategoryDescription),
-        tagStatus: tag.tagStatus,
-        tagType: orEmpty(tag.tagType),
-        locationCode: orEmpty(tag.locationCode),
-        updatedDate: toDateOrThrowError(tag.updatedDate)
-    };
 }
 
 export async function apiAllTags(instCode: string, abortSignal: AbortSignal): Promise<TagsData> {
@@ -68,14 +55,15 @@ export async function apiUpdatedTags(
 
 export async function searchTagsOnline(
     searchText: string,
+    instCode: string,
     maxHits: number,
-    instCode?: string,
+    projectCode?: string,
     abortSignal?: AbortSignal
 ): Promise<TagSummaryDb[]> {
     maxHits = maxHits <= 0 ? maxHits : 25;
-    instCode = instCode ?? Settings.getInstCode();
     let url = `${getApiBaseUrl()}/${instCode}/tags?take=${maxHits}`;
-    url += queryParameter('tagNo', searchText);
+    url += queryParameterOrEmpty('tagNo', searchText);
+    url += queryParameterOrEmpty('projectCode', projectCode);
 
     let results = await apiFetchJsonToArray<TagSummaryDb>(url, abortSignal);
     if (results.length < maxHits) {
@@ -94,6 +82,6 @@ async function getAllTagsFromApi(instCode: string, abortSignal: AbortSignal): Pr
         const tags: TagSummaryDb[] = await JSON.parse(await response.text());
         return { tags, dataSyncedAt: extractDateFromHeader(response, 'content-disposition') } as TagsData;
     } catch (ex) {
-        throw new JsonParseError(url, ex);
+        throw new JsonParseError(url, ex as Error); //TODO Ove as Error?
     }
 }

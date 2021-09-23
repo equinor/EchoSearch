@@ -1,5 +1,5 @@
 import { ApiDataFetcher } from '../apiDataFetcher';
-import { queryParameter } from '../apiHelper';
+import { queryParameterOrEmpty } from '../apiHelper';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { getApiBaseUrl, Settings } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
@@ -55,8 +55,8 @@ async function apiSearchMcPacks(
 ): Promise<McPackDb[]> {
     instCode = instCode ?? Settings.getInstCode();
     let url = `${getApiBaseUrl()}/${instCode}/mcPks`;
-    url += queryParameter('containsText', searchText, '?');
-    url += queryParameter('projectCodeContains', projectCode);
-    url += queryParameter('itemsPerPage', maxHits);
+    url += queryParameterOrEmpty('containsText', searchText, '?');
+    url += queryParameterOrEmpty('projectCodeContains', projectCode);
+    url += queryParameterOrEmpty('itemsPerPage', maxHits);
     return mcPacksApiFetcher.fetchAll(url, () => getMockedMcPacksString(100), abortSignal);
 }

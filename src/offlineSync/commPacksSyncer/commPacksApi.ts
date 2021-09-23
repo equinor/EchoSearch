@@ -1,6 +1,6 @@
 import { apiFetchJsonToArray } from '../../service/workerFetch';
 import { ApiDataFetcher } from '../apiDataFetcher';
-import { queryParameter } from '../apiHelper';
+import { queryParameterOrEmpty } from '../apiHelper';
 import { orEmpty, toDateOrThrowError, toNumber } from '../stringUtils';
 import { getApiBaseUrl, Settings } from '../syncSettings';
 import { dateAsApiString } from '../Utils/stringUtils';
@@ -65,8 +65,8 @@ async function apiSearchCommPacks(
 ): Promise<CommPackDb[]> {
     instCode = instCode ?? Settings.getInstCode();
     let url = `${getApiBaseUrl()}/${instCode}/commPks`;
-    url += queryParameter('containsText', searchText, '?');
-    url += queryParameter('projectCodeContains', projectCode);
-    url += queryParameter('itemsPerPage', maxHits);
+    url += queryParameterOrEmpty('containsText', searchText, '?');
+    url += queryParameterOrEmpty('projectCodeContains', projectCode);
+    url += queryParameterOrEmpty('itemsPerPage', maxHits);
     return commPacksApiFetcher.fetchAll(url, () => getMockedCommPacksString(100), abortSignal);
 }
