@@ -221,7 +221,7 @@ function print<T>(
             searchResults.values.map((item) => valuesToPrint(item).join(' '))
         );
     } else {
-        console.log(name, 'search error ', searchResults.error?.message?.toString());
+        console.log(name, 'search error ', searchResults.error?.name, searchResults.error?.message?.toString());
     }
 }
 
